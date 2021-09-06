@@ -1,0 +1,77 @@
+{
+    "title": "final code push",
+    "category": "new,fix",
+    "body": "final code push is scheduled tmrw"
+}
+
+{
+    "title": "facebook signup",
+    "category": "new",
+    "body": "facebook signup enabled for announceB"
+}
+
+{
+    "title": "twitter signup",
+    "category": "new,improvement",
+    "body": "twitter signup enabled for announceB"
+}
+
+{
+    "title": "github signup",
+    "category": "new",
+    "body": "git signup enabled for announceB"
+}
+
+{
+    "title": "light theme",
+    "category": "new",
+    "body": "light theme enabled for announceB"
+}
+
+{
+    "title": "dark theme",
+    "category": "new",
+    "body": "dark theme enabled for announceB"
+}
+
+{
+    "title": "analytics for hits",
+    "category": "new, fix",
+    "body": "analytics data enabled for announceB"
+}
+
+// changeLogFeedback
+
+{
+    "contentTitle": "good feature new",
+    "content" : "the feature added is easy to use",
+    "customerName" : "ram",
+    "customerType" : "prime",
+    "changeId" : "6133ba46dd79624af8588162"
+}
+
+{
+    "contentTitle": "nice feature",
+    "content" : "the feature is excellent",
+    "customerName" : "rp",
+    "customerType" : "non-prime",
+    "changeId" : "6133ba46dd79624af8588162"
+}
+
+//6130d3b1c8b2d9bf45df92be
+
+{
+    "contentTitle": "avg",
+    "content" : "the feature is excellent",
+    "customerName" : "vino",
+    "customerType" : "prime",
+    "changeId" : "6130d3b1c8b2d9bf45df92be"
+}
+
+{
+    "contentTitle": "bad",
+    "content" : "will spoil performance",
+    "customerName" : "ash",
+    "customerType" : "non-prime",
+    "changeId" : "6130d3b1c8b2d9bf45df92be"
+}
