@@ -16,5 +16,6 @@ const changeLogSchema = mongoose.Schema(
 
 );
 
+changeLogSchema.index({title: 'text'});
 module.exports = mongoose.model('Changelog',changeLogSchema);
 
