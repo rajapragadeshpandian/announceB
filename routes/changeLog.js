@@ -6,37 +6,65 @@ const changeLog = require('../models/changeLog');
 // get changeLog
 router.get('/',(req, res) => {
 
-    changeLog.find()
+    //http://localhost:5000/changeLog?value=signup&&pageNo=2&&choice=next ==> sample req
+
+    const limit = 3;
+    let val;
+    console.log(req.query.value);
+    let findText = req.query.value ? { $text : {$search : req.query.value }} : {};
+    if(req.query.choice === "next") {
+        console.log("next");
+        val = req.query.pageNo * limit;
+    } else if(req.query.choice === "prev") {
+        console.log("prev");
+        val = (req.query.pageNo -2) * limit;
+    } else {
+        val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
+    }
+
+    console.log("$$$$",val);
+
+    console.log("####",findText);
+
+    changeLog.find(findText)
+    .select('title category body _id')
     .sort({ createdAt : -1 })
-    .limit(2)
-    .exec((err, changes) => {
-        if(err) {
+    .skip(val)
+    .limit(limit)
+    .exec()
+    .then((changes) => {
+        console.log("$$$$$",findText);
+        let count;
+        changeLog.find(findText)
+        .count()
+        .exec()
+        .then((items) => {
+
+            const response = changes.map((item) => {
+                return {
+                    id : item._id,
+                    title : item.title,
+                    category : item.category,
+                    body : item.body,
+                }
+        });
+
+        res.status(200).json({
+            changeList : response,
+            count : items
+        });
+
+        }).catch((err) => {
             res.status(500).json({
                 error : err
             });
-        } 
-        else {
-                if(changes.length > 0) {
+        });
 
-                    const response = changes.map((item) => {
-                            return {
-                                id : item._id,
-                                title : item.title,
-                                category : item.category,
-                                body : item.body
-                            }
-                    });
-                    res.status(200).json({
-                        changeList : response,
-                        count : changes.length
-                    });
-
-                     } else {
-                        res.status(404).json({
-                            message : "changeLog not found"
-                        });
-                     }          
-            }
+    })
+    .catch((err) => {
+        res.status(500).json({
+            error : err
+        });
     });
 
 });
@@ -47,44 +75,56 @@ router.post('/', (req, res) => {
 
     console.log("$$$", req.body);
     const  { title , body , category} = req.body;
+
     const changelog = new changeLog({
 
         title : title,
         category : category.split(','),
         body : body
+    })
+    .save()
+    .then((change) => {
 
-    }).save((err, change) => {
+        let count;
+        changeLog.find({},{_id : 1,title : 1,category : 1,body : 1})
+        .count()
+        .exec()
+        .then((item) => {
 
-        if(err) {
-            res.status(500).json({
-                error : err
-            });
-        } else {
             res.status(200).json({
                 message : "changeLog successfully created",
                 createdChange : {
                     id : change._id,
                     title : change.title,
                      category : change.category,
-                    body : change.body
-                }
+                    body : change.body,
+                    count : item
+                },
+
             });
-        }
-      
-    });  
+
+        }).catch((err) => {
+            res.status(500).json({
+                error : err
+            });
+        });
+            
+    })
+    .catch((err) => {
+        res.status(500).json({
+            error : err
+        });
+    });
 });
 
 router.get('/:changelogId',(req, res) => {
-
+    console.log("changeLogid");
     const id = req.params.changelogId;
-    changeLog.findById({ _id : id })
-    .exec((err, change) => {
-
-            if(err) {
-                res.status(500).json({
-                    error : err
-                });
-            } else {
+    console.log("####", req.params.changelogId);
+    changeLog.findById({_id : id})
+    .exec()
+    .then((change) => {
+                console.log("$$$$", change);
                 res.status(200).json({
                     message : "changeLog found",
                     change : {
@@ -94,9 +134,14 @@ router.get('/:changelogId',(req, res) => {
                         body : change.body
                     }
                 });
-            }
 
+    })
+    .catch((err) => {
+            res.status(500).json({
+            error : "changeLog not foound"
+        });
     });
+
 });
 
 router.patch('/:changelogId',(req, res) => {
@@ -110,159 +155,46 @@ router.patch('/:changelogId',(req, res) => {
             category : category.split(','),
             body : body
          }}
-    ).exec((err, change) => {
-        if(err) {
-            res.status(500).json({
-                error : err
-            });
-        } else {
+    )
+    .exec()
+    .then((change) => {
+        
             res.status(200).json({
                 message : "changelog updated successfully"
             });
-        }
 
+    })
+    .catch((err) => {
+        res.status(500).json({
+            error : err
+        })
     });
 
     
 });
+
+
 
 router.delete('/:changelogId', (req, res) => {
 
     const id = req.params.changelogId;
     changeLog.remove({ _id : id})
-    .exec((err, change) => {
+    .exec()
+    .then((change) => {
 
-        if(err) {
-            res.status(500).json({
-                error : err
-            });
-        } else {
             res.status(200).json({
-                message : 'chnage deletd successfully'
+                message : 'change deletd successfully'
             });
-        }
 
-    });
-
-});
-
-router.get('/page/:pageNo', (req, res) => {
-    console.log("$$$$","pagination");
-    console.log("###", req.params.pageNo == "next");
-    const limit = 2;
-    const val  = (req.params.pageNo -1) * 2;
-    console.log("$$$", val);
-    changeLog.find()
-    .sort({createdAt : -1 })
-    .skip(val)
-    .limit(limit)
-    .exec((err, changes) => {
-
-        if(err) {
-            res.status(500).json({
-                error : err
-            })
-        } else {
-            if(changes.length > 0) {
-
-                const response = changes.map((item) => {
-                        return {
-                                id : item._id,
-                                title : item.title,
-                                category : item.category,
-                                body : item.body
-
-                        }
-                });
-
-                    res.status(200).json({
-                    message : "records returned  successfully",
-                    changes : response,
-                    count : changes.length
-                });
-
-            } else {
-                res.status(404).json({
-                    message : "records not found"
-                });
-            }
-        }
-    });
-    
-});
-
-router.get('/page/:pageNo/:choice',(req, res) => {
-
-    console.log("###", "prev or next page");
-    let val;
-    const limit = 2;
-    const pageNo = req.params.pageNo;
-    const choice = req.params.choice;
-    if(choice === "next") {
-        val = req.params.pageNo * limit;
-    } else {
-        val = (req.params.pageNo -2) * limit;
-    }
-
-    changeLog.find()
-    .sort({ createdAt : -1 })
-    .skip(val)
-    .limit(limit)
-    .exec((err, changes) => {
-        if(err) {
-            res.status(500).json({
-                error : err
-            });
-        } else {
-            if(changes.length > 0) {
-                const response = changes.map((item) => {
-                    return {
-                        id : item._id,
-                        title : item.title,
-                        category : item.category,
-                        body : item.body
-                    }
-                });
-                res.status(200).json({
-                    message : "prev or next page",
-                    value  : response
-                });
-            } else {
-                res.status(404).json({
-                    message : "changeLog not found"
-                });
-            }
-            
-        }
-
-    });   
-
-});
-
-router.get('/unique/tags', (req, res) => {
-
-    console.log("###", "uniqueTags");
-
-    changeLog.aggregate([
-        { $unwind : "$category"},
-        { $group : { _id : "$category"}}
-
-    ]).exec((err, tags) => {
-            if (err) {
-                res.status(500).json({
-                    message : "tags not found"
-                });
-            } else {
-                    res.status(200).json({
-                        tags : tags
-                    });
-            }
     })
-
+    .catch((err) => {
+        res.status(500).json({
+            error : err
+        });
+    });
 
 });
 
-//pending unique tags
 
 module.exports = router;
 
