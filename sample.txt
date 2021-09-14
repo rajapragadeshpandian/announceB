@@ -75,3 +75,49 @@
     "customerType" : "non-prime",
     "changeId" : "6130d3b1c8b2d9bf45df92be"
 }
+
+
+
+{
+    "contentTitle": "very useful",
+    "content" : "easy to access for customer login",
+    "customerName" : "xxx",
+    "customerType" : "prime",
+    "changeId" : "61364450d262ba313095d0b7"
+}
+
+//6130d960a517ea5157b84d09
+
+{
+    "contentTitle": "READ Nowwwww !!!!!!! Important",
+    "content" : "All of y’all that are complaining about the iPhone12 Dropping calls it’s a simple Fix because 5G is so new there is limited towers for 5G go to your settings and turn off the 5 G so your running on 4G",
+    "customerName" : "Moe 1187",
+    "customerType" : "non-prime",
+    "changeId" : "6130d960a517ea5157b84d09"
+}
+
+{
+    "contentTitle": "Didn’t want to upgrade, so happy I did!!",
+    "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
+    "customerName" : "ToniMomto3 ",
+    "customerType" : "prime",
+    "changeId" : "6130d960a517ea5157b84d09"
+}
+
+//6133b9eadd79624af8588160
+
+{
+    "contentTitle": "If you drop your phone",
+    "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
+    "customerName" : "Emilys  ",
+    "customerType" : "non-prime",
+    "changeId" : "6133b9eadd79624af8588160"
+}
+
+{
+    "contentTitle": "amazind phone",
+    "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
+    "customerName" : "professor",
+    "customerType" : "prime",
+    "changeId" : "6133b9eadd79624af8588160"
+}

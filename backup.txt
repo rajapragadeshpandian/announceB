@@ -156,3 +156,15 @@ db.restaurants.aggregate(
      { $sort : { borough : 1 } }
    ]
 )
+
+to get count and recrds in single query:
+db.persons.aggregate([
+... { $facet : {
+... totaldata : [
+... { $match : {index :0 }}
+... ],
+... totalCount : [
+... { $count : "count" }
+... ]
+... }}
+... ]);
