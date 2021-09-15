@@ -35,15 +35,9 @@ app.get('/changes/uniqueTags', (req, res) => {
                         tags : tags,
                         noOftags : tags.length,
                     });
-    }).catch((err) => {
-        res.status(500).json({
-            message : "tags not found"
-        });
-    });
+    }).catch(next);
 
 });
-
-
 
 
 app.use((req,res, next) => {
@@ -53,6 +47,7 @@ app.use((req,res, next) => {
 });
 
 app.use((error, req, res, next) => {
+    console.log("###", "common error handler called");
     console.log("$$$", error);
     res.status(error.status || 500);
     res.json({

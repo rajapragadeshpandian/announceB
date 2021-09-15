@@ -4,7 +4,7 @@ const  router = express.Router();
 const changeLog = require('../models/changeLog');
 
 // get changeLog
-router.get('/',(req, res) => {
+router.get('/',(req, res, next) => {
 
     //http://localhost:5000/changeLog?value=signup&&pageNo=2&&choice=next ==> sample req
 
@@ -54,24 +54,16 @@ router.get('/',(req, res) => {
             count : items
         });
 
-        }).catch((err) => {
-            res.status(500).json({
-                error : err
-            });
-        });
+        }).catch(next);
 
     })
-    .catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    .catch(next);
 
 });
 
 
 //post changeLog
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
     const  { title , body , category} = req.body;
@@ -103,21 +95,12 @@ router.post('/', (req, res) => {
 
             });
 
-        }).catch((err) => {
-            res.status(500).json({
-                error : err
-            });
-        });
-            
+        }).catch(next);
     })
-    .catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    .catch(next);
 });
 
-router.get('/:changelogId',(req, res) => {
+router.get('/:changelogId',(req, res, next) => {
     console.log("changeLogid");
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
@@ -136,15 +119,11 @@ router.get('/:changelogId',(req, res) => {
                 });
 
     })
-    .catch((err) => {
-            res.status(500).json({
-            error : "changeLog not foound"
-        });
-    });
+    .catch(next);
 
 });
 
-router.patch('/:changelogId',(req, res) => {
+router.patch('/:changelogId',(req, res, next) => {
     console.log("changelog updated");
     const id  = req.params.changelogId;
     const { title, category, body} = req.body;
@@ -164,18 +143,14 @@ router.patch('/:changelogId',(req, res) => {
             });
 
     })
-    .catch((err) => {
-        res.status(500).json({
-            error : err
-        })
-    });
+    .catch(next);
 
     
 });
 
 
 
-router.delete('/:changelogId', (req, res) => {
+router.delete('/:changelogId', (req, res, next) => {
 
     const id = req.params.changelogId;
     changeLog.remove({ _id : id})
@@ -187,11 +162,7 @@ router.delete('/:changelogId', (req, res) => {
             });
 
     })
-    .catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    .catch(next);
 
 });
 

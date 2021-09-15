@@ -30,11 +30,7 @@ router.get('/:changeLogId', (req, res) => {
                     feedback : feedback
                 });
 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
@@ -62,16 +58,12 @@ router.post('/', (req, res) => {
                         newFeedback : feedback
                     });
 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
 
-router.patch('/:feedbackId', (req, res) => {
+router.patch('/:feedbackId', (req, res, next) => {
 
     console.log("$$$", "feedback updated successfully");
     const { newContentTitle, newContent, newCustomerName, newCustomerType, changeId} = req.body;
@@ -94,15 +86,11 @@ router.patch('/:feedbackId', (req, res) => {
                     message : "feedback updated successfully"
                 });
                 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
-router.delete("/:feedbackId", (req, res) => {
+router.delete("/:feedbackId", (req, res, next) => {
 
     console.log("###", "delete");
      
@@ -112,11 +100,7 @@ router.delete("/:feedbackId", (req, res) => {
             res.status(200).json({
                 message : "deleted successfully"
             });
-     }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-     });
+     }).catch(next);
 
 });
 
