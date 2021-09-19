@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const  FeedbackSchema = mongoose.Schema({
-    contentTitle: String,
+    title: String,
     content : {type : String},
-    customerName : { type : String},
-    customerType : String,
+    customer : {
+        name : { type : String},
+        id : {type : mongoose.Schema.Types.ObjectId , ref : 'Customer'}
+    },
     __change : {type : mongoose.Schema.Types.ObjectId , ref : 'Changelog'}
     },
     {

@@ -34,19 +34,21 @@ router.get('/:changeLogId', (req, res) => {
 
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
 
     console.log("feedback");
 
-    const { contentTitle, content, customerName, customerType, changeId} = req.body;
+    const { title, content, customer, changeId} = req.body;
 
     console.log("$$$", req.body );
     const feedback = new Feedback({
 
-        contentTitle: contentTitle,
+        title: title,
         content : content,
-        customerName : customerName,
-        customerType : customerType,
+        customer : {
+            name : customer.name,
+            id : customer.id
+        },
         __change : changeId,
 
     })
