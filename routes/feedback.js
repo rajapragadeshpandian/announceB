@@ -5,19 +5,11 @@ const Feedback = require('../models/feedback');
 
 router.get('/:changeLogId', (req, res) => {
 
-    const limit = 1;
-    let val;
-
-    if(req.query.choice === "next") {
-        val = req.query.pageNo * limit;
-    } else if(req.query.choice === "prev") {
-        val = (req.query.pageNo -2) * limit;
-    } else {
-        val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
-    }
+    const limit = 3;
+    const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
 
     Feedback.find({ __change : req.params.changeLogId})
-    .select('_id contentTitle customerName content customerType __change')
+    .select('_id title customer content __change')
     .sort({ createdAt : -1 })
     .skip(val)
     .limit(limit)
@@ -68,16 +60,18 @@ router.post('/', (req, res, next) => {
 router.patch('/:feedbackId', (req, res, next) => {
 
     console.log("$$$", "feedback updated successfully");
-    const { newContentTitle, newContent, newCustomerName, newCustomerType, changeId} = req.body;
+    const {title, content, customer, changeId} = req.body;
     console.log("$$$", req.body);
     
     Feedback.findByIdAndUpdate({ _id : req.params.feedbackId },
     {
         $set : {
-            contentTitle: newContentTitle,
-        content : newContent,
-        customerName : newCustomerName,
-        customerType : newCustomerType,
+            title: title,
+        content : content,
+        customer : {
+            name : customer.name,
+            id : customer.id
+        },
         __change : changeId,
         }}
     )
