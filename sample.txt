@@ -43,18 +43,22 @@
 // changeLogFeedback
 
 {
-    "contentTitle": "good feature new",
+    "title": "good feature new",
     "content" : "the feature added is easy to use",
-    "customerName" : "ram",
-    "customerType" : "prime",
+    "customer" : {
+        "name" : "jack",
+        "id" : "6140a295d2552480b5faa76b"
+    }
     "changeId" : "6133ba46dd79624af8588162"
 }
 
 {
-    "contentTitle": "nice feature",
+    "title": "nice feature",
     "content" : "the feature is excellent",
-    "customerName" : "rp",
-    "customerType" : "non-prime",
+    "customer" : {
+        "name" : "jack",
+        "id" : "6140a295d2552480b5faa76b"
+    },
     "changeId" : "6133ba46dd79624af8588162"
 }
 
@@ -63,61 +67,100 @@
 {
     "contentTitle": "avg",
     "content" : "the feature is excellent",
-    "customerName" : "vino",
-    "customerType" : "prime",
+    "customer" : {
+        "name" : "jill",
+        "id" : "6140a2e7d2552480b5faa76f"
+    },
     "changeId" : "6130d3b1c8b2d9bf45df92be"
 }
 
 {
-    "contentTitle": "bad",
+    "title": "bad",
     "content" : "will spoil performance",
-    "customerName" : "ash",
-    "customerType" : "non-prime",
+    "customer" : {
+        "name" : "jill",
+        "id" : "6140a2e7d2552480b5faa76f"
+    },
     "changeId" : "6130d3b1c8b2d9bf45df92be"
 }
 
 
 
 {
-    "contentTitle": "very useful",
+    "title": "very useful",
     "content" : "easy to access for customer login",
-    "customerName" : "xxx",
-    "customerType" : "prime",
+    "customer" : {
+        "name" : "joe",
+        "id" : "6140a300d2552480b5faa771"
+    },
     "changeId" : "61364450d262ba313095d0b7"
 }
 
 //6130d960a517ea5157b84d09
 
 {
-    "contentTitle": "READ Nowwwww !!!!!!! Important",
+    "title": "READ Nowwwww !!!!!!! Important",
     "content" : "All of y’all that are complaining about the iPhone12 Dropping calls it’s a simple Fix because 5G is so new there is limited towers for 5G go to your settings and turn off the 5 G so your running on 4G",
-    "customerName" : "Moe 1187",
-    "customerType" : "non-prime",
+    "customer" : {
+        "name" : "joe",
+        "id" : "6140a300d2552480b5faa771"
+    },
     "changeId" : "6130d960a517ea5157b84d09"
 }
 
 {
-    "contentTitle": "Didn’t want to upgrade, so happy I did!!",
+    "title": "Didn’t want to upgrade, so happy I did!!",
     "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
-    "customerName" : "ToniMomto3 ",
-    "customerType" : "prime",
+     "customer" : {
+        "name" : "prag",
+        "id" : "6140a7d2afc93112c63d514c"
+    },
     "changeId" : "6130d960a517ea5157b84d09"
 }
 
 //6133b9eadd79624af8588160
 
 {
-    "contentTitle": "If you drop your phone",
+    "title": "If you drop your phone",
     "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
-    "customerName" : "Emilys  ",
-    "customerType" : "non-prime",
+    "customer" : {
+        "name" : "prag",
+        "id" : "6140a7d2afc93112c63d514c"
+    },
     "changeId" : "6133b9eadd79624af8588160"
 }
 
 {
-    "contentTitle": "amazind phone",
+    "title": "design changes",
     "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
-    "customerName" : "professor",
-    "customerType" : "prime",
+    "customer" : {
+        "name" : "vino",
+        "id" : "6145d5cfd6d1c7b5a4b8e92d"
+    },
     "changeId" : "6133b9eadd79624af8588160"
+}
+
+
+{
+    "name": "jack",
+    "email" : "jack@gmail.com",
+    "type" : "prime"
+}
+
+{
+    "name": "jill",
+    "email" : "jill@gmail.com",
+    "type" : "non-prime"
+}
+
+{
+    "name": "vino",
+    "email" : "vino@gmail.com",
+    "type" : "forest"
+}
+
+{
+    "name": "ram",
+    "email" : "ram@gmail.com",
+    "type" : "bush"
 }
