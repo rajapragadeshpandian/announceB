@@ -30,27 +30,25 @@ router.get('/:changeLogId', (req, res) => {
                     feedback : feedback
                 });
 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
 
     console.log("feedback");
 
-    const { contentTitle, content, customerName, customerType, changeId} = req.body;
+    const { title, content, customer, changeId} = req.body;
 
     console.log("$$$", req.body );
     const feedback = new Feedback({
 
-        contentTitle: contentTitle,
+        title: title,
         content : content,
-        customerName : customerName,
-        customerType : customerType,
+        customer : {
+            name : customer.name,
+            id : customer.id
+        },
         __change : changeId,
 
     })
@@ -62,16 +60,12 @@ router.post('/', (req, res) => {
                         newFeedback : feedback
                     });
 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
 
-router.patch('/:feedbackId', (req, res) => {
+router.patch('/:feedbackId', (req, res, next) => {
 
     console.log("$$$", "feedback updated successfully");
     const { newContentTitle, newContent, newCustomerName, newCustomerType, changeId} = req.body;
@@ -94,15 +88,11 @@ router.patch('/:feedbackId', (req, res) => {
                     message : "feedback updated successfully"
                 });
                 
-    }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-    });
+    }).catch(next);
 
 });
 
-router.delete("/:feedbackId", (req, res) => {
+router.delete("/:feedbackId", (req, res, next) => {
 
     console.log("###", "delete");
      
@@ -112,11 +102,7 @@ router.delete("/:feedbackId", (req, res) => {
             res.status(200).json({
                 message : "deleted successfully"
             });
-     }).catch((err) => {
-        res.status(500).json({
-            error : err
-        });
-     });
+     }).catch(next);
 
 });
 
