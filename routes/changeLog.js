@@ -19,7 +19,7 @@ router.get('/',(req, res, next) => {
     console.log("$$$$",val);
     console.log("####",findText);
         const changes =  changeLog.find(findText)
-        .select('title category body _id')
+        .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .skip(val)
         .limit(limit)
@@ -37,9 +37,7 @@ router.get('/',(req, res, next) => {
                     count : count
                 });
         })
-        .catch(next);
-
-    
+        .catch(next);    
 });
 
 
@@ -78,17 +76,13 @@ router.get('/:changelogId',(req, res, next) => {
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
     changeLog.findById({_id : id})
+    .select('title category body _id disLike like')
     .exec()
     .then((change) => {
                 console.log("$$$$", change);
                 res.status(200).json({
                     message : "changeLog found",
-                    change : {
-                        id : change._id,
-                        title : change.title,
-                        category : change.category,
-                        body : change.body
-                    }
+                    change : change
                 });
 
     })
