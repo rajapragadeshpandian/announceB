@@ -13,14 +13,14 @@ function openWidget() {
     .then((result) => result.json())
     .then((data) => {
         var changes = data;
-        fetchProduct(changes);
+        fetchChangeLog(changes);
     })
     .catch((err) => {
         console.log(err);
     });
 }
 
-    function fetchProduct(changes) {
+    function fetchChangeLog(changes) {
 
          console.log("####", changes);
         // console.log(product.data.count,product.data.products);
@@ -103,15 +103,24 @@ function openWidget() {
             let logDetailsItemTopBar = document.createElement('div');
             logDetailsItemTopBar.classList.add('topBar');
             var logDetailsItemHeading = document.createElement('h3');
+            var btnWrap = document.createElement('span');
+            btnWrap.className = "btnWrap";
+            var btnLink = document.createElement('a');
+            btnLink.href = "#";
+            btnLink.className = "back";
+            btnLink.innerHTML = "back";
+            btnWrap.appendChild(btnLink);
             logDetailsItemHeading.innerHTML = change.title;
+            logDetailsItemTopBar.appendChild(btnWrap);
             logDetailsItemTopBar.appendChild(logDetailsItemHeading);
+            
             logDetailsItem.appendChild(logDetailsItemTopBar);
             var slideBody = document.createElement('div');
             slideBody.classList.add('slidebody');
 
             change.category.map((item) => {
                 let slideCategories = document.createElement('div');
-                slideCategories.classList.add('category');
+                slideCategories.classList.add('logDetailsItemCategory');
                 if(item == "new") {
                     slideCategories.classList.add('categoryBlue');
                 } else if (item == "fix") {
@@ -174,6 +183,19 @@ function openWidget() {
     align-items: center;
     font-size: 15px;
     font-family: sans-serif;
+    position : relative;
+            }
+
+            .btnWrap {
+                height: 30px;
+    width: 30px;
+    position: absolute;
+    left: 10px;
+    top: 15px;
+            }
+
+            .back {
+                color : grey;
             }
 
             .topBar h3 {
@@ -199,7 +221,7 @@ function openWidget() {
                 padding : 10px;
             }
 
-            .category {
+            .category, .logDetailsItemCategory {
                 font-size: 15px;
     line-height: 20px;
     display: inline-block;
@@ -287,27 +309,45 @@ function openWidget() {
 // event bubbling and event capturing needs to be handled
         var loglist = document.getElementsByClassName('logList');
         for(i=0;i<loglist.length;i++) {
-            loglist[i].addEventListener('click',openName);
+            loglist[i].addEventListener('click',openName, false);
         }
 
-        var closeLog = document.getElementsByClassName('slidebody');
-        for(i=0;i<closeLog.length;i++) {
-            closeLog[i].addEventListener('click',closeName);
+
+
+        var back = document.getElementsByClassName('back');
+        console.log(back);
+        for(i=0;i<back.length;i++) {
+            back[i].addEventListener('click',closeName,false);
         }
 
         function openName(e) {
+
+            let target;
+            if(e.target.classList.contains("category") ||
+             e.target.classList.contains("title") ||
+              e.target.classList.contains("body")) {
+                  target = e.target.parentNode;
+              } else {
+                  target = e.target;
+              }
+            console.log(e.target.parentNode);
+
             document.getElementsByClassName('index')[0].classList.add('slide');
             var child = Array.prototype.slice.call(document.getElementsByClassName('changeLogs')[0].children);
             console.log(child);
-            var index = child.indexOf(e.target);
+            var index = child.indexOf(target);
             console.log(index);
-            console.log(e.target);
+            console.log(e.target.parentNode);
             console.log(e.currentTarget.parentNode.parentNode.nextElementSibling);
              e.currentTarget.parentNode.parentNode.nextElementSibling.children[index].classList.add('slide');
         }
     
         function closeName(e) {
-            e.target.parentNode.parentNode.classList.remove('slide');
+            var logDetailsItem = document.getElementsByClassName('logDetailsItem');
+            for(i=0;i<logDetailsItem.length;i++) {
+                logDetailsItem[i].classList.remove('slide');
+            }
+            //document.getElementsByClassName('logDetailsItem')[i].classList.remove('slide');
             document.getElementsByClassName('index')[0].classList.remove('slide');
             //e.target.parentNode.classList.remove('slide');
               
