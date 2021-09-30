@@ -185,6 +185,14 @@ find whether customer like the change
 
 db.cart.find({"likedPosts.changeId" : "1"}).pretty()
 
+push 
+
+db.cart.update({ index : 7 },
+ { $push : { 
+     likedPosts : { "changeId"  : 4, "choice" : "dislike" } 
+     }}
+     );
+
 
 // code changeLog get
 const limit = 3;
