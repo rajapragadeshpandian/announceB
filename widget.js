@@ -1,15 +1,48 @@
+const toggle = document.getElementsByClassName("widget")[0];
 
+toggle.addEventListener("click", toggleWidget);
 
-// const changes = document.getElementsByClassName("changes")[0];
+function toggleWidget() {
+    console.log("close widget");
+    var container = document.getElementsByClassName('container')[0];
+    // container.style.display = "none"; 
+    
+   const CustomerDetails = AB_config.callbacks.getCustomerDetails();
+   console.log(CustomerDetails);
+    
+    console.log(container.classList.contains('active'));
 
+    if(container.classList.contains('active')) {
+        AB_config.callbacks.onHideWidget();
+        container.classList.remove('active')
+    } else {
+        AB_config.callbacks.onShowWidget();
+        container.classList.add('active')
+    }
+}
 
-// changes.addEventListener("click", openChange);
+//  window.addEventListener('load', setTimeout(() => {
+//     init();
+//  }, 3000));
 
-window.addEventListener('load', openWidget);
+window.addEventListener('load', init);
 
-function openWidget() {
+function init() {
 
-    fetch('http://localhost:5000/changelog/')
+    const customerDetails = AB_config.callbacks.onWidgetReady();
+
+    console.log("@@", customerDetails.accId,customerDetails.customer);
+
+    console.log("accdetails", AB_config);    
+    let accId = customerDetails.accId;
+    let customer = customerDetails.customer;
+    console.log(customer.name, customer.email);
+
+    var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
+    console.log(`http://localhost:5000/changelog/widget
+    ?accId=${accId}&&${query}`);
+
+    fetch(`http://localhost:5000/changelog/widget?accId=${accId}&&${query}`)
     .then((result) => result.json())
     .then((data) => {
         var changes = data;
@@ -29,7 +62,8 @@ function openWidget() {
         console.log(changeDetails.changeList);
 
         const container = document.createElement('div');
-        container.className = "container";
+        container.classList.add('container');
+        container.classList.add('active');
        
         const innerContainer = document.createElement('div');
         innerContainer.className = "innerContainer";
@@ -43,7 +77,7 @@ function openWidget() {
         let topBar = document.createElement('div');
         topBar.className = "topBar";
         var heading = document.createElement('h3');
-        heading.innerHTML = "The ChangeLog";
+        heading.innerHTML = AB_config.title;
         topBar.appendChild(heading);
         innerContainer.appendChild(topBar);
 
@@ -57,7 +91,8 @@ function openWidget() {
         let footer = document.createElement('div');
         footer.className = "footer";
         var readMoreLink = document.createElement('a');
-        readMoreLink.innerHTML = "Read More";
+        readMoreLink.innerHTML = AB_config.readMore;
+        readMoreLink.className = "readMore";
         readMoreLink.href = "http://localhost:5000/changelog";
         footer.appendChild(readMoreLink);
 
@@ -153,8 +188,12 @@ function openWidget() {
             .container {
                 width : 400px;
                 height : 300px;
+                display : none;
             }
 
+            .container.active {
+                display : block;
+            }
             .innerContainer {
                 height : 100%;
                 width : 100%;
@@ -306,7 +345,6 @@ function openWidget() {
 
         // var openLog = document.getElementsByClassName('changeLogs')[0];
         // openLog.addEventListener('click', openName);
-// event bubbling and event capturing needs to be handled
         var loglist = document.getElementsByClassName('logList');
         for(i=0;i<loglist.length;i++) {
             loglist[i].addEventListener('click',openName, false);
@@ -321,7 +359,7 @@ function openWidget() {
         }
 
         function openName(e) {
-
+            AB_config.callbacks.onShowDetails();
             let target;
             if(e.target.classList.contains("category") ||
              e.target.classList.contains("title") ||
@@ -353,6 +391,9 @@ function openWidget() {
               
         }
     }
+
+   
+    
 
         
 

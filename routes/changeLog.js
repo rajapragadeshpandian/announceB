@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const  router = express.Router();
 const changeLog = require('../models/changeLog');
+const Customer = require('../models/customers');
 
 // get changeLog
 router.get('/',(req, res, next) => {
@@ -11,33 +12,114 @@ router.get('/',(req, res, next) => {
 
 // regex { title : { "$regex" : req.query.text , $options : "i" }}
 // { $text : {$search : req.query.value }}
+
+   
+
     const limit = 3;
     
     console.log(req.query.value);
     const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
-    console.log("$$$$",val);
-    console.log("####",findText);
+
+
+    function fetchChanges(changes) {
+
+        const count = changeLog.countDocuments(findText)
+        .exec()
+        .then((count) => count)
+
+        return Promise.all([count, changes]);
+    }
+
         const changes =  changeLog.find(findText)
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .skip(val)
         .limit(limit)
-        .exec();
-        
-        const count = changeLog.countDocuments(findText)
-        .exec();
+        .exec()
+        .then((changes) => fetchChanges(changes))
+        .then(([count, changes]) => {
 
-        Promise.all([changes, count])
-        .then(([changes , count]) => {
-            console.log("$$$$",changes);
-            console.log("####", count);
-                res.status(200).json({
-                    changeList : changes,
-                    count : count
-                });
+            console.log(changes);
+            res.status(200).json({
+                changeList : changes,
+                count : count
+                 });
         })
-        .catch(next);    
+        .catch(next);
+        
+        // const count = changeLog.countDocuments(findText)
+        // .exec();
+
+        // Promise.all([changes, count])
+        // .then(([changes , count]) => {
+        //     console.log("$$$$",changes);
+        //     console.log("####", count);
+        //         res.status(200).json({
+        //             changeList : changes,
+        //             count : count
+        //         });
+        // })
+            
+});
+
+router.get('/widget', (req, res, next) => {
+
+
+    console.log("widget query", req.query);
+
+    const { name, accId, email} = req.query;
+
+    //console.log("custdetails", name, accId, email);
+    const custPlan = Object.fromEntries(
+        Object.entries(req.query).slice(3)
+    );
+
+    //console.log(sliced);
+
+    function widget() {
+
+        console.log("widget function");
+        const changes =  changeLog.find()
+        .select('title category body _id disLike like')
+        .sort({ createdAt : -1 })
+        .limit(3)
+        .exec()
+        .then((change) => change)
+
+        return changes;
+    
+    }
+
+    Customer.findOne({email : email})
+    .exec()
+    .then((customer) => {
+
+        if(!customer) {
+            console.log("!!!","customer not exist");
+            let customer = new Customer({
+                name : name,
+                email : email,
+                subscription : [custPlan]
+            });
+            return customer.save()
+        } else {
+            console.log("###", "customer exist");
+            return customer;
+        }
+
+    })
+    .then(customer => widget())
+    .then((changes) => {
+        console.log("changes", changes);
+        res.status(200).json({
+        changeList : changes
+         });
+    })
+    .catch(next)
+       
+
+
 });
 
 
@@ -62,8 +144,7 @@ router.post('/', (req, res, next) => {
                     id : change._id,
                     title : change.title,
                      category : change.category,
-                    body : change.body,
-                    count : item
+                    body : change.body
                 },
 
             });

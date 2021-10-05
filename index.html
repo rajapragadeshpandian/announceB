@@ -7,13 +7,67 @@
     <body>
         <h1>Dashboard</h1>
 
-        <!-- <div class="outer">
-            <div class="inner">
-                    click
-            </div>
+        <div class="widget" style="margin-bottom: 20px">
+            <button>widget</button>
+        </div>
+        <script>
 
-        </div> -->
+
+            //  fetch('https://randomuser.me/api/?results=10')
+            // .then((res) => res.json())
+            // .then((data) => {
+            //     console.log(data);
+            //     getCustomerDetails(data);
+            // }) 
+            // .catch((err) => {
+            //     console.log(err);
+            // });
+
+            // function getCustomerDetails(data) {
+            //     console.log(data)
+            //     AB_config.callbacks.getCustomerDetails();
+            // }
+
+
+             var AB_config = {
+                accId : "pragadesh", 
+                customer : {
+                    name : "steve",
+                    email : "steve@gmail.com", 
+                    subscription : "monthly" 
+
+                },
+                title: "The Changelog",
+                 readMore: "Read more",
+             callbacks: {
+                onWidgetReady: function() {
+                    console.log("Widget is here!");
+                console.log("unseen entries count: ");
+                    return {
+                        accId : AB_config.accId,
+                        customer : AB_config.customer
+                    }
+                //fetch customer call should come here
+                },
+    onShowWidget: function(){
+      console.log("Someone opened the widget!");
+    },
+    onShowDetails: function(){
+        console.log("details shown in the widget");
+    },
+    onHideWidget: function(){
+      console.log("some one closed the widget");
+    },
+    getCustomerDetails: function(){
+
+        console.log(AB_config.accId);
+    }
+  }
+            }
+      
+
+        </script>
         
-        <script src="widget.js"></script>
+        <script src="one.js"></script>
     </body>
 </html>
