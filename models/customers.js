@@ -7,7 +7,7 @@ const customerSchema = mongoose.Schema({
         required : true,
         match : /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         },
-    type : String,
+    subscription : Array,
     likedPosts : [
         {
             __change : {type : mongoose.Schema.Types.ObjectId, ref : 'Changelog' },
@@ -17,3 +17,15 @@ const customerSchema = mongoose.Schema({
 });
 
 module.exports = mongoose.model('Customer', customerSchema);
+
+// subscription : [
+//     {
+//         plan : "pro"
+//     },
+// ]
+
+// customerDetails : [{
+//     name : String,
+//     email : String,
+//     subscription : String
+// }]
