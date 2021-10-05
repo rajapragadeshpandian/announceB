@@ -58,12 +58,11 @@ router.patch('/:changelogId', (req, res, next) => {
 
 
         if(filteredPost.length > 0){
-
+                console.log("filtered posts exist");
             Customer.updateOne({ _id : req.query.custId },
-                { $pullAll : { 
+                { $pull : { 
                     likedPosts : {
-                        __change  : req.params.changelogId,
-                        responded : req.query.choice
+                        __change  : req.params.changelogId
                         } 
                     }}
                     )
