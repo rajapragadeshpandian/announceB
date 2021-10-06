@@ -29,3 +29,4 @@ module.exports = mongoose.model('Customer', customerSchema);
 //     email : String,
 //     subscription : String
 // }]
+// customerDetails : Array

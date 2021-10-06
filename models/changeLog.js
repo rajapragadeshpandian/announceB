@@ -7,7 +7,7 @@ const changeLogSchema = mongoose.Schema(
         category : {type :[String], required : true},
         body : {type : String, required : true},
         like : {type : Number, default : 0 },
-        disLike : {type : Number , default : 0 },
+        dislike : {type : Number , default : 0 },
         // __user : {type : Schema.Types.ObjectId , ref : 'User'}
     },
     {

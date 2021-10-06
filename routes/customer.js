@@ -56,27 +56,43 @@ router.patch('/:changelogId', (req, res, next) => {
 
         console.log("@@@", filteredPost);
 
-
         if(filteredPost.length > 0){
-                console.log("filtered posts exist");
-            Customer.updateOne({ _id : req.query.custId },
-                { $pull : { 
-                    likedPosts : {
-                        __change  : req.params.changelogId
-                        } 
+            console.log("filtered posts exist");
+
+            Customer.updateOne({ _id : req.query.custId, "likedPosts.__change" : req.params.changelogId  },
+                { $set : { 
+                    "likedPosts.$.responded" : req.query.choice
                     }}
                     )
                     .exec()
                     .then((post) => {
 
-                            res.status(200).json({
-                                message : "updated successfully"
-                            })
+                        let choice;
+                        console.log(req.query.choice);
+                        if(req.query.choice == "like") {
+                            choice = { like : 1, dislike  : -1}
+                        } else if(req.query.choice == "dislike") {
+                            choice = { like : -1, dislike : 1 }
+                        } else if( req.query.choice == "unlike") {
+                            choice = { like : -1}
+                        } else {
+                            choice = { dislike : -1}
+                        }
+                        
+                       
+                        changeLog.updateOne({_id : req.params.changelogId},
+                            { $inc : choice })
+                               .exec()
+                               .then((changes) => {
+                                   res.status(200).json({
+                                       message : "updated successfully"
+                                   })
+                               })
+                               .catch(next)
+                        
+
                     })
-                    .catch(next);
-            res.status(200).json({
-                message : "posts already available"
-            })
+                    .catch(next)
         } else {
 
             Customer.updateOne({ _id : req.query.custId },
@@ -89,17 +105,34 @@ router.patch('/:changelogId', (req, res, next) => {
                     )
                     .exec()
                     .then((post) => {
+                         
+                        let choice;
+                        console.log(req.query.choice);
+                        if(req.query.choice == "like") {
+                            choice = { like : 1 }
+                        } else if(req.query.choice == "dislike") {
+                            choice = { dislike : 1 }
+                        }
 
-                            res.status(200).json({
-                                message : "updated successfully"
+                        console.log("%%%", choice, req.params.changelogId);
+
+                        changeLog.updateOne({_id : req.params.changelogId},
+                         { $inc : choice })
+                            .exec()
+                            .then((changes) => {
+                                res.status(200).json({
+                                    message : "updated successfully"
+                                })
                             })
+                            .catch(next)
+
+                            
                     })
                     .catch(next);
         
         }
-
-
     }
+
 
     Customer.findById({ _id :req.query.custId })
     .exec()
@@ -107,14 +140,6 @@ router.patch('/:changelogId', (req, res, next) => {
         console.log(customer);
         const likedPosts = customer.likedPosts;
         updateLikedPost(likedPosts);
-
-        // res.status(200).json({
-        //     message: "like updated for change",
-        //     changelogId : req.params.changelogId,
-        //     choice : req.query.choice,
-        //     custId : req.query.custId,
-        //     customer : customer
-        // });
     })
     .catch(next);
 
