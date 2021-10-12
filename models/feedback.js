@@ -16,3 +16,6 @@ const  FeedbackSchema = mongoose.Schema({
 
 module.exports = mongoose.model('Feedback',FeedbackSchema);
 
+
+// customer : { type : mongoose.Schema.Types.Mixed, default  : null}
+

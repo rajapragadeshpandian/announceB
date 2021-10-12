@@ -33,7 +33,7 @@ app.use('/changelog',changeLogDetails);
 app.use('/feedback', feedbackDetails);
 app.use('/customer', customerDetails);
 
-app.get('/changes/uniqueTags', (req, res) => {
+app.get('/changes/uniqueTags', (req, res, next) => {
 
     console.log("###", "uniqueTags");
 
