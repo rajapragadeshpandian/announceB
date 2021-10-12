@@ -59,81 +59,21 @@ router.get('/',(req, res, next) => {
         //             changeList : changes,
         //             count : count
         //         });
-        // })
-            
+        // })         
 });
-
-router.get('/widget', (req, res, next) => {
-
-
-    console.log("widget query", req.query);
-
-    const { name, accId, email} = req.query;
-
-    //console.log("custdetails", name, accId, email);
-    const custPlan = Object.fromEntries(
-        Object.entries(req.query).slice(3)
-    );
-
-    //console.log(sliced);
-
-    function widget() {
-
-        console.log("widget function");
-        const changes =  changeLog.find()
-        .select('title category body _id disLike like')
-        .sort({ createdAt : -1 })
-        .limit(3)
-        .exec()
-        .then((change) => change)
-
-        return changes;
-    
-    }
-
-    Customer.findOne({email : email})
-    .exec()
-    .then((customer) => {
-
-        if(!customer) {
-            console.log("!!!","customer not exist");
-            let customer = new Customer({
-                name : name,
-                email : email,
-                subscription : [custPlan]
-            });
-            return customer.save()
-        } else {
-            console.log("###", "customer exist");
-            return customer;
-        }
-
-    })
-    .then(customer => widget())
-    .then((changes) => {
-        console.log("changes", changes);
-        res.status(200).json({
-        changeList : changes
-         });
-    })
-    .catch(next)
-       
-
-
-});
-
 
 //post changeLog
 router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
-    const  { title , body , category} = req.body;
+    const  { title, body, category, exclusiveTo} = req.body;
 
     const changelog = new changeLog({
 
         title : title,
         category : category.split(','),
-        body : body
+        body : body,
+        exclusiveTo : exclusiveTo
     })
     .save()
     .then((change) => {
@@ -213,6 +153,26 @@ router.delete('/:changelogId', (req, res, next) => {
     .catch(next);
 
 });
+
+// router.get('/active/users', (req, res, next) => {
+
+//     var date = new Date(Date.now());
+//     var yesterday = new Date(date.getTime()- 24*60*60*1000);
+//     console.log(date);
+//     console.log(yesterday);
+
+//     changeLog.find({updatedAt : { $gt : yesterday }})
+//     .exec()
+//     .then((changes) => {
+    
+//         res.status(200).json({
+//             change: changes,
+//             len : changes.length
+
+//         });
+//     }).catch(next);
+// });
+
 
 
 module.exports = router;

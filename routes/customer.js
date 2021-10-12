@@ -163,4 +163,140 @@ router.delete('/:customerId', (req, res, next) => {
 });
 
 
+router.get('/widget', (req, res, next) => {
+
+
+    console.log("widget query", req.query);
+
+    const { name, accId, email} = req.query;
+
+    //console.log("custdetails", name, accId, email);
+    const customProps = Object.fromEntries(
+        Object.entries(req.query).slice(3)
+    );
+
+//     function convert(props) {
+//          var queryObj = {};
+
+//         //  queryObj = {
+//         //      plan : {plan : "starter"}
+//         //  }
+//         console.log("$$$", props);
+//         var key = Object.keys(props);
+
+//         const entries = Object.fromEntries(
+//             Object.entries(props)
+//         );
+//         console.log("%%%", entries, entries[0]);
+//         console.log("###", key, key.length);
+
+//           let i;
+//           for (i=0; i<key.length ; i++) {
+//               var q1 = {};
+//               q1[key[i]] = props[key[i]];
+//               console.log("^^^",q1);
+//                 console.log(key[i]);
+//                 console.log(props[key[i]]);
+//                  queryObj[key[i]] = q1;
+//                 console.log(queryObj);
+//           }
+//           return queryObj;
+//     }
+
+//    const customProps1 =  convert(customProps);
+
+//    console.log("&&&", customProps1);
+
+
+    function widget() {
+
+        console.log("widget function");
+        const changes =  changeLog.find()
+        .select('title category body _id disLike like')
+        .sort({ createdAt : -1 })
+        .limit(3)
+        .exec()
+        .then((change) => change)
+
+        return changes;
+    
+    }
+
+    Customer.findOne({email : email})
+    .exec()
+    .then((customer) => {
+
+        if(!customer) {
+            console.log("!!!","customer not exist");
+            let customer = new Customer({
+                name : name,
+                email : email,
+                customizedProps : customProps
+            });
+            return customer.save()
+        } else {
+            console.log("###", "customer exist");
+            return customer;
+        }
+
+    })
+    .then(customer => widget())
+    .then((changes) => {
+        console.log("changes", changes);
+        res.status(200).json({
+        changeList : changes
+         });
+    })
+    .catch(next)
+       
+});
+
+
+router.get('/filter', (req, res, next) => {
+
+    console.log("filter");
+
+    var value  = req.query.value;
+    var property =  req.query.property;
+    var customizedProps = "customizedProps." + property;
+    console.log("customizedProps",customizedProps);
+    var queryObj = {
+    };
+    queryObj[customizedProps] = value;
+    console.log("###", queryObj);   
+
+    Customer.find(queryObj)
+    .exec()
+    .then((customer) => {  
+        console.log("$$$", customer);
+        res.status(200).json({
+            message : "customer details returned",
+            customer : customer,
+            len : customer.length
+        });
+
+    })
+    .catch(next)
+    //{"customizedProps.plan" : "starter"}
+
+
+   // {"customizedProps.plan" : "starter"}  
+   // {customizedProps : { rent: "starter"}
+// let name = "name";
+// let value = "vicky";
+
+//    var queryObj = {};
+//    queryObj[name] = value;
+//    console.log(queryObj);
+
+// var obj = {};
+// obj[plan] = value;
+
+// console.log(obj);
+//{customizedProps : { $elemMatch : ff }}
+});
+
+
+
+
 module.exports = router;
