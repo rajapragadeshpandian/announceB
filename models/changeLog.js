@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const changeLogSchema = mongoose.Schema(
 
     {
-        title : {type : String , required : true},
-        category : {type :[String], required : true},
-        body : {type : String, required : true},
+        title : {type : String , required : true, default : null},
+        category : {type :[String], required : true, default : null},
+        body : {type : String, required : true, default : null},
         like : {type : Number, default : 0 },
         dislike : {type : Number , default : 0 },
+        exclusiveTo : { type : [String], default : null},
+        accId : { type : String, default : null}
         // __user : {type : Schema.Types.ObjectId , ref : 'User'}
     },
     {
