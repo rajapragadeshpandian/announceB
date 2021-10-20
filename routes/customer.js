@@ -294,7 +294,7 @@ router.get('/filter', (req, res, next) => {
 });
 
 router.post('/segment', (req, res,next) => {
-
+let finalQuery;
 var queryObj = {};
 var splitCondition = req.body.data.filter((item,index,arr) => {
     
@@ -341,10 +341,18 @@ var queryResults = splitProperties.map((data) => {
         // }
 });
 
-console.log(queryResults);
-queryObj[splitCondition[0].splitOperator] = queryResults;
+console.log(queryResults[0]);
 
-console.log(queryObj);
+
+if(splitCondition.length > 0) {
+    queryObj[splitCondition[0].splitOperator] = queryResults;
+    finalQuery = queryObj;
+} else {
+    finalQuery = queryResults[0];
+}
+
+
+console.log(finalQuery);
 
 
 // {
@@ -360,7 +368,7 @@ console.log(queryObj);
 // } 
 //{name : { $eq : ram}}
 
-        Customer.find(queryObj)
+        Customer.find(finalQuery)
         .exec()
         .then((customer) => {  
             res.status(200).json({
