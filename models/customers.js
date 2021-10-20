@@ -32,3 +32,14 @@ module.exports = mongoose.model('Customer', customerSchema);
 
 // accId should get associated to each customer to 
 // get customers for specific accpunt
+
+
+
+
+
+
+
+  
+
+
+
