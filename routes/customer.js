@@ -293,6 +293,8 @@ router.get('/filter', (req, res, next) => {
 //{customizedProps : { $elemMatch : ff }}
 });
 
+
+
 router.post('/segment', (req, res,next) => {
 let finalQuery;
 var queryObj = {};
@@ -379,6 +381,40 @@ console.log(finalQuery);
 
         })
         .catch(next);
+
+});
+
+router.get(('/custprops'), (req, res, next) => {
+
+    function filterPlan(customer) {
+
+       var plans =  customer.map((item) => {
+            const customProps = Object.fromEntries(
+                Object.entries(item.customizedProps).slice(0,1)
+            );
+            
+            return Object.keys(customProps);
+        });
+
+        return plans;
+    }
+
+    Customer.find({}, {customizedProps : 1})
+    .exec()
+    .then((customer) => {  
+        
+        var plan = filterPlan(customer);
+        var filteredPlan = plan.filter((item) => {
+                return item[0] == "type";
+        })
+
+        console.log(filteredPlan, filteredPlan.length > 0);
+        res.status(200).json({
+            message : "customer details returned"
+        });
+
+    })
+    .catch(next);
 
 });
 
