@@ -253,22 +253,23 @@ router.get('/widget', (req, res, next) => {
 
 
 router.get('/filter', (req, res, next) => {
+   
+    // filter['$or'] = conditions;
 
-    console.log("filter");
+    // console.log("filter", filter);
 
-    var value  = req.query.value;
-    var property =  req.query.property;
-    var customizedProps = "customizedProps." + property;
-    console.log("customizedProps",customizedProps);
+
+    var customizedProps = "customizedProps." + req.query.property;
     var queryObj = {
     };
-    queryObj[customizedProps] = value;
-    console.log("###", queryObj);   
+    queryObj[customizedProps] = req.query.value;
+   // { 'customizedProps.rental': 'monthly', name : "light" }
+    console.log("queryobj",queryObj);
 
     Customer.find(queryObj)
     .exec()
     .then((customer) => {  
-        console.log("$$$", customer);
+       console.log("$$$", customer);
         res.status(200).json({
             message : "customer details returned",
             customer : customer,
@@ -277,11 +278,7 @@ router.get('/filter', (req, res, next) => {
 
     })
     .catch(next)
-    //{"customizedProps.plan" : "starter"}
 
-
-   // {"customizedProps.plan" : "starter"}  
-   // {customizedProps : { rent: "starter"}
 // let name = "name";
 // let value = "vicky";
 
@@ -294,6 +291,87 @@ router.get('/filter', (req, res, next) => {
 
 // console.log(obj);
 //{customizedProps : { $elemMatch : ff }}
+});
+
+router.post('/segment', (req, res,next) => {
+
+var queryObj = {};
+var splitCondition = req.body.data.filter((item,index,arr) => {
+    
+      return item.splitOperator;
+});
+
+
+var splitProperties = req.body.data.filter((item,index,arr) => {
+    
+    return !item.splitOperator;
+});
+
+
+var queryResults = splitProperties.map((data) => {
+    var resultObj = {};
+  
+    //{name : { $eq : ram}}
+     var queryCondition = data.filter((item) =>  {
+            return item.condition;
+     });
+
+     var properties = data.filter((item) =>  {
+            return !item.condition;
+     });
+
+
+    var queryProperties = properties.map((data) => {
+         var propertyObj = {};
+         var valueObj = {};
+         valueObj[data.operator] = data.value;
+         propertyObj[data.property] = valueObj;
+
+         return propertyObj;
+     });
+
+     if(queryCondition.length >  0) {
+        resultObj[queryCondition[0].condition] = queryProperties;
+        return resultObj;
+     }
+
+     return queryProperties[0];
+        // {   
+        // $or : [{name : { $eq : ram}},{name : { $eq : prag}}]
+        // }
+});
+
+console.log(queryResults);
+queryObj[splitCondition[0].splitOperator] = queryResults;
+
+console.log(queryObj);
+
+
+// {
+//     $and : [
+//         {
+//         $or : [{name : { $eq : ram}},{name : { $eq : prag}}]
+//         },
+//         {
+//         $or : [{index : { $eq : 1}},{index : { $eq : 3}}]
+//         }
+        
+//     ]
+// } 
+//{name : { $eq : ram}}
+
+        Customer.find(queryObj)
+        .exec()
+        .then((customer) => {  
+            res.status(200).json({
+                message : "customer details returned",
+                customer : customer,
+                len : customer.length
+            });
+
+        })
+        .catch(next);
+
 });
 
 
