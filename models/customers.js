@@ -33,6 +33,18 @@ module.exports = mongoose.model('Customer', customerSchema);
 // accId should get associated to each customer to 
 // get customers for specific accpunt
 
+  // var filter = {
+	// 	"$and" : [
+	// 		{
+	// 		"$or" : [{"name" : { "$eq" : "ram"}},{"name" : { "$eq" : "prag"}}]
+	// 		},
+	// 		{
+	// 		"$or" : [{ "email": {"$eq" : "prag@gmail.com" }}, { "email": {"$eq" :"ram@gmail.com"}}]
+	// 		}
+			
+	// 	]
+    // };
+
 
 
 
