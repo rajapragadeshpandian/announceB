@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const Customer = require('../models/customers');
 const changeLog = require('../models/changeLog');
+const Segment = require('../models/segments');
 
 
 router.get('/', (req, res, next) => {
-
 
     Customer.find()
     .exec()
@@ -252,29 +252,52 @@ router.get('/widget', (req, res, next) => {
 });
 
 
-router.get('/filter', (req, res, next) => {
+router.post('/createSegment', (req, res, next) => {
    
-    // filter['$or'] = conditions;
 
-    // console.log("filter", filter);
+    const { title, condition} = req.body;
+    console.log("###", title, condition);
 
+    // Customer.find(condition)
+    //     .exec()
+    //     .then((customer) => {  
+    //         res.status(200).json({
+    //             message : "customer details returned",
+    //             customer : customer,
+    //             len : customer.length
+    //         });
 
-    var customizedProps = "customizedProps." + req.query.property;
-    var queryObj = {
-    };
-    queryObj[customizedProps] = req.query.value;
-   // { 'customizedProps.rental': 'monthly', name : "light" }
-    console.log("queryobj",queryObj);
+    //     })
+    //     .catch(next);
 
-    Customer.find(queryObj)
+    //     return;
+
+    Customer.find(condition)
     .exec()
-    .then((customer) => {  
-       console.log("$$$", customer);
-        res.status(200).json({
-            message : "customer details returned",
-            customer : customer,
-            len : customer.length
-        });
+    .then((customers) => {  
+       if(!customers) {
+        return res.status(404).json({
+            message : "customer not found for this filter"
+        })
+       }
+
+       const segment = new Segment({
+        title : title,
+        customers : customers
+    });
+
+     return segment.save();
+
+    })
+    .then((segment) => {
+
+        console.log( "$$$$", segment);
+            res.status(200).json({
+                message: "segment created",
+                segmentTitle : segment.title,
+                customers : segment.customers,
+                 segmentId: segment._id 
+            });
 
     })
     .catch(next)
@@ -294,8 +317,51 @@ router.get('/filter', (req, res, next) => {
 });
 
 
+router.get('/segment/:segmentId', (req, res, next) => {
+
+    const {segmentId} = req.params;
+
+    Segment.findById({ _id : segmentId})
+    .exec()
+    .then((segment) => {
+        console.log("####", segment);
+
+        res.status(200).json({
+            message : "segment Returned",
+            segment : segment
+        });
+    })
+    .catch(next);
+   
+});
+
+router.delete('/segment/:segmentId', (req, res, next) => {
+
+    const {segmentId} = req.params;
+
+    Segment.findByIdAndDelete({_id : segmentId})
+    .exec()
+    .then((segment) => {
+        res.status(200).json({
+            message : "segment deleed Returned"
+        });
+    })
+    .catch(next);
+
+})
+
+
 
 router.post('/segment', (req, res,next) => {
+
+    console.log("$$$", req.body);
+
+    // var customizedProps = "customizedProps." + req.query.property;
+    // var queryObj = {
+    // };
+    // queryObj[customizedProps] = req.query.value;
+   // { 'customizedProps.rental': 'monthly', name : "light" }
+    
 let finalQuery;
 var queryObj = {};
 var splitCondition = req.body.data.filter((item,index,arr) => {
@@ -384,7 +450,7 @@ console.log(finalQuery);
 
 });
 
-router.get(('/custprops'), (req, res, next) => {
+router.get('/custprops', (req, res, next) => {
 
     function filterPlan(customer) {
 
@@ -417,6 +483,7 @@ router.get(('/custprops'), (req, res, next) => {
     .catch(next);
 
 });
+
 
 
 
