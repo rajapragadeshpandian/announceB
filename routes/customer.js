@@ -210,6 +210,10 @@ router.get('/widget', (req, res, next) => {
 
     function widget() {
 
+
+        // find the segments in which the customer is associated with email
+        // return the segments in array
+        // frame an (or) condition and get the relevant changes
         console.log("widget function");
         const changes =  changeLog.find()
         .select('title category body _id disLike like')
@@ -256,51 +260,47 @@ router.post('/createSegment', (req, res, next) => {
    
 
     const { title, condition} = req.body;
-    console.log("###", title, condition);
 
-    // Customer.find(condition)
-    //     .exec()
-    //     .then((customer) => {  
-    //         res.status(200).json({
-    //             message : "customer details returned",
-    //             customer : customer,
-    //             len : customer.length
-    //         });
+    function fetchCustomers(segment) {
 
-    //     })
-    //     .catch(next);
+        const customers = Customer.find(segment.condition)
+            .exec()
+            .then((customers) => customers)
+        
+        return Promise.all([segment, customers]);
+    }
 
-    //     return;
+    Segment.find({ title : title})
+        .exec()
+        .then((segments) => {  
 
-    Customer.find(condition)
-    .exec()
-    .then((customers) => {  
-       if(!customers) {
-        return res.status(404).json({
-            message : "customer not found for this filter"
-        })
-       }
-
-       const segment = new Segment({
-        title : title,
-        customers : customers
-    });
-
-     return segment.save();
-
-    })
-    .then((segment) => {
-
-        console.log( "$$$$", segment);
-            res.status(200).json({
-                message: "segment created",
-                segmentTitle : segment.title,
-                customers : segment.customers,
-                 segmentId: segment._id 
+            if(segments.length > 0) {
+                return res.status(200).json({
+                    message : "Segment Name already exist"
+                });
+            }
+            const segment = new Segment({
+                title : title,
+                condition : condition
             });
 
-    })
-    .catch(next)
+            return segment.save();
+
+        })
+        .then((segment) => fetchCustomers(segment))
+        .then(([segment, customers]) => {
+
+            console.log("$$$", segment, customers);
+            res.status(200).json({
+                message: "segment created" ,
+                title : segment.title,
+                id : segment._id,
+                customers : customers
+            });
+        })
+        .catch(next);
+
+   
 
 // let name = "name";
 // let value = "vicky";
@@ -321,19 +321,52 @@ router.get('/segment/:segmentId', (req, res, next) => {
 
     const {segmentId} = req.params;
 
+    function fetchCustomers(segment) {
+
+        const customers = Customer.find(segment.condition)
+            .exec()
+            .then((customers) => customers)
+        
+        return customers;
+    }
+    
     Segment.findById({ _id : segmentId})
     .exec()
-    .then((segment) => {
-        console.log("####", segment);
-
-        res.status(200).json({
-            message : "segment Returned",
-            segment : segment
-        });
+    .then((segment) => fetchCustomers(segment))
+    .then((customers) => {
+        console.log("$$$", customers);
+            res.status(200).json({
+                message: "customers returned successfully",
+                customers : customers
+            });
     })
     .catch(next);
    
 });
+
+router.patch('/segment/:segmentId', (req, res, next) => {
+
+    console.log("segment updated");
+    const {segmentId} = req.params;
+    const { title, condition} = req.body;
+
+    Segment.findByIdAndUpdate({ _id : segmentId},
+        { $set : {
+           title : title,
+           condition : condition
+        }}
+   )
+   .exec()
+   .then((change) => {
+       
+           res.status(200).json({
+               message : "Segment updated successfully"
+           });
+
+   })
+   .catch(next);
+
+})
 
 router.delete('/segment/:segmentId', (req, res, next) => {
 
@@ -343,7 +376,7 @@ router.delete('/segment/:segmentId', (req, res, next) => {
     .exec()
     .then((segment) => {
         res.status(200).json({
-            message : "segment deleed Returned"
+            message : "segment deleted successfully"
         });
     })
     .catch(next);
