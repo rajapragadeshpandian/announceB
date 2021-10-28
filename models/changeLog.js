@@ -8,7 +8,8 @@ const changeLogSchema = mongoose.Schema(
         body : {type : String, required : true, default : null},
         like : {type : Number, default : 0 },
         dislike : {type : Number , default : 0 },
-        accId : { type : String, default : null}
+        accId : { type : String, default : null},
+        __customers : { type : [String], default : null}
         // __user : {type : Schema.Types.ObjectId , ref : 'User'}
     },
     {
