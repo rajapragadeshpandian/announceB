@@ -175,47 +175,16 @@ router.get('/widget', (req, res, next) => {
         Object.entries(req.query).slice(3)
     );
 
-//     function convert(props) {
-//          var queryObj = {};
-
-//         //  queryObj = {
-//         //      plan : {plan : "starter"}
-//         //  }
-//         console.log("$$$", props);
-//         var key = Object.keys(props);
-
-//         const entries = Object.fromEntries(
-//             Object.entries(props)
-//         );
-//         console.log("%%%", entries, entries[0]);
-//         console.log("###", key, key.length);
-
-//           let i;
-//           for (i=0; i<key.length ; i++) {
-//               var q1 = {};
-//               q1[key[i]] = props[key[i]];
-//               console.log("^^^",q1);
-//                 console.log(key[i]);
-//                 console.log(props[key[i]]);
-//                  queryObj[key[i]] = q1;
-//                 console.log(queryObj);
-//           }
-//           return queryObj;
-//     }
-
-//    const customProps1 =  convert(customProps);
-
-//    console.log("&&&", customProps1);
-
-
-    function widget() {
+    function widget(customer) {
 
 
         // find the segments in which the customer is associated with email
         // return the segments in array
         // frame an (or) condition and get the relevant changes
         console.log("widget function");
-        const changes =  changeLog.find()
+        console.log("####", customer._id);
+        let custId = customer._id ? {__customers : customer._id} : {}; 
+        const changes =  changeLog.find(custId)
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .limit(3)
@@ -244,7 +213,7 @@ router.get('/widget', (req, res, next) => {
         }
 
     })
-    .then(customer => widget())
+    .then(customer => widget(customer))
     .then((changes) => {
         console.log("changes", changes);
         res.status(200).json({
@@ -409,7 +378,7 @@ var splitProperties = req.body.data.filter((item,index,arr) => {
 });
 
 
-var queryResults = splitProperties.map((data) => {
+    var queryResults = splitProperties.map((data) => {
     var resultObj = {};
   
     //{name : { $eq : ram}}
@@ -482,6 +451,43 @@ console.log(finalQuery);
         .catch(next);
 
 });
+
+router.post('/filter', (req, res, next) => {
+
+    const id = req.body.changeId;
+    const condition = req.body.condition ? req.body.condition : {};
+
+    function updateChangeLog(customer) {
+
+            let customers = customer.map((item) => {
+                 return item['_id'];
+            });
+
+            console.log("$$$", customers);
+            console.log("$$$", id);
+
+             let change = changeLog.updateOne({_id : id},
+                { $set : {
+                    __customers : customers
+                }})
+                .exec()
+                .then((data) => data)
+ 
+         return change;
+    }
+     
+    
+        Customer.find(condition)
+        .select('_id')
+        .exec()
+        .then((customer) => updateChangeLog(customer))
+        .then((data) => {
+            res.status(200).json({
+                message : "changeLog Upated successfully"
+            })
+        })
+        .catch(next);
+})
 
 router.get('/custprops', (req, res, next) => {
 
