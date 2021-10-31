@@ -175,16 +175,41 @@ router.get('/widget', (req, res, next) => {
         Object.entries(req.query).slice(3)
     );
 
-    function widget(customer) {
+    function fetchUpdatedProps() {
 
 
+        let updatedProps = Customer.findOne({email : email})
+        .select('customizedProps')
+        .exec()
+        .then((customer) =>  customer)
+
+        return updatedProps;
+    }
+
+    function widget(updatedProps) {
+
+        const newProps = updatedProps.customizedProps;
+        console.log("$$$", updatedProps.customizedProps);
         // find the segments in which the customer is associated with email
         // return the segments in array
         // frame an (or) condition and get the relevant changes
-        console.log("widget function");
-        console.log("####", customer._id);
-        let custId = customer._id ? {__customers : customer._id} : {}; 
-        const changes =  changeLog.find(custId)
+
+        var keys = Object.keys(newProps);
+        console.log(keys);
+
+        var properties = keys.map((item) => {
+            let obj = {};
+            let property = "conditions." + item;
+            obj[property] = newProps[item]
+            return obj;
+        });
+        var queryObj = {};
+        queryObj['$or'] = properties;
+
+        console.log(queryObj);
+
+        //let custId = customer._id ? {__customers : customer._id} : {}; 
+        const changes =  changeLog.find(queryObj)
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .limit(3)
@@ -209,13 +234,22 @@ router.get('/widget', (req, res, next) => {
             return customer.save()
         } else {
             console.log("###", "customer exist");
+            
+
+            let customer = Customer.updateOne({ email : email}, 
+            { $set : {
+                customizedProps : customProps
+            }})
+            .exec()
+            .then((customer) => customer)
+
             return customer;
         }
 
     })
-    .then(customer => widget(customer))
+    .then((customer) => fetchUpdatedProps())
+    .then((updatedProps) => widget(updatedProps))
     .then((changes) => {
-        console.log("changes", changes);
         res.status(200).json({
         changeList : changes
          });
