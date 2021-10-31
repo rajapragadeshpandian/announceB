@@ -154,24 +154,50 @@ router.delete('/:changelogId', (req, res, next) => {
 
 });
 
-// router.get('/active/users', (req, res, next) => {
+router.patch('/set/filter', (req, res, next) => {
 
-//     var date = new Date(Date.now());
-//     var yesterday = new Date(date.getTime()- 24*60*60*1000);
-//     console.log(date);
-//     console.log(yesterday);
+    console.log("setfilter", req.body);
+    const id = req.body.changeId;
+    const { conditions } = req.body;
+            changeLog.update({ _id : id},
+                        { $set :{
+                            conditions : conditions                    
+                        } }
+                    )
+                    .exec()
+                    .then((changes) => {
 
-//     changeLog.find({updatedAt : { $gt : yesterday }})
-//     .exec()
-//     .then((changes) => {
+                        res.status(200).json({
+                            message : "filter updated successfully"
+                        });
+
+                    })
+                    .catch(next);
+   
+})
+
+router.get('/active/users', (req, res, next) => {
+
+    let days = req.query.days;
+    console.log(days);
+    var date = new Date(Date.now());
+    var yesterday = new Date(date.getTime()- days*24*60*60*1000);
+    console.log("$$$",date);
+    console.log("$$$",yesterday);
+
+    console.log(req.query);
+
+    changeLog.find({updatedAt : { $gt : yesterday }})
+    .exec()
+    .then((changes) => {
     
-//         res.status(200).json({
-//             change: changes,
-//             len : changes.length
+        res.status(200).json({
+            change: changes,
+            len : changes.length
 
-//         });
-//     }).catch(next);
-// });
+        });
+    }).catch(next);
+});
 
 
 

@@ -9,7 +9,7 @@ const changeLogSchema = mongoose.Schema(
         like : {type : Number, default : 0 },
         dislike : {type : Number , default : 0 },
         accId : { type : String, default : null},
-        __customers : { type : [String], default : null}
+        conditions : { type : mongoose.Schema.Types.Mixed, default  : null}
         // __user : {type : Schema.Types.ObjectId , ref : 'User'}
     },
     {

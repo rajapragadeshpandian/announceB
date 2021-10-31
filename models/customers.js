@@ -15,6 +15,9 @@ const customerSchema = mongoose.Schema({
              responded :{ type : String}
         }
     ]
+},
+{
+    timestamps: true 
 });
 
 module.exports = mongoose.model('Customer', customerSchema);
