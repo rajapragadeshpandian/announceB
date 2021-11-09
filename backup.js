@@ -107,5 +107,183 @@ router.get('/',(req, res) => {
     // });
 
 
+    function fetchCustomers(segment) {
 
+        
+        const renameKeys = (obj) =>
+        Object.keys(obj).reduce(
+          (acc, key) => ({
+            ...acc,
+            ...{ ["$"+key]: obj[key] }
+          }),
+          {}
+        );
+
+
+        function keyChange(condition) {
+      
+            let queryObj =  Object.keys(condition).map((item) => {
+    
+                 
+            if(item == "and" || item == "or") {
+                 let outerCondition = renameKeys(condition);
+       
+                    var innerQuery =  Object.keys(outerCondition).map((item) => {
+                         
+                         var innerCondition = outerCondition[item].map((item) => {
+                             
+                             let innerProp = Object.keys(item).map((data) => {
+                                 console.log("$$",item);
+                                 console.log("$$$",data);
+                                 if(data == "and" || data == "or") {
+                                    var properties = renameKeys(item);
+                               
+                                        let innerProperties = Object.keys(properties).map((item) => {
+                                       
+                            
+                                               var props = properties[item].map((item) => {
+                                                   let keys = Object.keys(item);
+                                                   let val = renameKeys(item[keys[0]]);
+                                                   item[keys[0]] = val;
+                                                   return item;
+                                                   
+                                               });
+                                               properties[item] = props;
+                                               //console.log(props);
+                                               //console.log("$$$",properties);
+                                               return properties;
+                                               
+                                           
+                                        });
+                                        
+                                            return innerProperties[0];
+                                 } else {
+                        
+                                    const keys = Object.keys(item);
+                                     var val = renameKeys(item[keys[0]]);
+                                     item[keys[0]] = val; 
+                                     return item;
+
+                                 }
+
+                             });
+                              
+                        console.log(innerProp[0]);
+                         return innerProp[0];
+                             
+                         });
+                         console.log("####",innerCondition);
+                        
+                     return innerCondition;
+                         
+                     });
+                     outerCondition["$"+item] = innerQuery[0];
+                     console.log(outerCondition);
+        
+                     return outerCondition;
+                 } else {
+                     console.log("else part");
+                      const keys = Object.keys(condition);
+                       var val = renameKeys(condition[keys[0]]);
+                       condition[keys[0]] = val; 
+                       return condition;
+                 }
+                
+             });
+            console.log("###",queryObj);
+           return queryObj[0];
+             
+         }
+        }
+
+
+
+        /*const renameKeys = (obj) =>
+        Object.keys(obj).reduce(
+          (acc, key) => ({
+            ...acc,
+            ...{ ["$"+key]: obj[key] }
+          }),
+          {}
+        );
+
+
+        function keyChange(condition) {
+
+            if(condition == null) {
+                return {};
+            }
+      
+            let queryObj =  Object.keys(condition).map((item) => {
+    
+                 
+            if(item == "and" || item == "or") {
+                 let outerCondition = renameKeys(condition);
+       
+                    var innerQuery =  Object.keys(outerCondition).map((item) => {
+                         
+                         var innerCondition = outerCondition[item].map((item) => {
+                             
+                             let innerProp = Object.keys(item).map((data) => {
+                                 console.log("$$",item);
+                                 console.log("$$$",data);
+                                 if(data == "and" || data == "or") {
+                                    var properties = renameKeys(item);
+                               
+                                        let innerProperties = Object.keys(properties).map((item) => {
+                                       
+                            
+                                               var props = properties[item].map((item) => {
+                                                   let keys = Object.keys(item);
+                                                   let val = renameKeys(item[keys[0]]);
+                                                   item[keys[0]] = val;
+                                                   return item;
+                                                   
+                                               });
+                                               properties[item] = props;
+                                               //console.log(props);
+                                               //console.log("$$$",properties);
+                                               return properties;
+                                               
+                                           
+                                        });
+                                        
+                                            return innerProperties[0];
+                                 } else {
+                        
+                                    const keys = Object.keys(item);
+                                     var val = renameKeys(item[keys[0]]);
+                                     item[keys[0]] = val; 
+                                     return item;
+
+                                 }
+
+                             });
+                              
+                        console.log(innerProp[0]);
+                         return innerProp[0];
+                             
+                         });
+                         console.log("####",innerCondition);
+                        
+                     return innerCondition;
+                         
+                     });
+                     outerCondition["$"+item] = innerQuery[0];
+                     console.log(outerCondition);
+        
+                     return outerCondition;
+                 } else {
+                     console.log("else part");
+                      const keys = Object.keys(condition);
+                       var val = renameKeys(condition[keys[0]]);
+                       condition[keys[0]] = val; 
+                       return condition;
+                 }
+                
+             });
+            console.log("###",queryObj);
+           return queryObj[0];
+             
+         }*/
 
