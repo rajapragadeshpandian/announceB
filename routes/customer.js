@@ -6,6 +6,111 @@ const changeLog = require('../models/changeLog');
 const Segment = require('../models/segments');
 
 
+// router.patch('/set/changes',(req, res, next) => {
+//     console.log("dhjaksdas")
+    
+//     Customer.update({}, 
+//     {$set : {
+//         __changes : []
+//     }})
+//     .exec()
+//     .then(() => {
+//         res.send("chnages updated successfully");
+//     })
+//     .catch(next);
+
+// });
+
+        const renameKeys = (obj) =>
+                Object.keys(obj).reduce(
+                (acc, key) => ({
+                    ...acc,
+                    ...{ ["$"+key]: obj[key] }
+                }),
+                {}
+            );
+
+
+        function keyChange(condition) {
+
+            if(condition == null) {
+                return {};
+            }
+      
+            let queryObj =  Object.keys(condition).map((item) => {
+    
+                 
+            if(item == "and" || item == "or") {
+                 let outerCondition = renameKeys(condition);
+       
+                    var innerQuery =  Object.keys(outerCondition).map((item) => {
+                         
+                         var innerCondition = outerCondition[item].map((item) => {
+                             
+                             let innerProp = Object.keys(item).map((data) => {
+                                 console.log("$$",item);
+                                 console.log("$$$",data);
+                                 if(data == "and" || data == "or") {
+                                    var properties = renameKeys(item);
+                               
+                                        let innerProperties = Object.keys(properties).map((item) => {
+                                       
+                            
+                                               var props = properties[item].map((item) => {
+                                                   let keys = Object.keys(item);
+                                                   let val = renameKeys(item[keys[0]]);
+                                                   item[keys[0]] = val;
+                                                   return item;
+                                                   
+                                               });
+                                               properties[item] = props;
+                                               //console.log(props);
+                                               //console.log("$$$",properties);
+                                               return properties;
+                                               
+                                           
+                                        });
+                                        
+                                            return innerProperties[0];
+                                 } else {
+                        
+                                    const keys = Object.keys(item);
+                                     var val = renameKeys(item[keys[0]]);
+                                     item[keys[0]] = val; 
+                                     return item;
+
+                                 }
+
+                             });
+                              
+                        console.log(innerProp[0]);
+                         return innerProp[0];
+                             
+                         });
+                         console.log("####",innerCondition);
+                        
+                     return innerCondition;
+                         
+                     });
+                     outerCondition["$"+item] = innerQuery[0];
+                     console.log(outerCondition);
+        
+                     return outerCondition;
+                 } else {
+                     console.log("else part");
+                      const keys = Object.keys(condition);
+                       var val = renameKeys(condition[keys[0]]);
+                       condition[keys[0]] = val; 
+                       return condition;
+                 }
+                
+             });
+            console.log("###",queryObj);
+           return queryObj[0];
+             
+         }
+
+
 router.get('/', (req, res, next) => {
 
     Customer.find()
@@ -141,10 +246,7 @@ router.patch('/:changelogId', (req, res, next) => {
         const likedPosts = customer.likedPosts;
         updateLikedPost(likedPosts);
     })
-    .catch(next);
-
-
-   
+    .catch(next);  
 
 });
 
@@ -175,46 +277,76 @@ router.get('/widget', (req, res, next) => {
         Object.entries(req.query).slice(3)
     );
 
-    function fetchUpdatedProps() {
+    
+ 
 
+    function getConditions() {
 
-        let updatedProps = Customer.findOne({email : email})
-        .select('customizedProps')
+        const conditions =  changeLog.find()
+        .select('_id conditions')
         .exec()
-        .then((customer) =>  customer)
+        .then((changes) => {
+            return changes;
+        })
 
-        return updatedProps;
+        return conditions;
     }
 
-    function widget(updatedProps) {
-
-        const newProps = updatedProps.customizedProps;
-        console.log("$$$", updatedProps.customizedProps);
-        // find the segments in which the customer is associated with email
-        // return the segments in array
-        // frame an (or) condition and get the relevant changes
-
-        var keys = Object.keys(newProps);
-        console.log(keys);
-
-        var properties = keys.map((item) => {
-            let obj = {};
-            let property = "conditions." + item;
-            obj[property] = newProps[item]
-            return obj;
+    function updateCustomer(data) {
+        var results =  data.map((item) => {
+            var properties = keyChange(item.conditions);
+            return {condition : properties, id : item._id}
         });
-        var queryObj = {};
-        queryObj['$or'] = properties;
 
+        let updatedProps = results.map((item) => {
+            // use filter instead for map
+            console.log(item.condition);
+            console.log(item.id);
+            var arr = [];
+                Customer.updateOne(
+                    { "$and" :
+                     [{email : email},item.condition]
+                },
+                {$addToSet : {
+                    __changes : item.id 
+                }})
+                .exec()
+                .then((customer) => customer)
+        });
+
+            let activeCustomer = Customer.findOne({email : email})
+            .exec()
+            .then((customer) => {
+                console.log(customer);
+                return customer;
+            })
+
+            return activeCustomer;
+
+    }
+
+    function widget(customer) {
+        let queryObj = {};
+
+        let changeId = customer.__changes;
+        let updatedCondition  =  changeId.map((item) => {
+            return  { _id : item }
+        });
+
+        queryObj["$or"] = updatedCondition;
         console.log(queryObj);
-
-        //let custId = customer._id ? {__customers : customer._id} : {}; 
-        const changes =  changeLog.find(queryObj)
+        let condition = changeId.length > 0 ? queryObj : {};
+        //{"$or" : [{_id: "ram"},{_id : "prag"}]}
+        
+        const changes =  changeLog.find(condition)
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .limit(3)
         .exec()
-        .then((change) => change)
+        .then((change) => {
+            console.log(change);
+            return change;
+        })
 
         return changes;
     
@@ -235,7 +367,6 @@ router.get('/widget', (req, res, next) => {
         } else {
             console.log("###", "customer exist");
             
-
             let customer = Customer.updateOne({ email : email}, 
             { $set : {
                 customizedProps : customProps
@@ -245,10 +376,10 @@ router.get('/widget', (req, res, next) => {
 
             return customer;
         }
-
     })
-    .then((customer) => fetchUpdatedProps())
-    .then((updatedProps) => widget(updatedProps))
+    .then((customer) => getConditions(customer))
+    .then((result) => updateCustomer(result))
+    .then((customer) => widget(customer))
     .then((changes) => {
         res.status(200).json({
         changeList : changes
@@ -264,7 +395,11 @@ router.post('/createSegment', (req, res, next) => {
 
     const { title, condition} = req.body;
 
+    console.log(condition);
+    
     function fetchCustomers(segment) {
+
+        console.log("senemt", segment);
 
         const customers = Customer.find(segment.condition)
             .exec()
@@ -326,7 +461,10 @@ router.get('/segment/:segmentId', (req, res, next) => {
 
     function fetchCustomers(segment) {
 
-        const customers = Customer.find(segment.condition)
+
+         var Condition = keyChange(segment.condition);
+
+        const customers = Customer.find(Condition)
             .exec()
             .then((customers) => customers)
         
@@ -337,10 +475,10 @@ router.get('/segment/:segmentId', (req, res, next) => {
     .exec()
     .then((segment) => fetchCustomers(segment))
     .then((customers) => {
-        console.log("$$$", customers);
             res.status(200).json({
                 message: "customers returned successfully",
-                customers : customers
+                customers : customers,
+                length : customers.length
             });
     })
     .catch(next);
@@ -486,42 +624,6 @@ console.log(finalQuery);
 
 });
 
-router.post('/filter', (req, res, next) => {
-
-    const id = req.body.changeId;
-    const condition = req.body.condition ? req.body.condition : {};
-
-    function updateChangeLog(customer) {
-
-            let customers = customer.map((item) => {
-                 return item['_id'];
-            });
-
-            console.log("$$$", customers);
-            console.log("$$$", id);
-
-             let change = changeLog.updateOne({_id : id},
-                { $set : {
-                    __customers : customers
-                }})
-                .exec()
-                .then((data) => data)
- 
-         return change;
-    }
-     
-    
-        Customer.find(condition)
-        .select('_id')
-        .exec()
-        .then((customer) => updateChangeLog(customer))
-        .then((data) => {
-            res.status(200).json({
-                message : "changeLog Upated successfully"
-            })
-        })
-        .catch(next);
-})
 
 router.get('/custprops', (req, res, next) => {
 
@@ -556,6 +658,30 @@ router.get('/custprops', (req, res, next) => {
     .catch(next);
 
 });
+
+/*router.patch('/change/update',(req, res, next) =>  {
+    console.log("change update");
+
+    var arr = ["new", "fix", "bug", "new", "impeovr", "bug"];
+
+    arr.map((item) => {
+        Customer.updateOne({"$and":[
+            {_id : "616009481b01a100dab5ff67"},
+            {name : "jill"}
+        ]},
+        {$addToSet : {
+            __changes : item
+        }}
+    ).exec()
+    .then(() => {
+        res.send("updated successfully");
+    })
+    .catch(next);
+
+    });
+
+
+});*/
 
 
 

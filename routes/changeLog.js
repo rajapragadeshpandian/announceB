@@ -66,14 +66,13 @@ router.get('/',(req, res, next) => {
 router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
-    const  { title, body, category, exclusiveTo} = req.body;
+    const  { title, body, category} = req.body;
 
     const changelog = new changeLog({
 
         title : title,
         category : category.split(','),
-        body : body,
-        exclusiveTo : exclusiveTo
+        body : body
     })
     .save()
     .then((change) => {
@@ -83,7 +82,7 @@ router.post('/', (req, res, next) => {
                 createdChange : {
                     id : change._id,
                     title : change.title,
-                     category : change.category,
+                    category : change.category,
                     body : change.body
                 },
 
@@ -158,10 +157,11 @@ router.patch('/set/filter', (req, res, next) => {
 
     console.log("setfilter", req.body);
     const id = req.body.changeId;
-    const { conditions } = req.body;
-            changeLog.update({ _id : id},
+    console.log(req.body.condition);
+    
+            changeLog.updateOne({ _id : id},
                         { $set :{
-                            conditions : conditions                    
+                            conditions : req.body.condition                 
                         } }
                     )
                     .exec()

@@ -1,0 +1,67 @@
+function keyChange(condition) {
+      
+      Object.keys(condition).map((item) => {
+          
+          let queryObj;
+          
+          if(item == "and" || item == "or") {
+              var outerCondition = renameKeys(condition);
+
+              Object.keys(outerCondition).map((item) => {
+                  
+                  var innerCondition = outerCondition[item].map((item) => {
+                        var properties = renameKeys(item);
+                        
+                        Object.keys(properties).map((item) => {
+                            
+                                if(item == "$and" || item == "$or") {
+                                    var props = properties[item].map((item) => {
+                                        let keys = Object.keys(item);
+                                        let val = renameKeys(item[keys[0]]);
+                                        item[keys[0]] = val;
+                                        return item;
+                                        
+                                    });
+                                    
+                                    console.log(props);
+                                    
+                                } else {
+                                        let keys = Object.keys(item);
+                                        let val = renameKeys(item[keys[0]]);
+                                        item[keys[0]] = val;
+                                        console.log(item);
+                                }
+                        });
+                        
+                        return properties;
+                      
+                  });
+                  
+                  outerCondition[item] = innerCondition;
+                  console.log(outerCondition);
+                  
+              });
+          } else {
+               const keys = Object.keys(condition);
+                var val1 = renameKeys(condition[keys[0]]);
+                console.log(val1);
+          }
+         
+      });
+      
+  }
+  
+  var condition = {
+       "and" : [
+              {
+              "or" : [{"customizedProps.plan" : { "eq" : "starter"}},{"customizedProps.plan" : { "eq" : "prime"}}]
+              },
+              {
+              "or" : [{ "customizedProps.rental": {"eq" : "monthly" }}, { "customizedProps.rental": {"eq" :"yearly"}}]
+              }
+            ]  
+   };
+  
+  
+ keyChange(condition);
+  
