@@ -15,7 +15,7 @@ const customerSchema = mongoose.Schema({
              responded :{ type : String}
         }
     ],
-    __changes : { type: Array, default : null}
+    __feedback : {type : Array, default : null}
 },
 {
     timestamps: true 
