@@ -300,43 +300,49 @@ router.get('/widget', (req, res, next) => {
 
         let updatedProps = results.map((item) => {
             // use filter instead for map
-            console.log(item.condition);
-            console.log(item.id);
-            var arr = [];
-                Customer.updateOne(
-                    { "$and" :
-                     [{email : email},item.condition]
-                },
-                {$addToSet : {
-                    __changes : item.id 
-                }})
-                .exec()
-                .then((customer) => customer)
-        });
+            // use find instaed of update here
+            // if document returns we will add changeLog id into array
+           // else not( no need to update id in customer document)
+    
+          let customer = Customer.findOne(
+               { "$and" :
+                 [{email : email},item.condition]
+             })
+             .exec()
+             .then((customer) => {
+                 if(!customer) {
+                     return false;
+                 } else {
+                     return item.id;
+                 }
+             })
+             
+             return customer;
+    });
 
-            let activeCustomer = Customer.findOne({email : email})
-            .exec()
-            .then((customer) => {
-                console.log(customer);
-                return customer;
-            })
+     return Promise.all(updatedProps);
 
-            return activeCustomer;
 
     }
 
-    function widget(customer) {
+    function widget(id) {
+    
         let queryObj = {};
 
-        let changeId = customer.__changes;
-        let updatedCondition  =  changeId.map((item) => {
+         let changeId = id;
+         let filteredId = changeId.filter((item) => {
+             if(item) {
+                 return item;
+             }
+         });
+        let updatedCondition  =  filteredId.map((item) => {
             return  { _id : item }
         });
-
+        console.log(updatedCondition);
         queryObj["$or"] = updatedCondition;
-        console.log(queryObj);
-        let condition = changeId.length > 0 ? queryObj : {};
-        //{"$or" : [{_id: "ram"},{_id : "prag"}]}
+         console.log(queryObj);
+     let condition = filteredId.length > 0 ? queryObj : {};
+    //     //{"$or" : [{_id: "ram"},{_id : "prag"}]}
         
         const changes =  changeLog.find(condition)
         .select('title category body _id disLike like')
@@ -379,7 +385,7 @@ router.get('/widget', (req, res, next) => {
     })
     .then((customer) => getConditions(customer))
     .then((result) => updateCustomer(result))
-    .then((customer) => widget(customer))
+    .then((IdList) => widget(IdList))
     .then((changes) => {
         res.status(200).json({
         changeList : changes
@@ -526,7 +532,7 @@ router.delete('/segment/:segmentId', (req, res, next) => {
 
 
 
-router.post('/segment', (req, res,next) => {
+/*router.post('/segment', (req, res,next) => {
 
     console.log("$$$", req.body);
 
@@ -659,7 +665,7 @@ router.get('/custprops', (req, res, next) => {
 
 });
 
-/*router.patch('/change/update',(req, res, next) =>  {
+router.patch('/change/update',(req, res, next) =>  {
     console.log("change update");
 
     var arr = ["new", "fix", "bug", "new", "impeovr", "bug"];
