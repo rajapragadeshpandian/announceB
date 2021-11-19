@@ -127,6 +127,146 @@ router.delete('/:customerId', (req, res, next) => {
        
 });
 
+router.get('/widget', (req, res, next) => {
+
+    console.log(req.query);
+    const {accId, id} = req.query;
+
+    function filterChangeLog(data) {
+
+        var results =  data.map((item) => {
+            var properties = keyChange(item.conditions);
+            return {condition : properties, id : item._id}
+        });
+
+        let updatedProps = results.map((item) => {
+    
+                let customer = Customer.findOne(
+                    { "$and" :
+                        [
+                            {_id : id},
+                            item.condition
+                        ]
+                    })
+                    .exec()
+                    .then((customer) => {
+                        if(!customer) {
+                            return;
+                        } else {
+                            return item.id;
+                        }
+                    });
+                    
+              return customer;
+        });
+
+     return Promise.all(updatedProps);
+    }
+
+    function fetchChangeLog(id) {
+    
+            let queryObj = {};
+
+            let changeId = id;
+            let filteredId = changeId.filter((item) => {
+                if(item) {
+                    return item;
+                }
+            });
+            let updatedCondition  =  filteredId.map((item) => {
+                return  { _id : item }
+            });
+        
+            queryObj["$or"] = updatedCondition;
+
+            let condition = filteredId.length > 0 ? queryObj : {};
+            console.log(queryObj);
+       
+            const changes =  changeLog.find(condition)
+            .select('title category body _id disLike like')
+            .sort({ createdAt : -1 })
+            .limit(3)
+            .exec()
+            .then((change) => {
+                return change;
+            })
+
+        return changes;
+    
+    }
+
+         changeLog.find({accId : accId})
+            .select('_id conditions')
+            .exec()
+            .then((result) => filterChangeLog(result))
+            .then((IdList) => fetchChangeLog(IdList))
+            .then((changes) => {
+                res.status(200).json({
+                    changeList : changes
+                 });
+            })
+            .catch(next);
+
+    
+})
+
+router.get('/identify', (req, res, next) => {
+
+    console.log("widget query", req.query);
+
+    const { name, accId, email} = req.query;
+
+    const customProps = Object.fromEntries(
+        Object.entries(req.query).slice(3)
+    );
+
+    function getCustomer() {
+
+            let customer = Customer.findOne({email : email, accId : accId})
+            .exec()
+            .then((customer) =>  customer)
+
+        return customer;
+    }
+
+    Customer.findOne({email : email, accId : accId})
+    .exec()
+    .then((customer) => {
+
+        if(!customer) {
+            console.log("!!!","customer not exist");
+            let customer = new Customer({
+                accId : accId,
+                name : name,
+                email : email,
+                customizedProps : customProps
+            });
+            return customer.save()
+        } else {
+            console.log("###", "customer exist");
+            
+            let customer = Customer.updateOne({ email : email}, 
+            { $set : {
+                customizedProps : customProps
+            }})
+            .exec()
+            .then((customer) => customer)
+
+            return customer;
+        }
+    })
+    .then(() => getCustomer())
+    .then((customer) => {
+        res.status(200).json({
+            customer : customer
+         });
+    })
+    .catch(next)
+    
+
+
+})
+
 
 router.get('/track', (req, res, next) => {
 
