@@ -121,7 +121,7 @@
 //6133b9eadd79624af8588160
 
 {
-    "title": "If you drop your phone",
+    "title": "Iconic update",
     "content" : "Like other reviewers said, 5G is not everywhere yet. It’s not the phone. It’s the service - 5G needs to expand where it’s not. In a 5G area, you will see the difference.",
     "customer" : {
         "name" : "prag",
@@ -163,4 +163,27 @@
     "name": "ram",
     "email" : "ram@gmail.com",
     "type" : "bush"
+}
+
+
+615b0efdcbbc93d2942629f2
+615d9f6a36fa39b22fc2e92c
+615d9fcd36fa39b22fc2e92e
+61600ce396e4bd158d5fe710
+617a5958224da9c10f7af961
+61850e2705c370cade4178d7
+61850e4c05c370cade4178d9
+
+{
+    "title": "avg feature",
+    "content" : "In a 5G area, you will see the difference.",
+    "customerEmail" : "ram@gmail.com"
+    "changeId" : "615b0efdcbbc93d2942629f2"
+}
+
+{
+    "title": "great theme",
+    "content" : "dark theme is excellent",
+    "customerEmail" : "jill@gmail.com",
+    "changeId" : "61850e2705c370cade4178d7"
 }
