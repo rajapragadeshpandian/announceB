@@ -25,37 +25,75 @@ function toggleWidget() {
 //     init();
 //  }, 3000));
 
+const customerDetails = AB_config.callbacks.onWidgetReady();
+console.log("accdetails", AB_config);    
+let accId = customerDetails.accId;
+let customer = customerDetails.customer;
+console.log(customer.name, customer.email);
+
+var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
+console.log(`http://localhost:5000//customer/track
+?accId=${accId}&&${query}`);
+
 window.addEventListener('load', init);
 
 function init() {
 
-    const customerDetails = AB_config.callbacks.onWidgetReady();
+    
 
-    console.log("@@", customerDetails.accId,customerDetails.customer);
+    //console.log("@@", customerDetails.accId,customerDetails.customer);
 
-    console.log("accdetails", AB_config);    
-    let accId = customerDetails.accId;
-    let customer = customerDetails.customer;
-    console.log(customer.name, customer.email);
+    // console.log("accdetails", AB_config);    
+    // let accId = customerDetails.accId;
+    // let customer = customerDetails.customer;
+    // console.log(customer.name, customer.email);
 
-    var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
-    console.log(`http://localhost:5000/changelog/widget
-    ?accId=${accId}&&${query}`);
+    // var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
+    // console.log(`http://localhost:5000//customer/widget
+    // ?accId=${accId}&&${query}`);
 
-    fetch(`http://localhost:5000/changelog/widget?accId=${accId}&&${query}`)
+    function getChangeLog(data) {
+        
+        console.log("$$$",data, data.customer._id);
+        let id = data.customer._id;
+
+        fetch(`http://localhost:5000/customer/widget?accId=${accId}&&id=${id}`)
+        .then((result) => result.json())
+        .then((data) => {
+            var changes = data;
+            console.log(changes);
+            fetchChangeLog(changes);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }
+
+    fetch(`http://localhost:5000/customer/identify?accId=${accId}&&${query}`)
     .then((result) => result.json())
     .then((data) => {
-        var changes = data;
-        fetchChangeLog(changes);
+        var custDetails = data;
+        getChangeLog(custDetails);
     })
     .catch((err) => {
         console.log(err);
     });
+
+    // fetch(`http://localhost:5000/customer/track?accId=${accId}&&${query}`)
+    // .then((result) => result.json())
+    // .then((data) => {
+    //     var changes = data;
+    //     fetchChangeLog(changes);
+    // })
+    // .catch((err) => {
+    //     console.log(err);
+    // });
 }
 
     function fetchChangeLog(changes) {
 
          console.log("####", changes);
+         console.log(AB_config);
         // console.log(product.data.count,product.data.products);
 
         let changeDetails = changes;
@@ -93,7 +131,8 @@ function init() {
         var readMoreLink = document.createElement('a');
         readMoreLink.innerHTML = AB_config.readMore;
         readMoreLink.className = "readMore";
-        readMoreLink.href = "http://localhost:5000/changelog";
+       // readMoreLink.href = "http://localhost:5000/changelog";
+        readMoreLink.href = `http://localhost:5000/widget?accId=${accId}&&email=${customer.email}`
         footer.appendChild(readMoreLink);
 
         index.appendChild(topBar);

@@ -18,20 +18,21 @@ router.get('/',(req, res, next) => {
     const limit = 3;
     
     console.log(req.query.value);
+    const accId = req.query.accId;
     const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
 
 
     function fetchChanges(changes) {
 
-        const count = changeLog.countDocuments(findText)
+        const count = changeLog.countDocuments({accId : accId,findText})
         .exec()
         .then((count) => count)
 
         return Promise.all([count, changes]);
     }
-
-        const changes =  changeLog.find(findText)
+    // have to add accountId
+        const changes =  changeLog.find({accId : accId, findText})
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .skip(val)
@@ -48,31 +49,21 @@ router.get('/',(req, res, next) => {
         })
         .catch(next);
         
-        // const count = changeLog.countDocuments(findText)
-        // .exec();
-
-        // Promise.all([changes, count])
-        // .then(([changes , count]) => {
-        //     console.log("$$$$",changes);
-        //     console.log("####", count);
-        //         res.status(200).json({
-        //             changeList : changes,
-        //             count : count
-        //         });
-        // })         
+             
 });
 
 //post changeLog
 router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
-    const  { title, body, category} = req.body;
+    const  { title, body, category, accId} = req.body;
 
     const changelog = new changeLog({
 
         title : title,
         category : category.split(','),
-        body : body
+        body : body,
+        accId : accId
     })
     .save()
     .then((change) => {
@@ -93,6 +84,7 @@ router.post('/', (req, res, next) => {
 
 router.get('/:changelogId',(req, res, next) => {
     console.log("changeLogid");
+    //accid has to be added
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
     changeLog.findById({_id : id})
