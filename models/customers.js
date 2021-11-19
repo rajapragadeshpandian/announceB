@@ -1,24 +1,20 @@
 const mongoose = require('mongoose');
 
 const customerSchema = mongoose.Schema({
-    accId : { type : String, default : null},
-    name : { type : String, default : null},
-    email : { 
-        type : String,
-        required : true,
-        match : /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        },
-    customizedProps : { type : mongoose.Schema.Types.Mixed, default  : null},
-    likedPosts : [
-        {
-            __change : {type : mongoose.Schema.Types.ObjectId, ref : 'Changelog' },
-             responded :{ type : String}
-        }
-    ],
-    __feedback : {type : Array, default : null}
+
+        accId : { type : String, default : null},
+        name : { type : String, default : null},
+        email : { 
+            type : String,
+            required : true,
+            match : /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            },
+        customizedProps : { type : mongoose.Schema.Types.Mixed, default  : null},
+        likedPosts : { type : Array, default : null},
+        dislikedPosts : { type: Array, default : null}
 },
 {
-    timestamps: true 
+         timestamps: true 
 });
 
 module.exports = mongoose.model('Customer', customerSchema);
@@ -92,7 +88,7 @@ module.exports = mongoose.model('Customer', customerSchema);
   })*/
 
 
-  const renameKeys = (obj) =>
+ /*const renameKeys = (obj) =>
     Object.keys(obj).reduce(
       (acc, key) => ({
         ...acc,
@@ -164,7 +160,7 @@ module.exports = mongoose.model('Customer', customerSchema);
    };
   
   
- keyChange(condition);
+ keyChange(condition);*/
   
   
   

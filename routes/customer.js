@@ -4,6 +4,7 @@ const router = express.Router();
 const Customer = require('../models/customers');
 const changeLog = require('../models/changeLog');
 const Segment = require('../models/segments');
+const Feedback = require('../models/feedback');
 
 
 // router.patch('/set/changes',(req, res, next) => {
@@ -111,144 +112,6 @@ const Segment = require('../models/segments');
          }
 
 
-router.get('/', (req, res, next) => {
-
-    Customer.find()
-    .exec()
-    .then((customer) => {
-        
-        res.status(200).json({
-            message : "customer details returned",
-            customer : customer
-        });
-
-    })
-    .catch(next)
-
-   
-});
-
-router.post('/', (req, res, next) => {
-
-    console.log("$$$$", req.body);
-    const { name, type, email} = req.body;
-    const customer = new Customer({
-        name : name,
-        type : type,
-        email : email
-    })
-    .save()
-    .then((customer) => {
-        res.status(200).json({
-            message : "customer created successfully",
-            customer : customer
-        });
-    })
-    .catch(next);
-  
-});
-
-router.patch('/:changelogId', (req, res, next) => {
-
-    const updateLikedPost = (likedPosts) => {
-
-        console.log('###', likedPosts);
-
-        const filteredPost = likedPosts.filter((post) => {
-            console.log("$$$", post);
-            return post.__change == req.params.changelogId
-        })
-
-        console.log("@@@", filteredPost);
-
-        if(filteredPost.length > 0){
-            console.log("filtered posts exist");
-
-            Customer.updateOne({ _id : req.query.custId, "likedPosts.__change" : req.params.changelogId  },
-                { $set : { 
-                    "likedPosts.$.responded" : req.query.choice
-                    }}
-                    )
-                    .exec()
-                    .then((post) => {
-
-                        let choice;
-                        console.log(req.query.choice);
-                        if(req.query.choice == "like") {
-                            choice = { like : 1, dislike  : -1}
-                        } else if(req.query.choice == "dislike") {
-                            choice = { like : -1, dislike : 1 }
-                        } else if( req.query.choice == "unlike") {
-                            choice = { like : -1}
-                        } else {
-                            choice = { dislike : -1}
-                        }
-                        
-                       
-                        changeLog.updateOne({_id : req.params.changelogId},
-                            { $inc : choice })
-                               .exec()
-                               .then((changes) => {
-                                   res.status(200).json({
-                                       message : "updated successfully"
-                                   })
-                               })
-                               .catch(next)
-                        
-
-                    })
-                    .catch(next)
-        } else {
-
-            Customer.updateOne({ _id : req.query.custId },
-                { $push : { 
-                    likedPosts : {
-                        __change  : req.params.changelogId,
-                        responded : req.query.choice
-                        } 
-                    }}
-                    )
-                    .exec()
-                    .then((post) => {
-                         
-                        let choice;
-                        console.log(req.query.choice);
-                        if(req.query.choice == "like") {
-                            choice = { like : 1 }
-                        } else if(req.query.choice == "dislike") {
-                            choice = { dislike : 1 }
-                        }
-
-                        console.log("%%%", choice, req.params.changelogId);
-
-                        changeLog.updateOne({_id : req.params.changelogId},
-                         { $inc : choice })
-                            .exec()
-                            .then((changes) => {
-                                res.status(200).json({
-                                    message : "updated successfully"
-                                })
-                            })
-                            .catch(next)
-
-                            
-                    })
-                    .catch(next);
-        
-        }
-    }
-
-
-    Customer.findById({ _id :req.query.custId })
-    .exec()
-    .then((customer) => {
-        console.log(customer);
-        const likedPosts = customer.likedPosts;
-        updateLikedPost(likedPosts);
-    })
-    .catch(next);  
-
-});
 
 router.delete('/:customerId', (req, res, next) => {
 
@@ -265,7 +128,7 @@ router.delete('/:customerId', (req, res, next) => {
 });
 
 
-router.get('/widget', (req, res, next) => {
+router.get('/track', (req, res, next) => {
 
 
     console.log("widget query", req.query);
@@ -277,46 +140,45 @@ router.get('/widget', (req, res, next) => {
         Object.entries(req.query).slice(3)
     );
 
-    
- 
+        function getConditions() {
 
-    function getConditions() {
+            //let accId = req.query.accId;
+            const conditions =  changeLog.find({accId : accId})
+            .select('_id conditions')
+            .exec()
+            .then((changes) => {
+                return changes;
+            })
 
-        const conditions =  changeLog.find()
-        .select('_id conditions')
-        .exec()
-        .then((changes) => {
-            return changes;
-        })
+            return conditions;
+        }
 
-        return conditions;
-    }
+    function filterChangeLog(data) {
 
-    function updateCustomer(data) {
         var results =  data.map((item) => {
             var properties = keyChange(item.conditions);
             return {condition : properties, id : item._id}
         });
 
         let updatedProps = results.map((item) => {
-            // use filter instead for map
-            // use find instaed of update here
-            // if document returns we will add changeLog id into array
-           // else not( no need to update id in customer document)
     
-          let customer = Customer.findOne(
-               { "$and" :
-                 [{email : email},item.condition]
-             })
-             .exec()
-             .then((customer) => {
-                 if(!customer) {
-                     return false;
-                 } else {
-                     return item.id;
-                 }
-             })
-             
+                let customer = Customer.findOne(
+                    { "$and" :
+                        [
+                            {accId: accId},
+                            {email : email},
+                            item.condition
+                        ]
+                    })
+                    .exec()
+                    .then((customer) => {
+                        if(!customer) {
+                            return;
+                        } else {
+                            return item.id;
+                        }
+                    });
+                    
              return customer;
     });
 
@@ -325,7 +187,7 @@ router.get('/widget', (req, res, next) => {
 
     }
 
-    function widget(id) {
+    function fetchChangeLog(id) {
     
         let queryObj = {};
 
@@ -338,19 +200,18 @@ router.get('/widget', (req, res, next) => {
         let updatedCondition  =  filteredId.map((item) => {
             return  { _id : item }
         });
-        console.log(updatedCondition);
+    
         queryObj["$or"] = updatedCondition;
-         console.log(queryObj);
-     let condition = filteredId.length > 0 ? queryObj : {};
-    //     //{"$or" : [{_id: "ram"},{_id : "prag"}]}
-        
+
+        let condition = filteredId.length > 0 ? queryObj : {};
+        console.log(queryObj);
+       
         const changes =  changeLog.find(condition)
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .limit(3)
         .exec()
         .then((change) => {
-            console.log(change);
             return change;
         })
 
@@ -358,13 +219,16 @@ router.get('/widget', (req, res, next) => {
     
     }
 
-    Customer.findOne({email : email})
+
+
+    Customer.findOne({email : email, accId : accId})
     .exec()
     .then((customer) => {
 
         if(!customer) {
             console.log("!!!","customer not exist");
             let customer = new Customer({
+                accId : accId,
                 name : name,
                 email : email,
                 customizedProps : customProps
@@ -383,12 +247,12 @@ router.get('/widget', (req, res, next) => {
             return customer;
         }
     })
-    .then((customer) => getConditions(customer))
-    .then((result) => updateCustomer(result))
-    .then((IdList) => widget(IdList))
+    .then(() => getConditions())
+    .then((result) => filterChangeLog(result))
+    .then((IdList) => fetchChangeLog(IdList))
     .then((changes) => {
         res.status(200).json({
-        changeList : changes
+            changeList : changes
          });
     })
     .catch(next)
@@ -528,7 +392,23 @@ router.delete('/segment/:segmentId', (req, res, next) => {
     })
     .catch(next);
 
-})
+});
+
+router.get('/adhoc', (req, res, next) => {
+
+        let name = "pragadesh";
+
+        changeLog.updateMany({},
+            { $set : {
+                accId : "announceB"
+            }})
+            .exec()
+            .then((customer) => {
+                res.send("updated successfully");
+            })
+            .catch(next);
+    
+    });
 
 
 

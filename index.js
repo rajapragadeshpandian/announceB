@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const changeLogDetails = require('./routes/changeLog');
 const feedbackDetails = require('./routes/feedback');
 const customerDetails = require('./routes/customer');
+const widget = require('./routes/widget');
 const changeLog = require('./models/changeLog');
 
 mongoose.connect(keys.mongoURI , {
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 app.use('/changelog',changeLogDetails);
 app.use('/feedback', feedbackDetails);
 app.use('/customer', customerDetails);
+app.use('/widget', widget);
 
 app.get('/changes/uniqueTags', (req, res, next) => {
 
@@ -50,6 +52,9 @@ app.get('/changes/uniqueTags', (req, res, next) => {
     }).catch(next);
 
 });
+
+
+    
 
 
 app.use((req,res, next) => {
