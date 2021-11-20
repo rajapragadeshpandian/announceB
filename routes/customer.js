@@ -186,7 +186,12 @@ router.get('/widget', (req, res, next) => {
 
             let condition = filteredId.length > 0 ? queryObj : {};
             console.log(queryObj);
-       
+
+            // {"$and":[
+            //     condition,
+            //     findText
+            // ]}
+       // should come here
             const changes =  changeLog.find(condition)
             .select('title category body _id disLike like')
             .sort({ createdAt : -1 })
