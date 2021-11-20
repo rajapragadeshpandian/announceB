@@ -2,6 +2,7 @@ const express = require('express');
 const keys = require('./config/keys');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const changeLogDetails = require('./routes/changeLog');
 const feedbackDetails = require('./routes/feedback');
 const customerDetails = require('./routes/customer');
@@ -15,8 +16,10 @@ mongoose.connect(keys.mongoURI , {
 
 const app = express();
 
+
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -53,6 +56,14 @@ app.get('/changes/uniqueTags', (req, res, next) => {
 
 });
 
+function validateCookie(req, res, next) {
+    console.log("@@@",req.cookies);
+    next();
+}
+app.get('/checkcookie',validateCookie, (req, res, next) => {
+    res.cookie('custId', "12345");
+    res.send("cookie send successfully");
+})
 
     
 

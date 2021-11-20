@@ -130,7 +130,12 @@ router.delete('/:customerId', (req, res, next) => {
 router.get('/widget', (req, res, next) => {
 
     console.log(req.query);
+    const limit = 3;
     const {accId, id} = req.query;
+
+    const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
+     const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
+    console.log(findText);
 
     function filterChangeLog(data) {
 
@@ -185,7 +190,8 @@ router.get('/widget', (req, res, next) => {
             const changes =  changeLog.find(condition)
             .select('title category body _id disLike like')
             .sort({ createdAt : -1 })
-            .limit(3)
+            .skip(val)
+            .limit(limit)
             .exec()
             .then((change) => {
                 return change;
@@ -201,10 +207,11 @@ router.get('/widget', (req, res, next) => {
             .then((result) => filterChangeLog(result))
             .then((IdList) => fetchChangeLog(IdList))
             .then((changes) => {
+                res.cookie("custId", req.query.id);
                 res.status(200).json({
                     changeList : changes
                  });
-            })
+            })  
             .catch(next);
 
     
@@ -213,6 +220,7 @@ router.get('/widget', (req, res, next) => {
 router.get('/identify', (req, res, next) => {
 
     console.log("widget query", req.query);
+   
 
     const { name, accId, email} = req.query;
 
@@ -268,7 +276,7 @@ router.get('/identify', (req, res, next) => {
 })
 
 
-router.get('/track', (req, res, next) => {
+/*router.get('/track', (req, res, next) => {
 
 
     console.log("widget query", req.query);
@@ -397,7 +405,7 @@ router.get('/track', (req, res, next) => {
     })
     .catch(next)
        
-});
+});*/
 
 
 router.post('/createSegment', (req, res, next) => {
