@@ -205,7 +205,6 @@ router.get('/', (req, res, next) => {
             .then((changes) => filterChangeLog(changes))
             .then((IdList) => fetchChangeLog(IdList))
             .then((changes) => {
-                console.log(changes);
                 res.status(200).json({
                     changeList : changes,
                     email : req.query.email

@@ -32,46 +32,17 @@ let customer = customerDetails.customer;
 console.log(customer.name, customer.email);
 
 var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
-console.log(`http://localhost:5000//customer/track
+console.log(`http://localhost:5000/customer/widget
 ?accId=${accId}&&${query}`);
 
 window.addEventListener('load', init);
 
 function init() {
 
-    
-
-    //console.log("@@", customerDetails.accId,customerDetails.customer);
-
-    // console.log("accdetails", AB_config);    
-    // let accId = customerDetails.accId;
-    // let customer = customerDetails.customer;
-    // console.log(customer.name, customer.email);
-
-    // var query = Object.keys(customer).map( key => key+ '='+ customer[key]).join('&&');
-    // console.log(`http://localhost:5000//customer/widget
-    // ?accId=${accId}&&${query}`);
-
-    function getChangeLog(data) {
-        
-        console.log("$$$",data, data.customer._id);
-        let id = data.customer._id;
-
-        fetch(`http://localhost:5000/customer/widget?accId=${accId}&&id=${id}`)
-        .then((result) => result.json())
-        .then((data) => {
-            var changes = data;
-            console.log(changes);
-            fetchChangeLog(changes);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    }
-
     fetch(`http://localhost:5000/customer/identify?accId=${accId}&&${query}`)
     .then((result) => result.json())
     .then((data) => {
+        console.log(data);
         var custDetails = data;
         getChangeLog(custDetails);
     })
@@ -90,9 +61,36 @@ function init() {
     // });
 }
 
-    function fetchChangeLog(changes) {
+        function getChangeLog(data) {
 
-         console.log("####", changes);
+                //         function getCookie(name)
+                //   {
+                //     var re = new RegExp(name + "=([^;]+)");
+                //     var value = re.exec(document.cookie);
+                //     return (value != null) ? unescape(value[1]) : null;
+                //   }
+                
+            
+                console.log("$$$",data, data.customer._id);
+                let id = data.customer._id;
+        
+                fetch(`http://localhost:5000/customer/widget?accId=${accId}&&id=${id}`)
+                .then((result) => result.json())
+                .then((data) => {
+                    var changes = data;
+                    console.log(changes);
+                    fetchChangeLog(changes, id);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    
+    
+
+    function fetchChangeLog(changes, id) {
+
+         console.log("####", changes, id);
          console.log(AB_config);
         // console.log(product.data.count,product.data.products);
 
@@ -132,7 +130,7 @@ function init() {
         readMoreLink.innerHTML = AB_config.readMore;
         readMoreLink.className = "readMore";
        // readMoreLink.href = "http://localhost:5000/changelog";
-        readMoreLink.href = `http://localhost:5000/widget?accId=${accId}&&email=${customer.email}`
+        readMoreLink.href = `http://localhost:5000/customer/widget?accId=${accId}&&id=${id}`
         footer.appendChild(readMoreLink);
 
         index.appendChild(topBar);
