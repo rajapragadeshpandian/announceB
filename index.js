@@ -61,7 +61,6 @@ function validateCookie(req, res, next) {
     next();
 }
 app.get('/checkcookie',validateCookie, (req, res, next) => {
-    res.cookie('custId', "12345");
     res.send("cookie send successfully");
 })
 
