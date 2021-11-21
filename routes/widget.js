@@ -274,6 +274,8 @@ router.get('/:changelogId',(req, res, next) => {
 
 
 router.get('/likedislike/count', (req, res, next) => {
+console.log(req.cookies);
+    return;
 
     //http://localhost:5000/widget/likedislike/count?
     //email=steve@gmail.com&&accId=announceB&&changelogId=61921768b6050a01c7669e99&&choice=like

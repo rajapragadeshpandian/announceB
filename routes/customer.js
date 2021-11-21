@@ -130,6 +130,7 @@ router.delete('/:customerId', (req, res, next) => {
 router.get('/widget', (req, res, next) => {
 
     console.log(req.query);
+    console.log(req.cookies);
     const limit = 3;
     const {accId, id} = req.query;
 
@@ -187,34 +188,64 @@ router.get('/widget', (req, res, next) => {
             let condition = filteredId.length > 0 ? queryObj : {};
             console.log(queryObj);
 
-            // {"$and":[
-            //     condition,
-            //     findText
-            // ]}
-       // should come here
-            const changes =  changeLog.find(condition)
+            function fetchCount(changes) {
+                console.log("$$$", changes);
+                        const count = changeLog.countDocuments(
+                            {"$and":[
+                                condition,
+                                findText
+                            ]}
+                        )
+                        .exec()
+                        .then((count) => count)
+        
+                return Promise.all([count, changes]);
+            }
+
+            const changes =  changeLog.find({
+                "$and" : [
+                    condition,
+                    findText   
+                ]
+            })
             .select('title category body _id disLike like')
             .sort({ createdAt : -1 })
             .skip(val)
             .limit(limit)
             .exec()
-            .then((change) => {
-                return change;
+            .then((change) => fetchCount(change))
+            .then(([count, changes]) => {
+                return {changes : changes, count: count};
             })
+            
 
         return changes;
     
     }
+
+    function getCustomerDetails(changes) {
+
+        let customerDetails = Customer.findById({_id : id})
+        .exec()
+        .then((customer) =>  customer)
+
+        return Promise.all([customerDetails, changes]);
+    }
+
+    
 
          changeLog.find({accId : accId})
             .select('_id conditions')
             .exec()
             .then((result) => filterChangeLog(result))
             .then((IdList) => fetchChangeLog(IdList))
-            .then((changes) => {
+            .then((changes) => getCustomerDetails(changes))
+            .then(([customerDetails, changes]) => {   
+                console.log(changes);
                 res.cookie("custId", req.query.id);
                 res.status(200).json({
-                    changeList : changes
+                    changeList : changes,
+                    customerName : customerDetails.name
                  });
             })  
             .catch(next);
@@ -235,7 +266,10 @@ router.get('/identify', (req, res, next) => {
 
     function getCustomer() {
 
-            let customer = Customer.findOne({email : email, accId : accId})
+            let customer = Customer.findOne(
+                {email : email, accId : accId}
+            )
+            .select('_id')
             .exec()
             .then((customer) =>  customer)
 
@@ -270,6 +304,7 @@ router.get('/identify', (req, res, next) => {
     })
     .then(() => getCustomer())
     .then((customer) => {
+        console.log("id", customer);
         res.status(200).json({
             customer : customer
          });

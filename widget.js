@@ -44,7 +44,8 @@ function init() {
     .then((data) => {
         console.log(data);
         var custDetails = data;
-        getChangeLog(custDetails);
+        console.log(custDetails.customer._id);
+        getChangeLog(custDetails.customer._id);
     })
     .catch((err) => {
         console.log(err);
@@ -61,7 +62,7 @@ function init() {
     // });
 }
 
-        function getChangeLog(data) {
+        function getChangeLog(id) {
 
                 //         function getCookie(name)
                 //   {
@@ -71,8 +72,8 @@ function init() {
                 //   }
                 
             
-                console.log("$$$",data, data.customer._id);
-                let id = data.customer._id;
+                // console.log("$$$",data, data.customer._id);
+                console.log(id);
         
                 fetch(`http://localhost:5000/customer/widget?accId=${accId}&&id=${id}`)
                 .then((result) => result.json())
@@ -142,7 +143,7 @@ function init() {
         document.body.appendChild(container);
 
 
-        changeDetails.changeList.map((change) => {
+        changeDetails.changeList.changes.map((change) => {
             let logList = document.createElement('div');
             logList.className="logList";
 
