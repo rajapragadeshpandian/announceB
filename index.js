@@ -1,13 +1,19 @@
 const express = require('express');
 const keys = require('./config/keys');
+const session = require('express-session');
+const passport = require('passport');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const changeLog = require('./models/changeLog');
 const changeLogDetails = require('./routes/changeLog');
 const feedbackDetails = require('./routes/feedback');
 const customerDetails = require('./routes/customer');
+const userDetails = require('./routes/authRoutes');
 const widget = require('./routes/widget');
-const changeLog = require('./models/changeLog');
+
+
+require('./Services/passport');
 
 mongoose.connect(keys.mongoURI , {
     useNewUrlParser: true,
@@ -17,9 +23,19 @@ mongoose.connect(keys.mongoURI , {
 const app = express();
 
 
+
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+app.use(session({secret: "secret",
+resave: true,
+    saveUninitialized: true}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -33,10 +49,14 @@ app.use((req, res, next) => {
     next();
 });
 
+
+
 app.use('/changelog',changeLogDetails);
 app.use('/feedback', feedbackDetails);
 app.use('/customer', customerDetails);
 app.use('/widget', widget);
+app.use('/user', userDetails);
+
 
 app.get('/changes/uniqueTags', (req, res, next) => {
 
@@ -56,13 +76,13 @@ app.get('/changes/uniqueTags', (req, res, next) => {
 
 });
 
-function validateCookie(req, res, next) {
-    console.log("@@@",req.cookies);
-    next();
-}
-app.get('/checkcookie',validateCookie, (req, res, next) => {
-    res.send("cookie send successfully");
-})
+// function validateCookie(req, res, next) {
+//     console.log("@@@",req.cookies);
+//     next();
+// }
+// app.get('/checkcookie',validateCookie, (req, res, next) => {
+//     res.send("cookie send successfully");
+// })
 
     
 

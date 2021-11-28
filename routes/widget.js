@@ -4,7 +4,7 @@ const Customer = require('../models/customers');
 const Feedback = require('../models/feedback');
 const changeLog = require('../models/changeLog');
 
-const renameKeys = (obj) =>
+/*const renameKeys = (obj) =>
                 Object.keys(obj).reduce(
                 (acc, key) => ({
                     ...acc,
@@ -91,9 +91,6 @@ const renameKeys = (obj) =>
                return queryObj[0];
                  
              }
-    
-            
-
 
 router.get('/', (req, res, next) => {
 
@@ -212,14 +209,20 @@ router.get('/', (req, res, next) => {
             })
             .catch(next)
 
-});
+});*/
 
 
 router.get('/:changelogId',(req, res, next) => {
 
     console.log("changeLogid");
-    //accid has to be added
+
+    //http://localhost:5000/widget/61921768b6050a01c7669e99?
+    //custId=6192180fe506a2e199e0c4e7
+
+    console.log(req.cookies);
     const id = req.params.changelogId;
+    const custId = req.query.custId;
+    console.log(custId);
     const email = req.query;
     const limit  = 3;
     const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
@@ -253,29 +256,44 @@ router.get('/:changelogId',(req, res, next) => {
         return Promise.all([feedbacks, change,count]);
     }
 
+    function fetchCustomerDetails(feedbacks, change,count) {
+
+        let customer = Customer.findOne(
+            {_id : custId}
+        )
+        .select('dislikedPosts likedPosts')
+        .exec()
+        .then((customer) => customer)
+
+        return Promise.all([feedbacks, change,count, customer]);
+    }
+
 
     changeLog.findById({_id : id})
     .select('title category body _id disLike like')
     .exec()
     .then((change) => getFeedbacks(change))
     .then(([feedbacks,change]) => getFeedbackCount(feedbacks,change))
-    .then(([feedbacks, change,count]) => {
+    .then(([feedbacks, change,count]) => fetchCustomerDetails(feedbacks, change,count))
+    .then(([feedbacks, change,count,customer]) => {
+        // return customer details along with it to populate 
+        // liked and dislikes posts
                 res.status(200).json({
                     message : "changeLog found",
                     feedbacks : feedbacks,
                     change : change,
-                    feedbackCount : count
+                    feedbackCount : count,
+                    customer : customer
                 });
 
     })
-    .catch(next);
+    .catch(next);// next(err)
 
 });
 
 
 router.get('/likedislike/count', (req, res, next) => {
 console.log(req.cookies);
-    return;
 
     //http://localhost:5000/widget/likedislike/count?
     //email=steve@gmail.com&&accId=announceB&&changelogId=61921768b6050a01c7669e99&&choice=like
