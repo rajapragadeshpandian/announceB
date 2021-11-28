@@ -5,6 +5,7 @@ const changeLog = require('../models/changeLog');
 const Customer = require('../models/customers');
 
 // get changeLog
+// req.user check in all routes
 router.get('/',(req, res, next) => {
 
     //http://localhost:5000/changeLog?text=signup&&pageNo=2&&choice=next ==> sample req
@@ -83,6 +84,7 @@ router.post('/', (req, res, next) => {
 });
 
 router.get('/:changelogId',(req, res, next) => {
+
     console.log("changeLogid");
     //accid has to be added
     const id = req.params.changelogId;

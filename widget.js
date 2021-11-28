@@ -44,6 +44,7 @@ function init() {
     .then((data) => {
         console.log(data);
         var custDetails = data;
+        console.log(custDetails);
         console.log(custDetails.customer._id);
         getChangeLog(custDetails.customer._id);
     })
@@ -64,12 +65,11 @@ function init() {
 
         function getChangeLog(id) {
 
-                //         function getCookie(name)
-                //   {
-                //     var re = new RegExp(name + "=([^;]+)");
-                //     var value = re.exec(document.cookie);
-                //     return (value != null) ? unescape(value[1]) : null;
-                //   }
+                 function getCookie(name)  {
+                    var re = new RegExp(name + "=([^;]+)");
+                    var value = re.exec(document.cookie);
+                    return (value != null) ? unescape(value[1]) : null;
+                  }
                 
             
                 // console.log("$$$",data, data.customer._id);
@@ -221,7 +221,6 @@ function init() {
             document.head.appendChild(style);
 
             style.innerHTML = `
-
 
             .container {
                 width : 400px;
