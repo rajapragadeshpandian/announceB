@@ -9,14 +9,16 @@ router.get('/', (req, res, next) => {
 
     const limit = 3;
     const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
-    const { email = null } = req.query;
+    const { customerId = null } = req.query;
 
     // count code has to be added for pagination
 
     function getCustomerId(feedback) {
 
-            if(email) {
-                 let custId =  Customer.findOne({email : email})
+            if(customerId) {
+                 let custId =  Customer.findOne(
+                     {_id : customerId}
+                    )
                 .select('_id')
                 .exec()
                 .then((id) => id)
@@ -52,7 +54,7 @@ router.post('/', (req, res, next) => {
 
     console.log("feedback");
 
-    const { title, content, customerEmail, changeId} = req.body;
+    const { title, content, customerId, changeId} = req.body;
 
     function createFeedback(customer) {
 
@@ -74,12 +76,12 @@ router.post('/', (req, res, next) => {
          return feedback;
     }
 
-        Customer.findOne({email : customerEmail})
+        Customer.findOne({_id : customerId})
         .select('_id name')
         .exec()
         .then((customer) => createFeedback(customer))
         .then((feedback) =>  {
-            res.redirect(`/feedback?changeLogId=${changeId}&&email=${customerEmail}`);
+            res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
         })
         .catch(next)
                                               
@@ -89,7 +91,7 @@ router.post('/', (req, res, next) => {
 router.patch('/', (req, res, next) => {
 
     console.log("$$$", "feedback updated successfully");
-    const {title, content, changeId, feedbackId, customerEmail} = req.body;
+    const {title, content, changeId, feedbackId, customerId} = req.body;
     console.log("$$$", req.body);
     
     Feedback.findByIdAndUpdate({ _id : feedbackId },
@@ -102,7 +104,7 @@ router.patch('/', (req, res, next) => {
     .exec()
     .then(() => {
 
-        res.redirect(`/feedback?changeLogId=${changeId}&&email=${customerEmail}`);
+        res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
     })
     .catch(next);
 
@@ -110,12 +112,12 @@ router.patch('/', (req, res, next) => {
 
 router.delete("/", (req, res, next) => {
 
-    const { changeId, feedbackId, customerEmail} = req.body;
+    const { changeId, feedbackId, customerId} = req.body;
      
      Feedback.findByIdAndDelete({ _id : feedbackId})
      .exec()
      .then(() => {
-        res.redirect(`/feedback?changeLogId=${changeId}&&email=${customerEmail}`);
+        res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
      })
      .catch(next);
 
