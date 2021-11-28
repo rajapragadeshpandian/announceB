@@ -362,7 +362,7 @@ console.log(req.cookies);
         }
 
             let result =  Customer.updateOne(
-                {email : req.query.email},
+                {_id : req.query.custId},
                 condition
             )
             .exec()
@@ -387,8 +387,7 @@ return result;
             function fetchCustomer(results) {
 
                 let updatedCustomer = Customer.find({
-                    email : req.query.email,
-                    accId : req.query.accId
+                    _id : req.query.custId
                 })
                 .exec()
                 .then((customer) =>  customer)
@@ -398,8 +397,7 @@ return result;
 
     Customer.find({
         "$and" : [
-            { email : req.query.email },
-            { accId : req.query.accId },
+            { _id : req.query.custId },
             {"$or" : [
                 {likedPosts : req.query.changelogId },
                 {dislikedPosts : req.query.changelogId }]
