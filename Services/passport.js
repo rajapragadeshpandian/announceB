@@ -24,39 +24,32 @@ passport.use(
          console.log("Email", email);
          console.log(password);
          console.log("req", req.body);
-// use this
-        //  function createUser(user) {
-        //     if(user.length > 0) {
-        //         return done(null, false);
-        //     } else {
-        //         let user = new User({
-        //             name : req.body.name,
-        //             password  : password,
-        //             identities : [{ email : email}]
-        //         })
-        //         return user.save();
-        //     }
-        //  }
+
+         function createUser(user) {
+
+            if(user.length > 0) {
+                console.log("user exist");
+                 return done(null, false);
+                 
+            } else {
+
+                let newUser = new User({
+                    name : req.body.name,
+                    password  : password,
+                    identities : [{ email : email}]
+                })
+                .save()
+                .then((user) => {
+                    return done(null, user);
+                })
+                .catch(err => done(err))
+            
+            }
+         }
 
      User.find({"identities.email"  : email})
     .exec()
-    .then((user) => {
-        if(user.length > 0) {
-            console.log("called");
-            return done(null, false);
-        } else {
-            new User({
-                name : req.body.name,
-                password  : password,
-                identities : [{ email : email}]
-            })
-            .save()
-            .then((user) => {
-               return done(null, user);
-            })
-            .catch(err => done(err));
-        }
-    })
+    .then((user) => createUser(user))
     .catch(err => done(err));
           
     })

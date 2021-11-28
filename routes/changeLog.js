@@ -26,7 +26,9 @@ router.get('/',(req, res, next) => {
 
     function fetchChanges(changes) {
 
-        const count = changeLog.countDocuments({accId : accId,findText})
+        const count = changeLog.countDocuments(
+            {accId : accId,findText}
+        )
         .exec()
         .then((count) => count)
 
