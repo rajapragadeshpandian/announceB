@@ -1,0 +1,26 @@
+user signup
+
+{
+    "email" : "ram@gmail.com",
+    "password" : "ramrathna27",
+    "name" : "ram"
+}
+
+{
+    "email" : "pragadesh@gmail.com",
+    "password" : "pragadesh21",
+    "name" : "rajapragadesh"
+}
+{
+    "email" : "steve@gmail.com",
+    "password" : "steve49",
+    "name" : "stevesmith"
+}
+{
+    "email" : "gill@gmail.com",
+    "password" : "sgill",
+    "name" : "shubman"
+}
+
+
+
