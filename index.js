@@ -55,7 +55,7 @@ app.use('/changelog',changeLogDetails);
 app.use('/feedback', feedbackDetails);
 app.use('/customer', customerDetails);
 app.use('/widget', widget);
-app.use('/user', userDetails);
+app.use('/auth', userDetails);
 
 
 app.get('/changes/uniqueTags', (req, res, next) => {
