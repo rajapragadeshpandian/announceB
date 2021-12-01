@@ -6,7 +6,6 @@ const  accountSchema = mongoose.Schema({
     users : [{
         userType : String, // owner , co Owner
         __user : {type : Schema.Types.ObjectId , ref : 'User'},
-        name : String,
         email : String
     }]
 });
