@@ -22,5 +22,27 @@ user signup
     "name" : "shubman"
 }
 
+{
+    "email" : "rajapragadeshpandian@gmail.com",
+    "password" : "pandian21",
+    "name" : "rajapragadeshpandian"
+}
+
+{
+    "email" : "rajapragadesh1994@gmail.com",
+    "password" : "pragadesh21",
+    "name" : "rajapragadesh"
+}
 
 
+profile {
+  id: '112865969116135218152',
+  displayName: 'Rajapragadesh Pandian',
+  name: { familyName: 'Pandian', givenName: 'Rajapragadesh' },
+  emails: [ { value: 'rajapragadeshpandian@gmail.com', verified: true } ]
+
+profile {
+  id: '117857155768450505971',
+  displayName: 'rajapragadesh p',
+  name: { familyName: 'p', givenName: 'rajapragadesh' },
+  emails: [ { value: 'rajapragadesh1994@gmail.com', verified: true } ]
