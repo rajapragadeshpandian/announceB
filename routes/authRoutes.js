@@ -26,6 +26,24 @@ router.get('/crypt', (req, res, next) => {
 
 })
 
+router.get('/', (req, res) => {
+
+    res.render("index");
+
+});
+
+router.get('/SignUpPage', (req, res) => {
+
+    res.render("signup");
+
+});
+
+router.get('/LogInPage', (req, res) => {
+
+    res.render("login");
+
+});
+
 router.post('/register', 
 passport.authenticate('local',
 { successRedirect: '/auth/registerSuccess',
@@ -40,26 +58,34 @@ failureRedirect : '/auth/loginFailure'}
 
 router.get('/google/signup',
 passport.authenticate('google',{
-scope : ['profile', 'email'] 
+scope : ['profile', 'email'] ,
+state : "signup"
 }
 ));
 
+router.get('/google/login',
+    passport.authenticate('google',{
+    scope : ['profile', 'email'],
+    state : 'login'
+}
+));
+         
 
-
-// router.get('/google/signup', (req, res, next) => {
-//     res.redirect('/auth/google/callback');
-// })
-
-// router.get('/google/callback', (req, res, next) => {
-//     res.send("google signup");
-// })
 
 router.get('/google/callback', 
 passport.authenticate('google',{
-successRedirect : '/auth/registerSuccess',
-failureRedirect : '/auth/registerFailure'
+successRedirect : '/auth/success',
+failureRedirect : '/auth/failure'
 }
-));        
+));       
+
+router.get('/success', (req, res, next) => {
+    res.render("success");
+});
+
+router.get('/failure', (req, res, next) => {
+    res.render("failure");
+});
 
 router.get('/registerSuccess', (req, res, next) => {
     res.send("use registered successfully");
@@ -74,8 +100,10 @@ router.get('/loginSuccess', (req, res, next) => {
 });
 
 router.get('/loginFailure', (req, res, next) => {
-    res.send("login failure");
+    res.send("Authentication failed.Bad credentials");
 });
+
+
 
 router.get('/logout', (req, res) => {
     req.logout();

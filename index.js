@@ -28,9 +28,13 @@ app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use(session({secret: "secret",
-resave: true,
-    saveUninitialized: true}));
+app.use(session(
+    {
+    secret: "secret",
+    resave: true,
+    saveUninitialized: false
+}
+));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -49,7 +53,7 @@ app.use((req, res, next) => {
     next();
 });
 
-
+app.set('view engine', 'ejs');
 
 app.use('/changelog',changeLogDetails);
 app.use('/feedback', feedbackDetails);

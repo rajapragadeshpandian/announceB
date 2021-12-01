@@ -70,10 +70,13 @@ passport.use(
                     
          } else if(req.url == '/login') {
 
-            console.log(keys);
                 function verifyPassword(user) {
                 
                         if(user.length > 0) {
+
+                            if(!user[0].password) {
+                                return done(null, false);
+                            }
                             bcrypt.compare(password, user[0].password)
                             .then((result) => {
                                 console.log(result);
@@ -84,9 +87,12 @@ passport.use(
                                 }
                             })
                             .catch(err => done(err));
+
                         } else {
+
                             console.log("else part called");
                             done(null, false);
+
                         }
                     
                 }
@@ -101,22 +107,87 @@ passport.use(
     })
 );
 
-//GoogleStrategy.passReqToCallback = true;
-
-
-
+GoogleStrategy.passReqToCallback = true;
 passport.use(
     new GoogleStrategy(
         {
         clientID : keys.GoogleClientID,
         clientSecret : keys.GoogleClientSecret,
         callbackURL : '/auth/google/callback',
+        passReqToCallback: true,
         proxy : true
     },
-    (accessToken, refreshToken, profile, done) => {
+    (req, accessToken, refreshToken, profile, done) => {
 
-        console.log("profile", profile);
+        console.log(profile);
+        const id = profile.id;
+        const email = profile.emails[0].value;
 
-        done(null, true);
+
+        function createUser(user) {
+
+             console.log(user);
+            // console.log(user[0].identities[0].googleId);
+        
+             if(user.length  > 0) {
+                const googleId = user[0].identities[0].googleId;
+
+                if(googleId) {
+                     done(null, false);
+                } else {
+
+                    User.updateOne({"identities.email" : email},
+                    { "$set" : {
+                    "identities.$.googleId" : profile.id
+                    }}
+                    )
+                    .exec()
+                    .then(() => {
+                        done(null, true);
+                     })
+                }             
+                        
+             } else {
+
+                    let newUser = new User({
+                        name : profile.displayName,
+                        identities : [{ 
+                            email : email,
+                            googleId : id
+                            }]
+                    })
+                    .save()
+                    .then((user) => {
+                        done(null, user);
+                    })
+
+             }
+        }
+
+        if(req.query.state == "signup") {
+            console.log("signup called");
+
+            User.find({"identities.email"  : email})
+            .exec()
+            .then((user) => createUser(user))
+            .catch()
+            
+        } else if(req.query.state == "login") {
+            console.log("login called");
+
+            User.find({"identities.googeId"  : id})
+            .exec()
+            .then((user) => {
+                if(user) {
+                    done(null, true);
+                } else {
+                    done(null, false);
+                }
+            })
+            .catch((err) => done(err))
+            
+        }
+
+        
     })
 );
