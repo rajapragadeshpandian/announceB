@@ -1,12 +1,14 @@
 
 const mongoose = require('mongoose');
 
+// account will get created once the user signedUp and team 
+// gets invited 
 const  accountSchema = mongoose.Schema({
-    accName : String,
+    accName : String, // announceB
     users : [{
-        userType : String, // owner , co Owner
-        __user : {type : Schema.Types.ObjectId , ref : 'User'},
-        email : String
+        userType : {type : String , default : null}, // firstsignup --> owner , co Owner
+        __user : {type : mongoose.Schema.Types.ObjectId , ref : 'User'},
+        email : {type : String , default : null}
     }]
 });
 

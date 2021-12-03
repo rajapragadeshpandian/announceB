@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 
 const User = require('../models/users');
 
+
 router.get('/crypt', (req, res, next) => {
 
     var passwod = "raj";
@@ -80,7 +81,7 @@ failureRedirect : '/auth/failure'
 ));       
 
 router.get('/success', (req, res, next) => {
-    res.render("success");
+    res.send(req.user);
 });
 
 router.get('/failure', (req, res, next) => {
@@ -88,7 +89,7 @@ router.get('/failure', (req, res, next) => {
 });
 
 router.get('/registerSuccess', (req, res, next) => {
-    res.send("use registered successfully");
+    res.send(req.user);
 });
 
 router.get('/registerFailure', (req, res, next) => {
@@ -96,19 +97,30 @@ router.get('/registerFailure', (req, res, next) => {
 });
 
 router.get('/loginSuccess', (req, res, next) => {
-    res.send("login successful");
+    res.send(req.user);
 });
 
 router.get('/loginFailure', (req, res, next) => {
     res.send("Authentication failed.Bad credentials");
 });
 
+router.get('/inviteteam', (req, res, next) => {
+    //console.log(req.user);
+    if(req.user) {
+        res.send(req.user);
+    } else {
+        res.send("no active user");
+    }
+
+})
 
 
 router.get('/logout', (req, res) => {
     req.logout();
     res.send("user logged out");
 });
+
+
 
 module.exports = router;
 
