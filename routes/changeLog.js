@@ -19,6 +19,7 @@ router.get('/',(req, res, next) => {
     const limit = 3;
     
     console.log(req.query.value);
+    console.log(req.user);
     const accId = req.query.accId;
     const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
