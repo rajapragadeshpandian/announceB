@@ -38,7 +38,7 @@ passport.use(
                     if(user.length > 0) {
                         
                         console.log("user exist");
-                        return done(null, false);
+                        return done(null, false, req.flash('info' , 'User Aready exist Please login'));
                         
                     } else {
 
@@ -70,7 +70,7 @@ passport.use(
                             .save()
                             .then((user) => createAccount(user))
                             .then(([user, account]) => {
-                                return done(null, user);
+                                return done(null, user, account);
                             })
                             .catch((err) => done(err))
                                
@@ -97,16 +97,16 @@ passport.use(
                         if(user.length > 0) {
 
                             if(!user[0].password) {
-                                return done(null, false);
+                                return done(null, false, req.flash('info' , 'You have a google account.Please login with google'));
                             }
                             
                             bcrypt.compare(password, user[0].password)
                             .then((result) => {
-                                console.log(result);
+                                
                                 if(result) {
                                     done(null, user);
                                 } else {
-                                    done(null, false);
+                                    done(null, false, req.flash('info' , 'Passwod is incorrect'));
                                 }
                             })
                             .catch(err => done(err));
@@ -114,7 +114,7 @@ passport.use(
                         } else {
 
                             console.log("else part called");
-                            done(null, false);
+                            done(null, false, req.flash('info' , 'User not Exist'));
 
                         }
                     
@@ -156,7 +156,7 @@ console.log(email);
                 const googleId = user[0].identities[0].googleId;
 
                 if(googleId) {
-                    return done(null, false);
+                    return done(null, false, req.flash('info' , 'Account already exist.Plese login with google'));
                 } else {
 
                         function fetchUser() {
@@ -233,10 +233,10 @@ console.log(email);
             .exec()
             .then((user) => {
                 console.log(user);
-                if(user) {
+                if(user.length > 0) {
                     done(null, user);
                 } else {
-                    done(null, false);
+                    done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
                 }
             })
             .catch((err) => done(err))
