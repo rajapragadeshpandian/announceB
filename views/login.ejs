@@ -1,6 +1,8 @@
 <h1>Login page</h1>
 
-
+<% if (message) { %>
+    <p style="color : red"><%= message %></p>
+    <% } %>
 
 <style>
 .fleldWrapper{
@@ -10,6 +12,20 @@
 padding : 20px 0px;
 }
 </style>
+
+<form action="/auth/login" method="post">
+    <div class="fleldWrapper">
+    <div class="label"><label>Email :</label></div>
+    <input type="email" name="email" placeholder="email" class="email" required />
+    </div>
+    <div class="fleldWrapper">
+            <div class="label"><label>password :</label></div>
+    <input type="password" name="password" class="password" placeholder="password" required />
+    </div>
+    <div class="fleldWrapper">
+            <button type="submit">submit</button>
+    </div>
+    </form>
 
     <div class="fleldWrapper">
             <a href="/auth/SignUpPage">Signup</a>

@@ -4,12 +4,14 @@ const session = require('express-session');
 const passport = require('passport');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const flash = require('connect-flash');
 const cookieParser = require('cookie-parser');
 const changeLog = require('./models/changeLog');
 const changeLogDetails = require('./routes/changeLog');
 const feedbackDetails = require('./routes/feedback');
 const customerDetails = require('./routes/customer');
 const userDetails = require('./routes/authRoutes');
+const accountDetails = require('./routes/accountRoutes');
 const widget = require('./routes/widget');
 
 
@@ -37,8 +39,10 @@ app.use(session(
 }
 ));
 
+
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 
 
 
@@ -61,6 +65,7 @@ app.use('/feedback', feedbackDetails);
 app.use('/customer', customerDetails);
 app.use('/widget', widget);
 app.use('/auth', userDetails);
+app.use('/account', accountDetails);
 
 
 app.get('/changes/uniqueTags', (req, res, next) => {
