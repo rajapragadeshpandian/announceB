@@ -4,6 +4,7 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 
 const User = require('../models/users');
+const Account = require('../models/account');
 
 
 router.get('/crypt', (req, res, next) => {
@@ -35,40 +36,40 @@ router.get('/', (req, res) => {
 
 router.get('/SignUpPage', (req, res) => {
 
-    res.render("signup");
+    res.render("signup", { message : req.flash('info')});
 
 });
 
 router.get('/LogInPage', (req, res) => {
 
-    res.render("login");
+    res.render("login", { message : req.flash('info')});
 
 });
 
 router.post('/register', 
 passport.authenticate('local',
-{ successRedirect: '/auth/registerSuccess',
-failureRedirect: '/auth/registerFailure'}
+{ successRedirect: '/auth/success',
+failureRedirect: '/auth/SignUpPage',
+failureFlash: true}
 ));
 
 router.post('/login',
 passport.authenticate('local',
-{ successRedirect : '/auth/loginSuccess',
-failureRedirect : '/auth/loginFailure'}
+{ successRedirect : '/auth/success',
+failureRedirect : '/auth/LogInPage',
+failureFlash: true}
 ));
 
 router.get('/google/signup',
 passport.authenticate('google',{
 scope : ['profile', 'email'] ,
-state : "signup"
-}
+state : "signup"}
 ));
 
 router.get('/google/login',
     passport.authenticate('google',{
     scope : ['profile', 'email'],
-    state : 'login'
-}
+    state : 'login'}
 ));
          
 
@@ -76,19 +77,38 @@ router.get('/google/login',
 router.get('/google/callback', 
 passport.authenticate('google',{
 successRedirect : '/auth/success',
-failureRedirect : '/auth/failure'
-}
-));       
+failureRedirect : '/auth/SignUpPage',
+failureFlash: true}
+));   
 
+// router.get('/auth/SignUpPage', (req, res ,next) => {
+//     res.render("SignUpPage", { message : req.flash('info')});
+// });
+
+
+// router.get('/auth/LogInPage', (req, res ,next) => {
+//     res.render("LogInPage", { message : req.flash('info')});
+// });
 router.get('/success', (req, res, next) => {
-    res.send(req.user);
+
+    Account.findOne({_id : "61aa1acd5cda43c11a14e65c"})
+    .exec()
+    .then((acc) =>{
+        res.redirect(`/auth?accId=${acc._id}`);
+    })
+    
+    
+    //res.render("success", { message : req.flash('info')});
+    //res.render('login', { message : req.flash('info')});
 });
 
-router.get('/failure', (req, res, next) => {
-    res.render("failure");
-});
+// router.get('/SignUpPage', (req, res, next) => {
 
-router.get('/registerSuccess', (req, res, next) => {
+//     console.log(req.url);
+//     res.render("SignUpPage", { message : req.flash('info')});
+// });
+
+/*router.get('/registerSuccess', (req, res, next) => {
     res.send(req.user);
 });
 
@@ -102,7 +122,7 @@ router.get('/loginSuccess', (req, res, next) => {
 
 router.get('/loginFailure', (req, res, next) => {
     res.send("Authentication failed.Bad credentials");
-});
+});*/
 
 router.get('/inviteteam', (req, res, next) => {
     //console.log(req.user);
