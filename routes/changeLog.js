@@ -13,9 +13,6 @@ router.get('/',(req, res, next) => {
 
 // regex { title : { "$regex" : req.query.text , $options : "i" }}
 // { $text : {$search : req.query.value }}
-
-   
-
     const limit = 3;
     
     console.log(req.query.value);
@@ -63,9 +60,8 @@ router.post('/', (req, res, next) => {
     const  { title, body, category, accId} = req.body;
 
     const changelog = new changeLog({
-
         title : title,
-        category : category.split(','),
+        category : category.split().map((item) => item.trim()),
         body : body,
         accId : accId
     })
