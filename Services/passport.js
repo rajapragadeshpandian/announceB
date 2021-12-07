@@ -4,6 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcrypt');
+const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
 
 const User = require('../models/users');
@@ -70,7 +71,7 @@ passport.use(
                             .save()
                             .then((user) => createAccount(user))
                             .then(([user, account]) => {
-                                return done(null, user, account);
+                                return done(null, user);
                             })
                             .catch((err) => done(err))
                                
@@ -114,7 +115,7 @@ passport.use(
                         } else {
 
                             console.log("else part called");
-                            done(null, false, req.flash('info' , 'User not Exist'));
+                            done(null, false, req.flash('info' , 'User not Exist.Please Sign up'));
 
                         }
                     
@@ -145,8 +146,9 @@ passport.use(
         const id = profile.id;
         const email = profile.emails[0].value;
 
-console.log(id);
-console.log(email);
+            console.log(id);
+            console.log(email);
+
         function createUser(user) {
 
              console.log(user);

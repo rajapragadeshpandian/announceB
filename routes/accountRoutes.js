@@ -4,19 +4,37 @@ const  router = express.Router();
 const Account = require('../models/account');
 const User = require('../models/users');
 
+router.get('/', (req, res, next) => {
 
+                const {accName} = req.query;
+                console.log(accName)
+                Account.find({accName : accName})
+                .find()
+                .exec()
+                .then((acc) => {
+                    res.status(200).json({
+                        accountDetails : acc
+                    })
+                    
+                })
+                .catch(next)
 
-router.post('/create', (req, res, next) => {
+})
 
-    const { name, email, accName, userType} = req.body;
+router.post('/invite', (req, res, next) => {
+
+    const { name, email, accName} = req.body;
 
             function createAccount(user){
 
-                let account = Account.updateOne({accName : accName},
+                let account = Account.updateOne(
+                    {accName : accName},
                         {$addToSet : {
-                            userType : userType,
+                            users : {
+                            userType : "co-user",
                             __user : user._id,
                             email : user.identities[0].email
+                            }
                         }}
                     )
                     .exec()
@@ -27,7 +45,8 @@ router.post('/create', (req, res, next) => {
 
             function fetchAccount() {
 
-                let account = Account.findOne({email : users.email})
+                let account = Account.findOne(
+                    {"users.email" : email})
                 .exec()
                 .then(account => account)
 
@@ -53,21 +72,64 @@ router.post('/create', (req, res, next) => {
 
 router.delete('/delete' , (req, res, next) => {
 
-    const {id} = req.body;
+    const {userId, accName} = req.body;
 
-     Account.deleteOne({_id : id})
-    .exec()
-    .then(account => {
-        res.status(200).json({
-            message : "account deleted successfully"
-        })
-    })
-    .catch(next)
+            function deleteAccount() {
+
+               let deletedAcc = Account.updateOne(
+                   {accName : accName},
+                    { $pull : {
+                        users : {
+                            __user : userId
+                        }
+                    }})
+                    .exec()
+                    .then((acc) => acc)
+                    
+                return deletedAcc;
+            }
+
+                function fetchAccount() {
+
+                    let account = Account.findOne(
+                        {accName : accName})
+                    .exec()
+                    .then(account => account)
+    
+                    return account;
+                }
+
+            
+
+                User.deleteOne({_id : userId })
+                .exec()
+                .then(() => deleteAccount())
+                .then(() => fetchAccount())
+                .then((account) => {
+                    res.status(200).json({
+                        account : account
+                    })
+
+                })
+                .catch(next)
+          
 
 })
 
-router.get('/adhoc', (req, res, next) => {
-    res.semd("hi");
+router.post('/adhoc', (req, res, next) => {
+    
+
+            Account.update({accName : "announceB"},
+                {$pull : {
+                    users : {
+                    __user : "61adb9620fe7cbcabcc0982a"
+                    }
+                }}
+            )
+            .exec()
+            .then(() => {
+                res.send("updated successfully")
+            })
 });
 
 module.exports = router;
