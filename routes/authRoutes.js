@@ -32,6 +32,7 @@ router.get('/crypt', (req, res, next) => {
 })
 
 router.get('/', (req, res) => {
+    console.log(keys);
 
     res.render("index");
 
@@ -92,12 +93,13 @@ router.get('/success', (req, res, next) => {
 router.get('/registerSuccess', (req, res, next) => {
 
     console.log(req.user.identities[0].email);
+    console.log(keys);
 
     sgMail.setApiKey(keys.sendGridKey);
 
     const message = {};
-    message.to = "rajapragadesh1994@gmail.com",
-    message.from = "rajapragadeshpandian@gmail.com";
+    message.to = req.user.identities[0].email,
+    message.from = "pragadesh72@gmail.com";
     message.subject = "user verification";
     message.text = " hi from sendgrid";
     message.html = `<h1> hi from sendgrid</h1>
@@ -180,6 +182,11 @@ console.log(message);
 router.get('/confirmation', (req, res) => {
  res.redirect(`/auth/LogInPage`);
 });
+
+router.post('/create/user', (req, res, next) => {
+    console.log(req.body);
+    res.send(req.body);
+})
 
 
 router.get('/logout', (req, res) => {
