@@ -96,7 +96,7 @@ router.get('/registerSuccess', (req, res, next) => {
     sgMail.setApiKey(keys.sendGridKey);
 
     const message = {};
-    message.to = req.user.identities[0].email;
+    message.to = "rajapragadesh1994@gmail.com",
     message.from = "rajapragadeshpandian@gmail.com";
     message.subject = "user verification";
     message.text = " hi from sendgrid";
