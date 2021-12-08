@@ -27,21 +27,99 @@ router.post('/invite', (req, res, next) => {
 
     const { email, accId, userType} = req.body;
 
-    sgMail.setApiKey(keys.sendGridKey);
+         function createNewUser(user) {
+
+             if(user.length > 0) {
+                 res.status(404).json({
+                     error : "User allready exist"
+                 })
+             } else {
+
+                function createAccount(user) {
+
+                    let account = Account.updateOne(
+
+                        {_id : accId},
+                            {$addToSet : {
+                                users : {
+                                userType : userType,
+                                __user : user._id,
+                                email : user.identities[0].email
+                                }
+                            }}
+                        )
+                        .exec()
+                        .then((account) => account)
+                        .catch(next)
+    
+                    return account;
+                }
+
+                    function sendMail() {
+
+                        sgMail.setApiKey(keys.sendGridKey);
+                        console.log(req.body.email);
+                        
+                            const message = {};
+                            message.to = req.body.email;
+                            message.from = "pragadesh72@gmail.com";
+                            message.subject = `Invite from AnnounceB as ${req.body.userType}`;
+                            message.text = "Please click on below links to accept or decline the invite";
+                            message.html = `
+                            <p>Please click on below links to accept or decline the invite<p>
+                            <div>
+                            <a href="http://localhost:5000/account/invite/accept?email=${req.body.email}">Accept</a>
+                            </div>
+                            <div>
+                            <a href="http://localhost:5000/account/invite/decline">Decline</a>
+                            </div>
+                            `;
+
+                            sgMail.send(message)
+                            .then(response => {
+                                    res.status(200).json({
+                                        response : response,
+                                        email : email,
+                                        userType : userType
+                                    })
+                            
+                            })
+                            .catch(next)
+
+                    }
+
+                let newUser = new User({
+                    identities : [{ email : email}]
+                })
+                .save()
+                .then((user) => createAccount(user))
+                .then((account) => sendMail())
+                .catch(next)
+
+             }
+
+         }
+
+        User.find({"identities.email" : email})
+        .exec()
+        .then((user) => createNewUser(user))
+        .catch(next)
+
+    /*sgMail.setApiKey(keys.sendGridKey);
  console.log(req.body.email);
  
     const message = {};
-    message.to = "rajapragadesh1994@gmaail.com";
-    message.from = "rajapragadeshpandian@gmail.com";
-    message.subject = "Invite from AnnounceB";
+    message.to = "rajapragadeshpandian@gmail.com";
+    message.from = "pragadesh72@gmail.com";
+    message.subject = `Invite from AnnounceB as ${req.body.userType}`;
     message.text = "Please click on below links to accept or decline the invite";
     message.html = `
     <p>Please click on below links to accept or decline the invite<p>
     <div>
-    <a href="http://localhost:5000/auth/accept">Accept</a>
+    <a href="http://localhost:5000/account/invite/accept?${req.body.email}">Accept</a>
     </div>
     <div>
-    <a href="http://localhost:5000/auth/decline">Decline</a>
+    <a href="http://localhost:5000/account/invite/decline">Decline</a>
     </div>
     `;
 
@@ -52,52 +130,13 @@ router.post('/invite', (req, res, next) => {
             })
     
     })
-    .catch(next);
-
-
-           /* function createAccount(user) {
-
-                let account = Account.updateOne(
-                    {_id : accId},
-                        {$addToSet : {
-                            users : {
-                            userType : "co-user",
-                            __user : user._id,
-                            email : user.identities[0].email
-                            }
-                        }}
-                    )
-                    .exec()
-                    .then((account) => account);
-
-                return account;
-            }
-
-            function fetchAccount() {
-
-                let account = Account.findOne(
-                    {"users.email" : email})
-                .exec()
-                .then(account => account)
-
-                return account;
-            }
-    
-
-            let newUser = new User({
-                name : name,
-                identities : [{ email : email}]
-            })
-            .save()
-            .then((user) => createAccount(user))
-            .then(() => fetchAccount())
-            .then((account) =>{
-                res.status(200).json({
-                    accountDetails : account
-                })
-            })
-            .catch(next)*/
+    .catch(next);*/
        
+});
+
+router.get('/invite/accept', (req, res, next) => {
+    console.log(req.query);
+res.render('userDetails', {email : req.query.email || "prag@gmail.com"});
 });
 
 router.delete('/delete' , (req, res, next) => {
