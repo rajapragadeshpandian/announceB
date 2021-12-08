@@ -1,19 +1,21 @@
 const express = require('express');
 const  router = express.Router();
+const sgMail = require('@sendgrid/mail');
+const keys = require('../config/keys');
 
 const Account = require('../models/account');
 const User = require('../models/users');
 
 router.get('/', (req, res, next) => {
 
-                const {accName} = req.query;
-                console.log(accName)
-                Account.find({accName : accName})
+                const {accId} = req.query;
+                console.log(accId);
+                Account.find({_id : accId})
                 .find()
                 .exec()
-                .then((acc) => {
+                .then((account) => {
                     res.status(200).json({
-                        accountDetails : acc
+                        accountDetails : account
                     })
                     
                 })
@@ -23,12 +25,40 @@ router.get('/', (req, res, next) => {
 
 router.post('/invite', (req, res, next) => {
 
-    const { name, email, accName} = req.body;
+    const { email, accId, userType} = req.body;
 
-            function createAccount(user){
+    sgMail.setApiKey(keys.sendGridKey);
+ console.log(req.body.email);
+ 
+    const message = {};
+    message.to = "rajapragadesh1994@gmaail.com";
+    message.from = "rajapragadeshpandian@gmail.com";
+    message.subject = "Invite from AnnounceB";
+    message.text = "Please click on below links to accept or decline the invite";
+    message.html = `
+    <p>Please click on below links to accept or decline the invite<p>
+    <div>
+    <a href="http://localhost:5000/auth/accept">Accept</a>
+    </div>
+    <div>
+    <a href="http://localhost:5000/auth/decline">Decline</a>
+    </div>
+    `;
+
+    sgMail.send(message)
+    .then(response => {
+            res.status(200).json({
+                response : response
+            })
+    
+    })
+    .catch(next);
+
+
+           /* function createAccount(user) {
 
                 let account = Account.updateOne(
-                    {accName : accName},
+                    {_id : accId},
                         {$addToSet : {
                             users : {
                             userType : "co-user",
@@ -66,18 +96,18 @@ router.post('/invite', (req, res, next) => {
                     accountDetails : account
                 })
             })
-            .catch(next)
+            .catch(next)*/
        
 });
 
 router.delete('/delete' , (req, res, next) => {
 
-    const {userId, accName} = req.body;
+    const {userId, accId} = req.body;
 
             function deleteAccount() {
 
                let deletedAcc = Account.updateOne(
-                   {accName : accName},
+                   {_id : accId},
                     { $pull : {
                         users : {
                             __user : userId
@@ -92,7 +122,7 @@ router.delete('/delete' , (req, res, next) => {
                 function fetchAccount() {
 
                     let account = Account.findOne(
-                        {accName : accName})
+                        {_id : accId})
                     .exec()
                     .then(account => account)
     
@@ -112,9 +142,9 @@ router.delete('/delete' , (req, res, next) => {
 
                 })
                 .catch(next)
-          
 
-})
+
+});
 
 router.post('/adhoc', (req, res, next) => {
     
