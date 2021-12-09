@@ -4,9 +4,11 @@ const  router = express.Router();
 const changeLog = require('../models/changeLog');
 const Customer = require('../models/customers');
 
+const requireLogin = require('../middlewares/requireLogin');
+
 // get changeLog
 // req.user check in all routes
-router.get('/',(req, res, next) => {
+router.get('/', requireLogin,(req, res, next) => {
 
     //http://localhost:5000/changeLog?text=signup&&pageNo=2&&choice=next ==> sample req
 // no need for choice(prev or next) inc and dec pageno on client side  

@@ -81,7 +81,7 @@ router.get('/google/login',
 
 router.get('/google/callback', 
 passport.authenticate('google',{
-successRedirect : '/auth/success',
+successRedirect : '/auth/loginSuccess',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
 ));  
@@ -115,27 +115,25 @@ router.get('/registerSuccess', (req, res, next) => {
     
     })
     .catch(next);
-
-   
-
 });
 
 
 router.get('/loginSuccess', (req, res, next) => {
 
     // get account details by use mail
-    // console.log(req.user);
-    // Account.findOne({_id : "61aa1acd5cda43c11a14e65c"})
-    // .exec()
-    // .then((acc) =>{
-    //     res.redirect(`/auth?accId=${acc._id}`);
-    // })
+    console.log("active user",req.user._id);
+     const id = req.user._id;
+    Account.findOne({"users.__user" : id})
+    .exec()
+    .then((acc) =>{
+      //res.redirect(`/changelog?accId=${acc._id}`);
+      res.redirect(`/changelog?accId=announceB`);
+    })
 
-    res.render('success');
-    
-    
-    //res.render("success", { message : req.flash('info')});
-    //res.render('login', { message : req.flash('info')});
+    // res.status(200).json({
+    //     user : req.user
+    // });
+
 });
 
 
@@ -149,43 +147,51 @@ router.get('/inviteteam', (req, res, next) => {
 
 });
 
-/*router.post('/signup', (req, res, next) => {
-    
-    const { email, name, password} = req.body;
-    console.log(req.body.email);
-
-    sgMail.setApiKey(keys.sendGridKey);
-
-    const message = {};
-    message.to = req.body.email;
-    message.from = "rajapragadeshpandian@gmail.com";
-    message.subject = "user verification";
-    message.text = " hi from sendgrid";
-    message.html = `<h1> hi from sendgrid</h1>
-    <p>Please click on conform to accept the invite<p>
-    <div>
-    <a href="http://localhost:5000/auth/confirmation?email=${req.body.email}">confirm</a>
-    </div>
-    `;
-console.log(message);
-    sgMail.send(message)
-    .then(response => {
-        res.status(200).json({
-            response : response
-        })
-    })
-    .catch(next);
-
-  
-});*/
 
 router.get('/confirmation', (req, res) => {
  res.redirect(`/auth/LogInPage`);
 });
 
 router.post('/create/user', (req, res, next) => {
-    console.log(req.body);
-    res.send(req.body);
+    
+    const { email, name, password} = req.body;
+
+    function updateDetails(user) {
+
+        if(user) {
+
+            function updateUser(hash) {
+
+                User.updateOne(
+                    {"identities.email" : email},
+                    {$set : {
+                        name : name,
+                        password : hash
+                    }}
+                )
+                .exec()
+                .then(() => {
+                    res.redirect('/auth/LogInPage');
+                })
+                .catch(next)
+            }
+            
+            bcrypt.hash(password, 10)
+            .then((hash) => updateUser(hash))
+            .catch(err => done(err))                    
+
+        } else {
+            res.send("User not exist");
+        }
+        
+
+    }
+
+    User.findOne({"identities.email" : email})
+    .exec()
+    .then((user) => updateDetails(user))
+    .catch(next)
+
 })
 
 
