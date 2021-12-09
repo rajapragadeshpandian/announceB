@@ -6,7 +6,9 @@ const keys = require('../config/keys');
 const Account = require('../models/account');
 const User = require('../models/users');
 
-router.get('/', (req, res, next) => {
+const requireLogin = require('../middlewares/requireLogin');
+
+router.get('/', requireLogin,  (req, res, next) => {
 
                 const {accId} = req.query;
                 console.log(accId);
@@ -71,7 +73,7 @@ router.post('/invite', (req, res, next) => {
                             <a href="http://localhost:5000/account/invite/accept?email=${req.body.email}">Accept</a>
                             </div>
                             <div>
-                            <a href="http://localhost:5000/account/invite/decline">Decline</a>
+                            <a href="http://localhost:5000/account/invite/decline?email=${req.body.email}">Decline</a>
                             </div>
                             `;
 
@@ -105,38 +107,16 @@ router.post('/invite', (req, res, next) => {
         .then((user) => createNewUser(user))
         .catch(next)
 
-    /*sgMail.setApiKey(keys.sendGridKey);
- console.log(req.body.email);
- 
-    const message = {};
-    message.to = "rajapragadeshpandian@gmail.com";
-    message.from = "pragadesh72@gmail.com";
-    message.subject = `Invite from AnnounceB as ${req.body.userType}`;
-    message.text = "Please click on below links to accept or decline the invite";
-    message.html = `
-    <p>Please click on below links to accept or decline the invite<p>
-    <div>
-    <a href="http://localhost:5000/account/invite/accept?${req.body.email}">Accept</a>
-    </div>
-    <div>
-    <a href="http://localhost:5000/account/invite/decline">Decline</a>
-    </div>
-    `;
-
-    sgMail.send(message)
-    .then(response => {
-            res.status(200).json({
-                response : response
-            })
-    
-    })
-    .catch(next);*/
        
 });
 
 router.get('/invite/accept', (req, res, next) => {
     console.log(req.query);
 res.render('userDetails', {email : req.query.email || "prag@gmail.com"});
+});
+
+router.get('/invite/decline', (req, res, next) => {
+res.send('user declined the request');
 });
 
 router.delete('/delete' , (req, res, next) => {
@@ -188,11 +168,10 @@ router.delete('/delete' , (req, res, next) => {
 router.post('/adhoc', (req, res, next) => {
     
 
-            Account.update({accName : "announceB"},
-                {$pull : {
-                    users : {
-                    __user : "61adb9620fe7cbcabcc0982a"
-                    }
+            User.updateOne(
+                {"identities.email" : "rajapragadesh1994@gmail.com"},
+                {$set : {
+                    name : "rajapragadesh.p"
                 }}
             )
             .exec()
