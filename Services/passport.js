@@ -50,9 +50,7 @@ passport.use(
                                     let account = new Account({
                                         accName : "announceB",
                                         users : [{
-                                            userType : "Owner", 
-                                            // firstsignup --> owner
-                                            // , co Owner
+                                            userType : "Owner",
                                             __user : user._id,
                                             email : user.identities[0].email
                                         }]
@@ -95,13 +93,13 @@ passport.use(
 
                 function verifyPassword(user) {
                 
-                        if(user.length > 0) {
+                        if(user) {
 
-                            if(!user[0].password) {
+                            if(!user.password) {
                                 return done(null, false, req.flash('info' , 'You have a google account.Please login with google'));
                             }
                             
-                            bcrypt.compare(password, user[0].password)
+                            bcrypt.compare(password, user.password)
                             .then((result) => {
                                 
                                 if(result) {
@@ -121,7 +119,7 @@ passport.use(
                     
                 }
 
-                    User.find({"identities.email" : email})
+                    User.findOne({"identities.email" : email})
                     .exec()
                     .then((user) => verifyPassword(user))
                     .catch(err => done(err))    
@@ -163,7 +161,7 @@ passport.use(
 
                         function fetchUser() {
                             
-                            User.find({"identities.email" : email})
+                            User.findOne({"identities.email" : email})
                             .exec()
                             .then((user) => {
                                 done(null, user);
@@ -231,11 +229,11 @@ passport.use(
             console.log("login called");
             console.log(id);
 
-            User.find({"identities.googleId" : id})
+            User.findOne({"identities.googleId" : id})
             .exec()
             .then((user) => {
                 console.log(user);
-                if(user.length > 0) {
+                if(user) {
                     done(null, user);
                 } else {
                     done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
