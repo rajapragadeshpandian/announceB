@@ -111,8 +111,22 @@ router.post('/invite', (req, res, next) => {
 });
 
 router.get('/invite/accept', (req, res, next) => {
-    console.log(req.query);
-res.render('userDetails', {email : req.query.email || "prag@gmail.com"});
+
+    User.updateOne({"identities.email" : req.query.email},
+                    { "$set" : {
+                    "identities.$.verified" : true
+                    }}
+                    )
+                    .exec()
+                    .then(() => {
+                        res.redirect(`/account/userdetails?email=${req.query.email}`)
+                    })
+                    .catch((err) => done(err))
+
+});
+
+router.get('/userdetails', (req, res, next) => {
+    res.render('userDetails', {email : req.query.email || "prag@gmail.com"});
 });
 
 router.get('/invite/decline', (req, res, next) => {
