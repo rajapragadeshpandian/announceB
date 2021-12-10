@@ -105,7 +105,7 @@ router.get('/registerSuccess', (req, res, next) => {
     message.html = `<h1> hi from sendgrid</h1>
     <p>Please click on confirm to accept the invite<p>
     <div>
-    <a href="http://localhost:5000/auth/confirmation">confirm</a>
+    <a href="http://localhost:5000/auth/confirmation?email=${req.user.identities[0].email}">confirm</a>
     </div>
     `;
 
@@ -149,7 +149,18 @@ router.get('/inviteteam', (req, res, next) => {
 
 
 router.get('/confirmation', (req, res) => {
- res.redirect(`/auth/LogInPage`);
+
+    User.updateOne({"identities.email" : req.query.email},
+                    { "$set" : {
+                    "identities.$.verified" : true
+                    }}
+                    )
+                    .exec()
+                    .then(() => {
+                        res.redirect(`/auth/LogInPage`);
+                    })
+                    .catch((err) => done(err))
+ 
 });
 
 router.post('/create/user', (req, res, next) => {
@@ -199,6 +210,23 @@ router.get('/logout', (req, res) => {
     req.logout();
     res.send("user logged out");
 });
+
+router.post('/adhoc', (req, res, next) => {
+    
+   
+
+    User.updateOne({"identities.email" : "rajapragadeshpandian@gmail.com"},
+                    { "$set" : {
+                    "identities.$.verified" :null
+                    }}
+                    )
+                    .exec()
+                    .then(() => {
+                        res.send("updated successfully")
+                    })
+                    .catch((err) => done(err))
+});
+
 
 
 
