@@ -92,7 +92,7 @@ router.get('/success', (req, res, next) => {
 
 router.get('/registerSuccess', (req, res, next) => {
 
-    console.log(req.user.identities[0].email);
+    console.log(req.user);
     console.log(keys);
 
     sgMail.setApiKey(keys.sendGridKey);
@@ -170,7 +170,11 @@ router.post('/create/user', (req, res, next) => {
     function updateDetails(user) {
 
         if(user) {
-
+            // check if google id exist or no
+            if((user.identities[0].googleId) ||
+                 (user.password) ) {
+            res.redirect('/auth/LogInPage');
+            } else  {
             function updateUser(hash) {
 
                 User.updateOne(
@@ -189,19 +193,24 @@ router.post('/create/user', (req, res, next) => {
             
             bcrypt.hash(password, 10)
             .then((hash) => updateUser(hash))
-            .catch(err => done(err))                    
+            .catch(err => done(err))     
+        }               
 
         } else {
-            res.send("User not exist");
+            res.status(400).json({
+               error: "User has to be verified to set creds"
+            });
         }
         
 
     }
 
-    User.findOne({"identities.email" : email})
-    .exec()
-    .then((user) => updateDetails(user))
-    .catch(next)
+            User.findOne({"identities.email" : email,
+            "identities.verified" : true
+            })
+            .exec()
+            .then((user) => updateDetails(user))
+            .catch(next)
 
 })
 
@@ -212,8 +221,7 @@ router.get('/logout', (req, res) => {
 });
 
 router.post('/adhoc', (req, res, next) => {
-    
-   
+
 
     User.updateOne({"identities.email" : "rajapragadeshpandian@gmail.com"},
                     { "$set" : {
