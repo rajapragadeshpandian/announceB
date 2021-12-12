@@ -36,16 +36,16 @@ passport.use(
 
                 function createUser(user) {
 
-                    if(user.length > 0) {
-                        
-                        console.log("user exist");
-                        return done(null, false, req.flash('info' , 'User Aready exist Please login'));
-                        
-                    } else {
+                    if(user) {
 
-                        function saveUser(hash) {
+                         function checkAccount(acc) {
 
-                                function createAccount(user) {
+                                if(acc) {
+                                    
+                                    console.log("user exist");
+                                    return done(null, false, req.flash('info' , 'User and Owner account Aready exist Please login'));
+                                    
+                                } else {
 
                                     let account = new Account({
                                         accName : "announceB",
@@ -56,33 +56,68 @@ passport.use(
                                         }]
                                     })
                                     .save()
-                                    .then((account) => account)
-
-                                    return Promise.all([user, account]);
-
+                                    .then((account) => {
+                                        done( null, user);
+                                    })
+                                    .catch((err) => done(err))
+                                    
                                 }
-                            let newUser = new User({
-                                name : req.body.name,
-                                password  : hash,
-                                identities : [{ email : email}]
-                            })
-                            .save()
-                            .then((user) => createAccount(user))
-                            .then(([user, account]) => {
-                                return done(null, user);
-                            })
-                            .catch((err) => done(err))
-                               
+                        }
+
+                     Account.findOne(
+                            { users : {
+                                $elemMatch : {
+                                        __user : user._id,
+                                        userType : "Owner"
+                                     }
+                        }})
+                        .exec()
+                        .then((acc) => checkAccount(acc))
+                        .catch((err) => done(err))
+
+                    } else {
+
+                        function saveUser(hash) {
+
+                            function createAccount(user) {
+
+                                let account = new Account({
+                                    accName : "announceB",
+                                    users : [{
+                                        userType : "Owner",
+                                        __user : user._id,
+                                        email : user.identities[0].email
+                                    }]
+                                })
+                                .save()
+                                .then((account) => {
+                                        done(null, user);
+                                })
+                                .catch((err) => done(err))
+
+                            }
+
+                        let newUser = new User({
+                            name : req.body.name,
+                            password  : hash,
+                            identities : [{ email : email}]
+                        })
+                        .save()
+                        .then((user) => createAccount(user))
+                        .catch((err) => done(err))
+                        
                     }
 
-                        bcrypt.hash(password, 10)
-                        .then((hash) => saveUser(hash))
-                        .catch(err => done(err))
-                    
+                    bcrypt.hash(password, 10)
+                    .then((hash) => saveUser(hash))
+                    .catch(err => done(err))
+                
+
                     }
-                }
+
+              }
         
-             User.find({"identities.email"  : email})
+             User.findOne({"identities.email"  : email})
             .exec()
             .then((user) => createUser(user))
             .catch(err => done(err));
@@ -95,7 +130,7 @@ passport.use(
                 
                         if(user) {
 
-                            if(!user.password) {
+                            if(user.identities[0].googleId) {
                                 return done(null, false, req.flash('info' , 'You have a google account.Please login with google'));
                             }
                             
@@ -150,24 +185,16 @@ passport.use(
         function createUser(user) {
 
              console.log(user);
-            // console.log(user[0].identities[0].googleId);
-    
-             if(user.length  > 0) {
-                const googleId = user[0].identities[0].googleId;
 
-                if(googleId) {
+             if(user) {
+
+                const googleId = user.identities[0].googleId;
+
+                function checkAccount(acc) {
+
+                if(googleId && acc) {
                     return done(null, false, req.flash('info' , 'Account already exist.Plese login with google'));
-                } else {
-
-                        function fetchUser() {
-                            
-                            User.findOne({"identities.email" : email})
-                            .exec()
-                            .then((user) => {
-                                done(null, user);
-                            })
-                    
-                        }
+                } else if(!googleId && acc) {
 
                     User.updateOne({"identities.email" : email},
                     { "$set" : {
@@ -175,9 +202,68 @@ passport.use(
                     }}
                     )
                     .exec()
-                    .then(() => fetchUser())
+                    .then(() => {
+                            done(null, user);
+                    })
                     .catch((err) => done(err))
-                }             
+                    
+                } else if(googleId && !acc) {
+
+                    let account = new Account({
+                        accName : "announceB",
+                        users : [{
+                            userType : "Owner",
+                            __user : user._id,
+                            email : user.identities[0].email
+                        }]
+                    })
+                    .save()
+                    .then((account) => {
+                        done(null, user);
+                    })
+                    .catch((err) => done(err))
+
+                } else {
+
+                    function createAccount() {
+
+                        let account = new Account({
+                            accName : "announceB",
+                            users : [{
+                                userType : "Owner",
+                                __user : user._id,
+                                email : user.identities[0].email
+                            }]
+                        })
+                        .save()
+                        .then((account) => {
+                            done(null, user);
+                        })
+                        .catch((err) => done(err))
+                    }
+
+                    User.updateOne({"identities.email" : email},
+                    { "$set" : {
+                    "identities.$.googleId" : profile.id
+                    }}
+                    )
+                    .exec()
+                    .then(() => createAccount())
+                    .catch((err) => done(err))
+
+                }
+
+            }  
+                Account.findOne(
+                    { users : {
+                        $elemMatch : {
+                                __user : user._id,
+                                userType : "Owner"
+                             }
+                }})
+                .exec()
+                .then((acc) => checkAccount(acc))
+                .catch((err) => done(err))
                         
              } else {
 
@@ -192,9 +278,10 @@ passport.use(
                                 }]
                             })
                             .save()
-                            .then((account) => account)
-
-                            return Promise.all([user, account])
+                            .then((account) => {
+                                done(null, user);
+                            })
+                            .catch((err) => done(err))
                         }
                 
 
@@ -207,9 +294,6 @@ passport.use(
                     })
                     .save()
                     .then((user) => createAccount(user))
-                    .then(([user, account]) => {
-                        done(null, user);
-                    })
                     .catch(err => done(err))
 
              }
@@ -219,7 +303,7 @@ passport.use(
             console.log("signup called");
             console.log(email);
         
-            User.find({"identities.email" : email})
+            User.findOne({"identities.email" : email})
             .exec()
             .then((user) => createUser(user))
             .catch((err) => done(err))

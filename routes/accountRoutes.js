@@ -29,35 +29,7 @@ router.post('/invite', (req, res, next) => {
 
     const { email, accId, userType} = req.body;
 
-         function createNewUser(user) {
-
-             if(user.length > 0) {
-                 res.status(404).json({
-                     error : "User allready exist"
-                 })
-             } else {
-
-                function createAccount(user) {
-
-                    let account = Account.updateOne(
-
-                        {_id : accId},
-                            {$addToSet : {
-                                users : {
-                                userType : userType,
-                                __user : user._id,
-                                email : user.identities[0].email
-                                }
-                            }}
-                        )
-                        .exec()
-                        .then((account) => account)
-                        .catch(next)
-    
-                    return account;
-                }
-
-                    function sendMail() {
+                 function sendMail() {
 
                         sgMail.setApiKey(keys.sendGridKey);
                         console.log(req.body.email);
@@ -90,6 +62,66 @@ router.post('/invite', (req, res, next) => {
 
                     }
 
+         function createNewUser(user) {
+
+             if(user) {
+
+                function checkaccount(acc) {
+                    if(acc) {
+                        res.status(200).json({
+                         message : "user already  exist in this account"
+                     });
+                    } else {
+
+                        let account = Account.updateOne(
+                            {_id : accId},
+                                {$addToSet : {
+                                    users : {
+                                    userType : userType,
+                                    __user : user._id,
+                                    email : user.identities[0].email
+                                    }
+                                }}
+                            )
+                            .exec()
+                            .then((account) => account)
+                            .catch(next);
+
+                        return account;
+                    }
+                   
+                }
+               
+                Account.findOne({
+                    _id : accId,
+                    "users.__user" : user._id
+                })
+                .exec()
+                .then((acc) => checkaccount(acc))
+                .then(() => sendMail())
+                .catch(next)
+
+             } else {
+
+                function createAccount(user) {
+
+                    let account = Account.updateOne(
+                        {_id : accId},
+                            {$addToSet : {
+                                users : {
+                                userType : userType,
+                                __user : user._id,
+                                email : user.identities[0].email
+                                }
+                            }}
+                        )
+                        .exec()
+                        .then((account) => account)
+                        .catch(next)
+    
+                    return account;
+                }
+
                 let newUser = new User({
                     identities : [{ email : email}]
                 })
@@ -102,7 +134,7 @@ router.post('/invite', (req, res, next) => {
 
          }
 
-        User.find({"identities.email" : email})
+        User.findOne({"identities.email" : email})
         .exec()
         .then((user) => createNewUser(user))
         .catch(next)
@@ -180,18 +212,39 @@ router.delete('/delete' , (req, res, next) => {
 });
 
 router.post('/adhoc', (req, res, next) => {
-    
 
-            User.updateOne(
-                {"identities.email" : "rajapragadesh1994@gmail.com"},
-                {$set : {
-                    name : "rajapragadesh.p"
-                }}
-            )
-            .exec()
-            .then(() => {
-                res.send("updated successfully")
-            })
+    /*db.survey.find(
+        { results: {
+             $elemMatch: {
+                  product: "xyz", 
+                  score: { $gte: 8 } } } }
+     )*/
+
+    Account.find(
+        { users : {
+            $elemMatch : {
+                    __user : "61b201b90e156d91428533a2",
+                    userType : "Owner"
+                 }
+    }})
+    .exec()
+    .then((acc) => {
+        res.status(200).json({
+            acc : acc
+        })
+    })
+    .catch(next)
+
+            // User.updateOne(
+            //     {"identities.email" : "rajapragadesh1994@gmail.com"},
+            //     {$set : {
+            //         name : "rajapragadesh.p"
+            //     }}
+            // )
+            // .exec()
+            // .then(() => {
+            //     res.send("updated successfully")
+            // })
 });
 
 module.exports = router;
