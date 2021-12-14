@@ -282,8 +282,7 @@ passport.use(
                                 done(null, user);
                             })
                             .catch((err) => done(err))
-                        }
-                
+                        }           
 
                     let newUser = new User({
                         name : profile.displayName,
@@ -295,7 +294,6 @@ passport.use(
                     .save()
                     .then((user) => createAccount(user))
                     .catch(err => done(err))
-
              }
         }
 

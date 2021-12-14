@@ -225,31 +225,26 @@ router.get('/:changelogId',(req, res, next) => {
     console.log(custId);
     const email = req.query;
     const limit  = 3;
-    const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
+    //const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
     console.log("####", req.params.changelogId);
 
     function getFeedbacks(change) {
         
-        console.log(change);
-
                 const feedbacks = Feedback.find(
                     {__change : change._id}
                 )
                 .sort({ createdAt : -1 })
-                .skip(val)
                 .limit(limit)
                 .exec()
                 .then((data) => data)
 
         return Promise.all([feedbacks,change]);
-
     }
 
     function getFeedbackCount(feedbacks,change) {
-        console.log(feedbacks);
-        console.log(change);
 
-        const count = Feedback.countDocuments({__change : change._id})
+        const count = Feedback.countDocuments(
+            {__change : change._id})
         .exec()
         .then((count) => count)
 

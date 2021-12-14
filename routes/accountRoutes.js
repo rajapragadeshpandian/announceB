@@ -144,7 +144,7 @@ router.post('/invite', (req, res, next) => {
 
 router.get('/invite/accept', (req, res, next) => {
 
-    User.updateOne({"identities.email" : req.query.email},
+        User.updateOne({"identities.email" : req.query.email},
                     { "$set" : {
                     "identities.$.verified" : true
                     }}
@@ -207,8 +207,6 @@ router.delete('/delete' , (req, res, next) => {
 
                 })
                 .catch(next)
-
-
 });
 
 router.post('/adhoc', (req, res, next) => {
