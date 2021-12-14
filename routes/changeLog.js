@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const  router = express.Router();
 const changeLog = require('../models/changeLog');
 const Customer = require('../models/customers');
+const Account = require('../models/account');
+const Feedback = require('../models/feedback');
 
 const requireLogin = require('../middlewares/requireLogin');
 
@@ -19,6 +21,8 @@ router.get('/',(req, res, next) => {
     
     console.log(req.query.value);
     console.log(req.user);
+    console.log(req.user);
+    const userId = req.user ? req.user._id : {};
     const accId = req.query.accId;
     const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
@@ -34,6 +38,19 @@ router.get('/',(req, res, next) => {
 
         return Promise.all([count, changes]);
     }
+
+    function getAccounts(count, changes) {
+
+            const accounts = Account.find({
+                "users.__user" : userId
+            })
+            .select('users')
+            .exec()
+            .then((account) => account)
+            .catch(next)
+
+        return Promise.all([count, changes, accounts]);
+    }
     // have to add accountId
         const changes =  changeLog.find({accId : accId, findText})
         .select('title category body _id disLike like')
@@ -42,12 +59,13 @@ router.get('/',(req, res, next) => {
         .limit(limit)
         .exec()
         .then((changes) => fetchChanges(changes))
-        .then(([count, changes]) => {
-
+        .then(([count, changes]) => getAccounts(count, changes))
+        .then((count, changes, accounts) => {
             console.log(changes);
             res.status(200).json({
                 changeList : changes,
-                count : count
+                count : count,
+                accounts : accounts
                  });
         })
         .catch(next);
@@ -90,16 +108,44 @@ router.get('/:changelogId',(req, res, next) => {
     //accid has to be added
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
+
+    function getFeedbacks(change) {
+                const feedbacks = Feedback.find(
+                    {__change : change._id}
+                )
+                .sort({ createdAt : -1 })
+                .limit(5)
+                .exec()
+                .then((data) => data)
+
+        return Promise.all([feedbacks,change]);
+    }
+
+    function getFeedbackCount(feedbacks,change) {
+        console.log(feedbacks);
+        console.log(change);
+
+        const count = Feedback.countDocuments(
+            {__change : change._id})
+        .exec()
+        .then((count) => count)
+
+        return Promise.all([feedbacks, change,count]);
+    }
+
     changeLog.findById({_id : id})
     .select('title category body _id disLike like')
     .exec()
-    .then((change) => {
+    .then((change) => getFeedbacks(change))
+    .then(([feedbacks,change]) => getFeedbackCount(feedbacks,change))
+    .then(([feedbacks, change,count]) => {
                 console.log("$$$$", change);
                 res.status(200).json({
                     message : "changeLog found",
-                    change : change
+                    change : change,
+                    feedbacks : feedbacks,
+                    count : count
                 });
-
     })
     .catch(next);
 
