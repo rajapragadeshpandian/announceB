@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
@@ -120,22 +121,68 @@ router.get('/registerSuccess', (req, res, next) => {
 
 router.get('/loginSuccess', (req, res, next) => {
 
-    // get account details by use mail
-    console.log("active user",req.user._id);
-     const id = req.user._id;
-    Account.findOne({"users.__user" : id})
-    .exec()
-    .then((acc) =>{
-      //res.redirect(`/changelog?accId=${acc._id}`);
-      res.redirect(`/changelog?accId=announceB`);
-    })
+        // get account details by use mail
+        console.log("active user",req.user._id);
+        const id = req.user._id;
 
-    // res.status(200).json({
-    //     user : req.user
-    // });
+     function verifyAccount(user) {
+
+         const googleId = user.identities[0].googleId;
+         const verified = user.identities[0].verified;
+
+         if(googleId || verified) {
+                 function checkOwner(acc) {
+                    if(acc) {
+                        console.log("OwnerAcc",acc);
+                        res.redirect(`/changelog?accId=announceB`);
+                    } else {
+                            function checkEditor(editAcc) {
+                                if(editAcc) {
+                                    console.log(editAcc);
+                                    res.redirect(`/changelog?accId=announceB`);            
+                                } else {
+                                    res.status(404).json({
+                                        error : "please create account"
+                                    })
+                                }
+                            }
+                        Account.find(
+                            { users : {
+                                $elemMatch : {
+                                        __user : user._id,
+                                        userType : "Editor"
+                                     }
+                        }})
+                        .exec()
+                        .then(editAcc => checkEditor(editAcc))
+                        .catch(next)
+                    }
+                 }
+
+            Account.find(
+                { users : {
+                    $elemMatch : {
+                            __user : user._id,
+                            userType : "Owner"
+                         }
+            }})
+            .exec()
+            .then(acc => checkOwner(acc))
+            .catch(next)
+
+         } else {
+                res.status(400).json({
+                    error : "Please have your account verified"
+                })
+         }
+
+     }
+            User.findOne({_id : id})
+            .exec()
+            .then((user) => verifyAccount(user))
+            .catch(next)
 
 });
-
 
 router.get('/inviteteam', (req, res, next) => {
     //console.log(req.user);
