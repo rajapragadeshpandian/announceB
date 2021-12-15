@@ -57,10 +57,9 @@ passport.use(
                                     })
                                     .save()
                                     .then((account) => {
-                                        done( null, user);
+                                         done(null, user);
                                     })
-                                    .catch((err) => done(err))
-                                    
+                                    .catch((err) => done(err))       
                                 }
                         }
 
@@ -130,20 +129,22 @@ passport.use(
                 
                         if(user) {
 
-                            if(user.identities[0].googleId) {
-                                return done(null, false, req.flash('info' , 'You have a google account.Please login with google'));
+                            if(user.password && user.verified) {
+                                bcrypt.compare(password, user.password)
+                                .then((result) => {
+                                    
+                                    if(result) {
+                                        done(null, user);
+                                    } else {
+                                        done(null, false, req.flash('info' , 'Passwod is incorrect'));
+                                    }
+                                })
+                                .catch(err => done(err));
+                            } else {
+                                done(null, false, req.flash('info' , 'user not verified yet.Please verify your account or try login with google'));
+
                             }
                             
-                            bcrypt.compare(password, user.password)
-                            .then((result) => {
-                                
-                                if(result) {
-                                    done(null, user);
-                                } else {
-                                    done(null, false, req.flash('info' , 'Passwod is incorrect'));
-                                }
-                            })
-                            .catch(err => done(err));
 
                         } else {
 
@@ -192,22 +193,9 @@ passport.use(
 
                 function checkAccount(acc) {
 
-                if(googleId && acc) {
+                if(acc) {
                     return done(null, false, req.flash('info' , 'Account already exist.Plese login with google'));
-                } else if(!googleId && acc) {
-
-                    User.updateOne({"identities.email" : email},
-                    { "$set" : {
-                    "identities.$.googleId" : profile.id
-                    }}
-                    )
-                    .exec()
-                    .then(() => {
-                            done(null, user);
-                    })
-                    .catch((err) => done(err))
-                    
-                } else if(googleId && !acc) {
+                } else {
 
                     let account = new Account({
                         accName : "announceB",
@@ -223,36 +211,7 @@ passport.use(
                     })
                     .catch((err) => done(err))
 
-                } else {
-
-                    function createAccount() {
-
-                        let account = new Account({
-                            accName : "announceB",
-                            users : [{
-                                userType : "Owner",
-                                __user : user._id,
-                                email : user.identities[0].email
-                            }]
-                        })
-                        .save()
-                        .then((account) => {
-                            done(null, user);
-                        })
-                        .catch((err) => done(err))
-                    }
-
-                    User.updateOne({"identities.email" : email},
-                    { "$set" : {
-                    "identities.$.googleId" : profile.id
-                    }}
-                    )
-                    .exec()
-                    .then(() => createAccount())
-                    .catch((err) => done(err))
-
-                }
-
+                } 
             }  
                 Account.findOne(
                     { users : {
@@ -311,21 +270,77 @@ passport.use(
             console.log("login called");
             console.log(id);
 
-            User.findOne({"identities.googleId" : id})
-            .exec()
-            .then((user) => {
-                console.log(user);
+             function checkId(user) {
+
                 if(user) {
-                    done(null, user);
+
+                    if(user.identities[0].googleId) {
+                        console.log("call here");   
+                        done(null, user);
+
+                    } else {
+                        console.log("else called");
+
+                        function createAccount() {
+
+                            function checkAccount(acc) {
+
+                                if(acc) {
+                                    done(null, user);
+                                } else {
+                                    let account = new Account({
+                                        accName : "announceB",
+                                        users : [{
+                                            userType : "Owner", 
+                                            __user : user._id,
+                                            email : user.identities[0].email
+                                        }]
+                                    })
+                                    .save()
+                                    .then((account) => {
+                                        done(null, user);
+                                    })
+                                    .catch((err) => done(err))
+
+                                }
+
+                            }
+
+                            Account.findOne(
+                                { users : {
+                                    $elemMatch : {
+                                            __user : user._id,
+                                            userType : "Owner"
+                                         }
+                            }})
+                            .exec()
+                            .then((acc) => checkAccount(acc))
+                            .catch((err) => done(err))
+
+                        }   
+
+                        User.updateOne({"identities.email" : email},
+                        { "$set" : {
+                        "identities.$.googleId" : profile.id
+                        }}
+                        )
+                        .exec()
+                        .then(() => createAccount())
+                        .catch((err) => done(err))
+                    }
+                   
                 } else {
                     done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
                 }
-            })
+
+             }
+            
+            User.findOne({"identities.email" : email})
+            .exec()
+            .then((user) => checkId(user))
             .catch((err) => done(err))
             
         }
-
-        
     })
 );
 
