@@ -158,6 +158,7 @@ router.get('/invite/accept/:token', (req, res, next) => {
            res.send("Email verification failed, possibly the link is invalid or expired");
        }
        else {
+           console.log(decoded);
            const userId = decoded.userId;
            //res.send("Email verifified successfully");
                 function getEmail() {
