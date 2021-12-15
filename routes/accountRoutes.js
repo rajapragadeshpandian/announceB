@@ -2,6 +2,7 @@ const express = require('express');
 const  router = express.Router();
 const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
+const jwt = require('jsonwebtoken');
 
 const Account = require('../models/account');
 const User = require('../models/users');
@@ -28,11 +29,17 @@ router.get('/', requireLogin,  (req, res, next) => {
 router.post('/invite', (req, res, next) => {
 
     const { email, accId, userType} = req.body;
-
-                 function sendMail() {
+    
+                 function sendMail(user) {
 
                         sgMail.setApiKey(keys.sendGridKey);
                         console.log(req.body.email);
+
+                        const token = jwt.sign({
+                        userId: user._id
+                        }, keys.emailSecret , { expiresIn: '1d' }  
+                        ); 
+
                         
                             const message = {};
                             message.to = req.body.email;
@@ -42,10 +49,10 @@ router.post('/invite', (req, res, next) => {
                             message.html = `
                             <p>Please click on below links to accept or decline the invite<p>
                             <div>
-                            <a href="http://localhost:5000/account/invite/accept?email=${req.body.email}">Accept</a>
+                            <a href="http://localhost:5000/account/invite/accept/${token}">Accept</a>
                             </div>
                             <div>
-                            <a href="http://localhost:5000/account/invite/decline?email=${req.body.email}">Decline</a>
+                            <a href="http://localhost:5000/account/invite/decline/${token}">Decline</a>
                             </div>
                             `;
 
@@ -87,7 +94,7 @@ router.post('/invite', (req, res, next) => {
                             .then((account) => account)
                             .catch(next);
 
-                        return account;
+                        return Promise.all([user, account]);
                     }
                    
                 }
@@ -98,7 +105,7 @@ router.post('/invite', (req, res, next) => {
                 })
                 .exec()
                 .then((acc) => checkaccount(acc))
-                .then(() => sendMail())
+                .then(([user, account]) => sendMail(user))
                 .catch(next)
 
              } else {
@@ -119,7 +126,7 @@ router.post('/invite', (req, res, next) => {
                         .then((account) => account)
                         .catch(next)
     
-                    return account;
+                        return Promise.all([user, account]);
                 }
 
                 let newUser = new User({
@@ -127,7 +134,7 @@ router.post('/invite', (req, res, next) => {
                 })
                 .save()
                 .then((user) => createAccount(user))
-                .then((account) => sendMail())
+                .then(([user, account]) => sendMail(user))
                 .catch(next)
 
              }
@@ -142,26 +149,45 @@ router.post('/invite', (req, res, next) => {
        
 });
 
-router.get('/invite/accept', (req, res, next) => {
+router.get('/invite/accept/:token', (req, res, next) => {
 
-        User.updateOne({"identities.email" : req.query.email},
-                    { "$set" : {
-                    "identities.$.verified" : true
-                    }}
-                    )
+    jwt.verify(req.params.token, keys.emailSecret,
+        function(err, decoded) {
+       if (err) {
+           console.log(err);
+           res.send("Email verification failed, possibly the link is invalid or expired");
+       }
+       else {
+           const userId = decoded.userId;
+           //res.send("Email verifified successfully");
+                function getEmail() {
+                    User.findOne({_id : userId})
                     .exec()
-                    .then(() => {
-                        res.redirect(`/account/userdetails?email=${req.query.email}`)
+                    .then((user) => {
+                        res.redirect(`/account/userdetails?email=${user.identities[0].email}`)
                     })
-                    .catch((err) => done(err))
+                    .catch(next)
+                }
+           User.updateOne({_id : userId},
+            { "$set" : {
+            verified : true
+            }}
+            )
+            .exec()
+            .then(() => getEmail())
+            .catch(next)
+       }
+    });
 
 });
 
 router.get('/userdetails', (req, res, next) => {
-    res.render('userDetails', {email : req.query.email || "prag@gmail.com"});
+    res.render('userDetails', {email : req.query.email || ""});
 });
 
-router.get('/invite/decline', (req, res, next) => {
+router.get('/invite/decline/:token', (req, res, next) => {
+    //send mail to one who invites you once declines
+    // so they will delete your invite
 res.send('user declined the request');
 });
 
@@ -193,8 +219,6 @@ router.delete('/delete' , (req, res, next) => {
     
                     return account;
                 }
-
-            
 
                 User.deleteOne({_id : userId })
                 .exec()

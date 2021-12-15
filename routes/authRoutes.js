@@ -5,32 +5,13 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
+const jwt = require('jsonwebtoken');
 
 
 const User = require('../models/users');
 const Account = require('../models/account');
 
 
-router.get('/crypt', (req, res, next) => {
-
-    var passwod = "raj";
-    var newPass = "prag";
-
-    bcrypt.hash(passwod, 10)
-    .then((hash) => {
-        console.log(hash);
-        console.log("$2b$10$.8WvoZan/j3CBwf1mALWVeAJpifjusCVplWkeCkh47AL6VAMz6wyK");
-            bcrypt.compare(newPass, hash)
-            .then((result) => {
-                console.log(result);
-                res.send(result);
-            })
-            .catch(next);
-            
-    })
-    .catch(next)
-
-})
 
 router.get('/', (req, res) => {
     console.log(keys);
@@ -93,6 +74,11 @@ router.get('/success', (req, res, next) => {
 
 router.get('/registerSuccess', (req, res, next) => {
 
+        const token = jwt.sign({
+            userId: req.user._id
+        }, keys.emailSecret , { expiresIn: '1d' }  
+        );  
+
     console.log(req.user);
     console.log(keys);
 
@@ -106,7 +92,7 @@ router.get('/registerSuccess', (req, res, next) => {
     message.html = `<h1> hi from sendgrid</h1>
     <p>Please click on confirm to accept the invite<p>
     <div>
-    <a href="http://localhost:5000/auth/confirmation?email=${req.user.identities[0].email}">confirm</a>
+    <a href="http://localhost:5000/auth/confirmation/${token}">confirm</a>
     </div>
     `;
 
@@ -125,12 +111,8 @@ router.get('/loginSuccess', (req, res, next) => {
         console.log("active user",req.user._id);
         const id = req.user._id;
 
-     function verifyAccount(user) {
+     function getAccount(user) {
 
-         const googleId = user.identities[0].googleId;
-         const verified = user.identities[0].verified;
-
-         if(googleId || verified) {
                  function checkOwner(acc) {
                     if(acc) {
                         console.log("OwnerAcc",acc);
@@ -170,16 +152,10 @@ router.get('/loginSuccess', (req, res, next) => {
             .then(acc => checkOwner(acc))
             .catch(next)
 
-         } else {
-                res.status(400).json({
-                    error : "Please have your account verified"
-                })
-         }
-
      }
             User.findOne({_id : id})
             .exec()
-            .then((user) => verifyAccount(user))
+            .then((user) => getAccount(user))
             .catch(next)
 
 });
@@ -195,11 +171,20 @@ router.get('/inviteteam', (req, res, next) => {
 });
 
 
-router.get('/confirmation', (req, res) => {
+router.get('/confirmation/:token', (req, res) => {
 
-    User.updateOne({"identities.email" : req.query.email},
+    jwt.verify(req.params.token, keys.emailSecret,
+    function(err, decoded) {
+   if (err) {
+       console.log(err);
+       res.send("Email verification failed, possibly the link is invalid or expired");
+   }
+   else {
+       const userId = decoded.userId;
+       //res.send("Email verifified successfully");
+       User.updateOne({_id : userId},
                     { "$set" : {
-                    "identities.$.verified" : true
+                    verified : true
                     }}
                     )
                     .exec()
@@ -207,6 +192,8 @@ router.get('/confirmation', (req, res) => {
                         res.redirect(`/auth/LogInPage`);
                     })
                     .catch((err) => done(err))
+   }
+});
  
 });
 
@@ -247,11 +234,8 @@ router.post('/create/user', (req, res, next) => {
             res.status(400).json({
                error: "User has to be verified to set creds"
             });
-        }
-        
-
+        }    
     }
-
             User.findOne({"identities.email" : email,
             "identities.verified" : true
             })
@@ -266,13 +250,37 @@ router.get('/logout', (req, res) => {
     req.logout();
     res.send("user logged out");
 });
+router.get('/secretkey', (req, res, next) => {
+
+        const token = jwt.sign({
+        userId: '61b201b90e156d91428533a2'
+    }, keys.emailSecret , { expiresIn: '1d' }  
+);  
+ res.send(token);
+})
+
+router.get('/verify/:token', (req, res, next) => {
+
+            jwt.verify(req.params.token, keys.emailSecret,
+             function(err, decoded) {
+            if (err) {
+                console.log(err);
+                res.send("Email verification failed, possibly the link is invalid or expired");
+            }
+            else {
+                console.log(decoded);
+                res.send("Email verifified successfully");
+            }
+        });
+})
 
 router.post('/adhoc', (req, res, next) => {
 
 
-    User.updateOne({"identities.email" : "rajapragadeshpandian@gmail.com"},
+    User.updateOne(
+        {"identities.email" : "rajapragadeshpandian@gmail.com"},
                     { "$set" : {
-                    "identities.$.verified" :null
+                    verified :null
                     }}
                     )
                     .exec()

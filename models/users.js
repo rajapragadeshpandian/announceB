@@ -6,9 +6,9 @@ const  userSchema = mongoose.Schema({
     password: { type : String, default : null},
     identities: [{
             email: { type : String, default : null},
-            googleId: { type : String, default : null},
-            verified: { type : Boolean, default : null}
-    }]
+            googleId: { type : String, default : null}
+    }],
+    verified: { type : Boolean, default : null}
             
 });
 
