@@ -248,7 +248,8 @@ passport.use(
                         identities : [{ 
                             email : email,
                             googleId : id
-                            }]
+                            }],
+                            verified : true
                     })
                     .save()
                     .then((user) => createAccount(user))
@@ -279,53 +280,17 @@ passport.use(
                         done(null, user);
 
                     } else {
-                        console.log("else called");
-
-                        function createAccount() {
-
-                            function checkAccount(acc) {
-
-                                if(acc) {
-                                    done(null, user);
-                                } else {
-                                    let account = new Account({
-                                        accName : "announceB",
-                                        users : [{
-                                            userType : "Owner", 
-                                            __user : user._id,
-                                            email : user.identities[0].email
-                                        }]
-                                    })
-                                    .save()
-                                    .then((account) => {
-                                        done(null, user);
-                                    })
-                                    .catch((err) => done(err))
-
-                                }
-
-                            }
-
-                            Account.findOne(
-                                { users : {
-                                    $elemMatch : {
-                                            __user : user._id,
-                                            userType : "Owner"
-                                         }
-                            }})
-                            .exec()
-                            .then((acc) => checkAccount(acc))
-                            .catch((err) => done(err))
-
-                        }   
-
+                        console.log("else called")
                         User.updateOne({"identities.email" : email},
                         { "$set" : {
-                        "identities.$.googleId" : profile.id
+                        googleId : profile.id,
+                        verified : true
                         }}
                         )
                         .exec()
-                        .then(() => createAccount())
+                        .then(() => {
+                            done(null, user)
+                        })
                         .catch((err) => done(err))
                     }
                    
