@@ -283,7 +283,7 @@ passport.use(
                         console.log("else called")
                         User.updateOne({"identities.email" : email},
                         { "$set" : {
-                        googleId : profile.id,
+                        "identities.$.googleId" : profile.id,
                         verified : true
                         }}
                         )
