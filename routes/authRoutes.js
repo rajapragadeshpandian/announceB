@@ -171,7 +171,7 @@ router.get('/inviteteam', (req, res, next) => {
 });
 
 
-router.get('/confirmation/:token', (req, res) => {
+router.get('/confirmation/:token', (req, res, next) => {
 
     jwt.verify(req.params.token, keys.emailSecret,
     function(err, decoded) {
@@ -182,17 +182,30 @@ router.get('/confirmation/:token', (req, res) => {
    else {
        const userId = decoded.userId;
        //res.send("Email verifified successfully");
-       User.updateOne({_id : userId},
-                    { "$set" : {
-                    verified : true
-                    }}
-                    )
+       function updateFlag(user) {
+           
+           if(user) {
+               res.redirect(`/auth/LogInPage`);
+           } else {
+            User.updateOne({_id : userId},
+                { "$set" : {
+                verified : true
+                }}
+                )
+                .exec()
+                .then(() => {
+                    res.redirect(`/auth/LogInPage`);
+                })
+                .catch(next)
+           }
+       }
+                    User.findOne(
+                        {_id : userId, verified : true})
                     .exec()
-                    .then(() => {
-                        res.redirect(`/auth/LogInPage`);
-                    })
-                    .catch((err) => done(err))
+                    .then((user) => updateFlag(user))
+                    .catch(next)
    }
+
 });
  
 });
