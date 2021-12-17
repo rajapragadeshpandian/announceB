@@ -34,6 +34,7 @@ router.post('/invite', (req, res, next) => {
 
                         sgMail.setApiKey(keys.sendGridKey);
                         console.log(req.body.email);
+                        console.log(user);
 
                         const token = jwt.sign({
                         userId: user._id
@@ -136,17 +137,13 @@ router.post('/invite', (req, res, next) => {
                 .then((user) => createAccount(user))
                 .then(([user, account]) => sendMail(user))
                 .catch(next)
-
              }
-
          }
 
         User.findOne({"identities.email" : email})
         .exec()
         .then((user) => createNewUser(user))
-        .catch(next)
-
-       
+        .catch(next)       
 });
 
 router.get('/invite/accept/:token', (req, res, next) => {
@@ -161,22 +158,48 @@ router.get('/invite/accept/:token', (req, res, next) => {
            console.log(decoded);
            const userId = decoded.userId;
            //res.send("Email verifified successfully");
-                function getEmail() {
-                    User.findOne({_id : userId})
-                    .exec()
-                    .then((user) => {
-                        res.redirect(`/account/userdetails?email=${user.identities[0].email}`)
-                    })
-                    .catch(next)
+           // check flag is verified or owner acount exist
+           
+           function checkOwnerAcc(user) {
+
+                if(user) {
+
+                function checkVerification(acc) {
+
+                    if(user.verified && acc) {
+                        res.redirect('/auth/LogInPage');
+                    } else {
+                        User.updateOne({_id : userId},
+                            { "$set" : {
+                            verified : true
+                            }}
+                            )
+                            .exec()
+                            .then(() => {
+                                res.redirect(`/account/userdetails?email=${user.identities[0].email}`);
+                            })
+                            .catch(next)
+                    }
                 }
-           User.updateOne({_id : userId},
-            { "$set" : {
-            verified : true
-            }}
-            )
-            .exec()
-            .then(() => getEmail())
-            .catch(next)
+
+                Account.find({
+                    "users.__user" : userId,
+                    "users.userType" : "Owner"
+                })
+                .exec()
+                .then((acc) => checkVerification(acc))
+                .catch(next)
+
+            } else {
+                    res.send("user not exist");
+                }
+           }
+        
+
+        User.findOne({_id : userId})
+        .exec()
+        .then((user) => checkOwnerAcc(user))
+        .catch(next)
        }
     });
 
@@ -243,7 +266,7 @@ router.post('/adhoc', (req, res, next) => {
                   score: { $gte: 8 } } } }
      )*/
 
-    Account.find(
+    /*Account.find(
         { users : {
             $elemMatch : {
                     __user : "61b201b90e156d91428533a2",
@@ -256,18 +279,21 @@ router.post('/adhoc', (req, res, next) => {
             acc : acc
         })
     })
-    .catch(next)
+    .catch(next)*/
 
-            // User.updateOne(
-            //     {"identities.email" : "rajapragadesh1994@gmail.com"},
-            //     {$set : {
-            //         name : "rajapragadesh.p"
-            //     }}
-            // )
-            // .exec()
-            // .then(() => {
-            //     res.send("updated successfully")
-            // })
+            Account.updateOne(
+                {_id : "61baedbfaf3c1a6a704c9d45"},
+                    { $pull : {
+                        users : {
+                            __user : "61bafcfa9fc81a1af410377d"
+                        }
+                    }}
+            )
+            .exec()
+            .then(() => {
+                res.send("updated successfully")
+            })
+            .catch(next)
 });
 
 module.exports = router;

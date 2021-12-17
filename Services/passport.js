@@ -20,19 +20,15 @@ passport.serializeUser(function(user, done) {
       console.log("deserialize", user);
     done(null, user);
   });   
-
-LocalStrategy.passReqToCallback = true;
+  
 passport.use(
+    'localsignup',
     new LocalStrategy({
         usernameField : 'email',
         passwordField : 'password',
         passReqToCallback: true
     },
      (req, email, password, done) => {
-         
-         console.log(req.url);
-
-         if(req.url == '/register' ) {
 
                 function createUser(user) {
 
@@ -40,11 +36,8 @@ passport.use(
 
                          function checkAccount(acc) {
 
-                                if(acc) {
-                                    
-                                    console.log("user exist");
+                                if(acc){
                                     return done(null, false, req.flash('info' , 'User and Owner account Aready exist Please login'));
-                                    
                                 } else {
 
                                     let account = new Account({
@@ -104,74 +97,73 @@ passport.use(
                         .save()
                         .then((user) => createAccount(user))
                         .catch((err) => done(err))
-                        
                     }
 
                     bcrypt.hash(password, 10)
                     .then((hash) => saveUser(hash))
                     .catch(err => done(err))
-                
-
                     }
-
               }
         
              User.findOne({"identities.email"  : email})
             .exec()
             .then((user) => createUser(user))
             .catch(err => done(err));
-
-
-                    
-         } else if(req.url == '/login') {
-
-                function verifyPassword(user) {
-                
-                        if(user) {
-
-                            if(user.password && user.verified) {
-                                bcrypt.compare(password, user.password)
-                                .then((result) => {
-                                    
-                                    if(result) {
-                                        done(null, user);
-                                    } else {
-                                        done(null, false, req.flash('info' , 'Passwod is incorrect'));
-                                    }
-                                })
-                                .catch(err => done(err));
-                            } else {
-                                done(null, false, req.flash('info' , 'user not verified yet.Please verify your account or try login with google'));
-
-                            }
-                            
-
-                        } else {
-
-                            console.log("else part called");
-                            done(null, false, req.flash('info' , 'User not Exist.Please Sign up'));
-
-                        }
-                    
-                }
-
-                    User.findOne({"identities.email" : email})
-                    .exec()
-                    .then((user) => verifyPassword(user))
-                    .catch(err => done(err))    
-
-         }
-                  
     })
 );
 
-GoogleStrategy.passReqToCallback = true;
 passport.use(
+    'locallogin',
+    new LocalStrategy({
+        usernameField : 'email',
+        passwordField : 'password',
+        passReqToCallback: true
+    },
+     (req, email, password, done) => {
+        function verifyPassword(user) {
+                
+            if(user) {
+
+                if(user.password) {
+                    bcrypt.compare(password, user.password)
+                    .then((result) => {
+                        
+                        if(result) {
+                            done(null, user);
+                        } else {
+                            done(null, false, req.flash('info' , 'Passwod is incorrect'));
+                        }
+                    })
+                    .catch(err => done(err));
+                } else {
+                    done(null, false, req.flash('info' , "Password not set to your account.  try login with google"));
+
+                }
+            } else {
+
+                console.log("else part called");
+                done(null, false, req.flash('info' , 'User not Exist or yet to be verified'));
+            }
+    }
+        User.findOne({
+            "identities.email" : email,
+            verified : true
+        })
+        .exec()
+        .then((user) => verifyPassword(user))
+        .catch(err => done(err))    
+
+     })
+    );
+
+//GoogleStrategy.passReqToCallback = true;
+passport.use(
+    'googlesignup',
     new GoogleStrategy(
         {
         clientID : keys.GoogleClientID,
         clientSecret : keys.GoogleClientSecret,
-        callbackURL : '/auth/google/callback',
+        callbackURL : '/auth/google/callback/signup',
         passReqToCallback: true,
         proxy : true
     },
@@ -179,16 +171,8 @@ passport.use(
 
         const id = profile.id;
         const email = profile.emails[0].value;
-
-            console.log(id);
-            console.log(email);
-
         function createUser(user) {
-
-             console.log(user);
-
              if(user) {
-
                 const googleId = user.identities[0].googleId;
 
                 function checkAccount(acc) {
@@ -256,20 +240,29 @@ passport.use(
                     .catch(err => done(err))
              }
         }
-
-        if(req.query.state == "signup") {
-            console.log("signup called");
-            console.log(email);
-        
             User.findOne({"identities.email" : email})
             .exec()
             .then((user) => createUser(user))
-            .catch((err) => done(err))
-            
-        } else if(req.query.state == "login") {
+            .catch((err) => done(err))       
+    })
+);
 
-            console.log("login called");
-            console.log(id);
+passport.use(
+    'googlelogin',
+    new GoogleStrategy(
+        {
+        clientID : keys.GoogleClientID,
+        clientSecret : keys.GoogleClientSecret,
+        callbackURL : '/auth/google/callback/login',
+        passReqToCallback: true,
+        proxy : true
+    },
+    (req, accessToken, refreshToken, profile, done) => {
+
+        console.log("login called");
+
+        const id = profile.id;
+        const email = profile.emails[0].value;
 
              function checkId(user) {
 
@@ -297,15 +290,11 @@ passport.use(
                 } else {
                     done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
                 }
-
              }
-            
+    
             User.findOne({"identities.email" : email})
             .exec()
             .then((user) => checkId(user))
             .catch((err) => done(err))
-            
-        }
-    })
-);
+    }));
 
