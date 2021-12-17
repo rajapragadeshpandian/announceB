@@ -21,52 +21,57 @@ router.get('/', (req, res) => {
 });
 
 router.get('/SignUpPage', (req, res) => {
-
     res.render("signup", { message : req.flash('info')});
-
 });
 
 router.get('/LogInPage', (req, res) => {
     //res.render('dashboard', { changes : item });
     console.log(req.user);
     res.render("login", { message : req.flash('info')});
-
 });
 
 router.post('/register', 
-passport.authenticate('local',
+passport.authenticate('localsignup',
 { successRedirect: '/auth/registerSuccess',
 failureRedirect: '/auth/SignUpPage',
 failureFlash: true}
 ));
 
 router.post('/login',
-passport.authenticate('local',
+passport.authenticate('locallogin',
 { successRedirect : '/auth/loginSuccess',
 failureRedirect : '/auth/LogInPage',
 failureFlash: true}
 ));
 
 router.get('/google/signup',
-passport.authenticate('google',{
+passport.authenticate('googlesignup',{
 scope : ['profile', 'email'] ,
 state : "signup"}
 ));
 
-router.get('/google/login',
-    passport.authenticate('google',{
-    scope : ['profile', 'email'],
-    state : 'login'}
-));
-         
-
-
-router.get('/google/callback', 
-passport.authenticate('google',{
+router.get('/google/callback/signup', 
+passport.authenticate('googlesignup',{
 successRedirect : '/auth/loginSuccess',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
+));
+
+router.get('/google/login',
+    passport.authenticate('googlelogin',{
+    scope : ['profile', 'email'],
+    state : 'login'}
 ));  
+
+//http://localhost:5000/auth/google/callback/signup
+//http://localhost:5000/auth/google/callback/login
+
+router.get('/google/callback/login', 
+passport.authenticate('googlelogin',{
+successRedirect : '/auth/loginSuccess',
+failureRedirect : '/auth/SignUpPage',
+failureFlash: true}
+)); 
 
 router.get('/success', (req, res, next) => {
     res.render('success');
@@ -218,8 +223,7 @@ router.post('/create/user', (req, res, next) => {
 
         if(user) {
             // check if google id exist or no
-            if((user.identities[0].googleId) ||
-                 (user.password) ) {
+            if(user.password) {
             res.redirect('/auth/LogInPage');
             } else  {
             function updateUser(hash) {
