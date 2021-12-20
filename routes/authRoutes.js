@@ -52,7 +52,7 @@ state : "signup"}
 
 router.get('/google/callback/signup', 
 passport.authenticate('googlesignup',{
-successRedirect : '/auth/loginSuccess',
+successRedirect : '/auth/success',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
 ));
@@ -68,7 +68,7 @@ router.get('/google/login',
 
 router.get('/google/callback/login', 
 passport.authenticate('googlelogin',{
-successRedirect : '/auth/loginSuccess',
+successRedirect : '/auth/success',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
 )); 

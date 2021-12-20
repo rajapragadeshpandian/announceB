@@ -1,5 +1,6 @@
 
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const  userSchema = mongoose.Schema({
     name: { type : String, default : null},
@@ -12,26 +13,76 @@ const  userSchema = mongoose.Schema({
             
 });
 
-module.exports = mongoose.model('Users',userSchema);
+//module.exports = mongoose.model('Users',userSchema);
+const User = mongoose.model('Users',userSchema);
 
-
-/*db.users.find({ "identities.email" : "prag@gmail.com"}).pretty()
-{
-        "_id" : ObjectId("619ceffe2907930eb936300d"),
-        "name" : "pragadesh",
-        "password" : "12345",
-        "identities" : [
-                {
-                        "email" : "prag@gmail.com",
-                        "googleId" : null
-                }
-        ]
+function getUserByEmail(email) {
+                const user = User.findOne({
+                        "identities.email"  : email
+                })
+                .exec()      
+        return user;
 }
 
-db.users.update({"identities.email" : "prag@gmail.com"},
-... { "$set" : {
-... "identities.$.googleId" : "67890"
-... }}
-... );
-WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
-*/
+const hashPassword = (password) => {
+        const hash = bcrypt.hash(password, 10);
+        return hash;
+}
+
+const comparePassword = (password1, password2) => {
+        const result = bcrypt.compare(password1, password2);
+        return result;
+}
+
+const createNewUser = (name, hash, email) => {
+
+        const newUser = new User({
+                name : name,
+                password  : hash,
+                identities : [{ email : email}]
+                })
+                .save()
+
+        return newUser;
+}
+
+function createGoogleUser(name, email, id) {
+
+        const newUser = new User({
+                name : name,
+                identities : [{ 
+                    email : email,
+                    googleId : id
+                    }],
+                    verified : true
+            })
+            .save()
+
+        return newUser;
+}
+
+function updateGoogleId(email, id) {
+
+        const googleId = User.updateOne(
+        {"identities.email" : email},
+        { "$set" : {
+        "identities.$.googleId" : id,
+        verified : true
+        }}
+        )
+        .exec()
+        return googleId;
+}
+
+
+
+module.exports = {
+        getUserByEmail : getUserByEmail,
+        hashPassword : hashPassword,
+        createNewUser : createNewUser,
+        comparePassword : comparePassword,
+        createGoogleUser : createGoogleUser,
+        updateGoogleId : updateGoogleId
+}
+
+
