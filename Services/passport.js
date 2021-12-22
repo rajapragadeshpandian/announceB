@@ -29,7 +29,7 @@ passport.use(
         passReqToCallback: true
     },
      (req, email, password, done) => {
-
+//checked
                 function createUser(user) {
 
                     if(user) {
@@ -43,7 +43,7 @@ passport.use(
                             }
                     }
                       
-                     Account.checkOwner(user)
+                     Account.checkUserType(user,"Owner")
                      .then((acc) => createAccount(acc))
                      .catch((err) => done(err))
 
@@ -78,10 +78,10 @@ passport.use(
         passReqToCallback: true
     },
      (req, email, password, done) => {
-
+//checked
         function verifyPassword(user) {
                 
-            if(user.verified) {
+            if(user && user.verified) {
 
                 if(user.password) {
                     User.comparePassword(password, user.password)
@@ -120,7 +120,7 @@ passport.use(
         proxy : true
     },
     (req, accessToken, refreshToken, profile, done) => {
-
+//checked
         const id = profile.id;
         const email = profile.emails[0].value;
         function createUser(user) {
@@ -139,11 +139,12 @@ passport.use(
                 } 
             }  
 
-            Account.checkOwner(user)
+            Account.checkUserType(user,"Owner")
             .then((acc) => createAccount(acc))
             .catch((err) => done(err))
                         
-             } else {          
+             } else {       
+                 //checked   
                 User.createGoogleUser(profile.displayName, email, id)
                 .then((user) => Account.createAccount("Owner",user))
                 .then(([acc, user]) => done(null, user))
@@ -178,13 +179,16 @@ passport.use(
 
                 if(user) {
                     if(user.identities[0].googleId) {
+                        //checked
                         done(null, user);
                     } else {
+                        //checked
                         User.updateGoogleId(email, profile.id)
                         .then(() => done(null, user))
                         .catch(err => done(err))
                     }
                 } else {
+                    //checked
                     done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
                 }
              }

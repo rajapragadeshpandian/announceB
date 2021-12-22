@@ -24,6 +24,14 @@ function getUserByEmail(email) {
         return user;
 }
 
+function getUserById(id) {
+        const user = User.findOne({
+                _id  : id
+        })
+        .exec()      
+return user;
+}
+
 const hashPassword = (password) => {
         const hash = bcrypt.hash(password, 10);
         return hash;
@@ -74,15 +82,41 @@ function updateGoogleId(email, id) {
         return googleId;
 }
 
+function verifyFlag(id) {
+
+       const flag =  User.updateOne({_id : id},
+                { "$set" : {
+                verified : true
+                }}
+                )
+                .exec()
+        return flag;
+}
+
+function setNameAndPassword(email, name, hash) {
+        const user = User.updateOne(
+                {"identities.email" : email},
+                {$set : {
+                    name : name,
+                    password : hash
+                }}
+            )
+            .exec()
+        return user;
+}
 
 
 module.exports = {
         getUserByEmail : getUserByEmail,
+        getUserById : getUserById,
         hashPassword : hashPassword,
         createNewUser : createNewUser,
         comparePassword : comparePassword,
         createGoogleUser : createGoogleUser,
-        updateGoogleId : updateGoogleId
+        updateGoogleId : updateGoogleId,
+        verifyFlag : verifyFlag,
+        setNameAndPassword : setNameAndPassword
+        
 }
 
 

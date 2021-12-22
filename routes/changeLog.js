@@ -39,7 +39,7 @@ router.get('/',(req, res, next) => {
         return Promise.all([count, changes]);
     }
 
-    function getAccounts(count, changes) {
+    /*function getAccounts(count, changes) {
 
             const accounts = Account.find({
                 "users.__user" : userId
@@ -50,7 +50,7 @@ router.get('/',(req, res, next) => {
             .catch(next)
 
         return Promise.all([count, changes, accounts]);
-    }
+    }*/
     // have to add accountId
         const changes =  changeLog.find({accId : accId, findText})
         .select('title category body _id disLike like')
@@ -59,7 +59,7 @@ router.get('/',(req, res, next) => {
         .limit(limit)
         .exec()
         .then((changes) => fetchChanges(changes))
-        .then(([count, changes]) => getAccounts(count, changes))
+        .then(([count, changes]) => Account.findAccounts(userId, count, changes))
         .then((count, changes, accounts) => {
             console.log(changes);
             res.status(200).json({

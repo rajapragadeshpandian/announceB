@@ -6,22 +6,6 @@ const changeLog = require('../models/changeLog');
 const Segment = require('../models/segments');
 const Feedback = require('../models/feedback');
 
-
-// router.patch('/set/changes',(req, res, next) => {
-//     console.log("dhjaksdas")
-    
-//     Customer.update({}, 
-//     {$set : {
-//         __changes : []
-//     }})
-//     .exec()
-//     .then(() => {
-//         res.send("chnages updated successfully");
-//     })
-//     .catch(next);
-
-// });
-
         const renameKeys = (obj) =>
                 Object.keys(obj).reduce(
                 (acc, key) => ({
@@ -310,9 +294,6 @@ router.get('/identify', (req, res, next) => {
          });
     })
     .catch(next)
-    
-
-
 })
 
 
@@ -495,21 +476,6 @@ router.post('/createSegment', (req, res, next) => {
             });
         })
         .catch(next);
-
-   
-
-// let name = "name";
-// let value = "vicky";
-
-//    var queryObj = {};
-//    queryObj[name] = value;
-//    console.log(queryObj);
-
-// var obj = {};
-// obj[plan] = value;
-
-// console.log(obj);
-//{customizedProps : { $elemMatch : ff }}
 });
 
 
