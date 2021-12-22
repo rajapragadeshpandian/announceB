@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
 const jwt = require('jsonwebtoken');
+const userConfirm = require('../Templates/userConfirm');
 
 
 const User = require('../models/users');
@@ -52,7 +53,7 @@ state : "signup"}
 
 router.get('/google/callback/signup', 
 passport.authenticate('googlesignup',{
-successRedirect : '/auth/success',
+successRedirect : '/auth/loginSuccess',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
 ));
@@ -68,7 +69,7 @@ router.get('/google/login',
 
 router.get('/google/callback/login', 
 passport.authenticate('googlelogin',{
-successRedirect : '/auth/success',
+successRedirect : '/auth/loginSuccess',
 failureRedirect : '/auth/SignUpPage',
 failureFlash: true}
 )); 
@@ -78,7 +79,7 @@ router.get('/success', (req, res, next) => {
 }) 
 
 router.get('/registerSuccess', (req, res, next) => {
-
+//checked
         const token = jwt.sign({
             userId: req.user._id
         }, keys.emailSecret , { expiresIn: '1d' }  
@@ -88,19 +89,11 @@ router.get('/registerSuccess', (req, res, next) => {
     console.log(keys);
 
     sgMail.setApiKey(keys.sendGridKey);
+    const toEmail = req.user.identities[0].email;
+    const subject = "User verification";
 
-    const message = {};
-    message.to = req.user.identities[0].email,
-    message.from = "pragadesh72@gmail.com";
-    message.subject = "user verification";
-    message.text = " hi from sendgrid";
-    message.html = `<h1> hi from sendgrid</h1>
-    <p>Please click on confirm to accept the invite<p>
-    <div>
-    <a href="http://localhost:5000/auth/confirmation/${token}">confirm</a>
-    </div>
-    `;
-
+    const message = userConfirm(toEmail, subject, token);
+    
     sgMail.send(message)
     .then(response => {
             res.render("success");
@@ -112,11 +105,13 @@ router.get('/registerSuccess', (req, res, next) => {
 
 router.get('/loginSuccess', (req, res, next) => {
 
-        // get account details by use mail
+//checked
         console.log("active user",req.user._id);
         const id = req.user._id;
 
      function getAccount(user) {
+
+         if(user) {
 
                  function checkOwner(acc) {
                     if(acc) {
@@ -133,35 +128,27 @@ router.get('/loginSuccess', (req, res, next) => {
                                     })
                                 }
                             }
-                        Account.find(
-                            { users : {
-                                $elemMatch : {
-                                        __user : user._id,
-                                        userType : "Editor"
-                                     }
-                        }})
-                        .exec()
-                        .then(editAcc => checkEditor(editAcc))
-                        .catch(next)
+
+                Account.checkUserType(user,"Editor")
+                 .then(acc => checkEditor(acc))
+                 .catch(next)
                     }
                  }
 
-            Account.find(
-                { users : {
-                    $elemMatch : {
-                            __user : user._id,
-                            userType : "Owner"
-                         }
-            }})
-            .exec()
-            .then(acc => checkOwner(acc))
-            .catch(next)
+                 Account.checkUserType(user,"Owner")
+                 .then(acc => checkOwner(acc))
+                 .catch(next)
+        } else {
+            res.status(400).json({
+                message : "user doesnt exist"
+            })
+        }
 
      }
-            User.findOne({_id : id})
-            .exec()
-            .then((user) => getAccount(user))
-            .catch(next)
+
+     User.getUserById(id)
+     .then((user) => getAccount(user))
+     .catch(next)
 
 });
 
@@ -177,38 +164,30 @@ router.get('/inviteteam', (req, res, next) => {
 
 
 router.get('/confirmation/:token', (req, res, next) => {
-
+//checked
     jwt.verify(req.params.token, keys.emailSecret,
     function(err, decoded) {
    if (err) {
-       console.log(err);
        res.send("Email verification failed, possibly the link is invalid or expired");
    }
    else {
        const userId = decoded.userId;
-       //res.send("Email verifified successfully");
        function updateFlag(user) {
            
-           if(user) {
+           if(user && user.verified) {
                res.redirect(`/auth/LogInPage`);
            } else {
-            User.updateOne({_id : userId},
-                { "$set" : {
-                verified : true
-                }}
-                )
-                .exec()
-                .then(() => {
-                    res.redirect(`/auth/LogInPage`);
-                })
-                .catch(next)
+               User.verifyFlag(userId)
+               .then(() => {
+                res.redirect(`/auth/LogInPage`);
+               })
+               .catch(next)
            }
        }
-                    User.findOne(
-                        {_id : userId, verified : true})
-                    .exec()
-                    .then((user) => updateFlag(user))
-                    .catch(next)
+
+            User.getUserById(userId)
+            .then((user) => updateFlag(user))
+            .catch(next)
    }
 
 });
@@ -221,14 +200,19 @@ router.post('/create/user', (req, res, next) => {
 
     function updateDetails(user) {
 
-        if(user) {
+        if(user && user.verified) {
             // check if google id exist or no
             if(user.password) {
             res.redirect('/auth/LogInPage');
             } else  {
             function updateUser(hash) {
-
-                User.updateOne(
+                //email, name, hash
+                User.setNameAndPassword(email, name, hash)
+                .then(() => {
+                    res.redirect('/auth/LogInPage');
+                })
+                .catch(next)
+                /*User.updateOne(
                     {"identities.email" : email},
                     {$set : {
                         name : name,
@@ -239,73 +223,48 @@ router.post('/create/user', (req, res, next) => {
                 .then(() => {
                     res.redirect('/auth/LogInPage');
                 })
-                .catch(next)
+                .catch(next)*/
             }
             
-            bcrypt.hash(password, 10)
+            User.hashPassword(password)
             .then((hash) => updateUser(hash))
-            .catch(err => done(err))     
+            .catch(next)
+            /*bcrypt.hash(password, 10)
+            .then((hash) => updateUser(hash))
+            .catch(err => done(err))*/     
         }               
 
         } else {
             res.status(400).json({
-               error: "User has to be verified to set creds"
+               error: "User has to be verified to set credentals"
             });
         }    
     }
-            User.findOne({"identities.email" : email,
-            "identities.verified" : true
-            })
-            .exec()
-            .then((user) => updateDetails(user))
-            .catch(next)
+
+    User.getUserByEmail(email)
+    .then((user) => updateDetails(user))
+    .catch(next)
 
 })
-
 
 router.get('/logout', (req, res) => {
     req.logout();
     res.send("user logged out");
 });
-router.get('/secretkey', (req, res, next) => {
 
-        const token = jwt.sign({
-        userId: '61b201b90e156d91428533a2'
-    }, keys.emailSecret , { expiresIn: '1d' }  
-);  
- res.send(token);
-})
-
-router.get('/verify/:token', (req, res, next) => {
-
-            jwt.verify(req.params.token, keys.emailSecret,
-             function(err, decoded) {
-            if (err) {
-                console.log(err);
-                res.send("Email verification failed, possibly the link is invalid or expired");
-            }
-            else {
-                console.log(decoded);
-                res.send("Email verifified successfully");
-            }
-        });
-})
-
-router.post('/adhoc', (req, res, next) => {
-
-
-    User.updateOne(
-        {"identities.email" : "rajapragadeshpandian@gmail.com"},
-                    { "$set" : {
-                    verified :null
-                    }}
-                    )
-                    .exec()
-                    .then(() => {
-                        res.send("updated successfully")
-                    })
-                    .catch((err) => done(err))
-});
+// router.post('/adhoc', (req, res, next) => {
+//     User.updateOne(
+//         {"identities.email" : "rajapragadeshpandian@gmail.com"},
+//                     { "$set" : {
+//                     verified :null
+//                     }}
+//                     )
+//                     .exec()
+//                     .then(() => {
+//                         res.send("updated successfully")
+//                     })
+//                     .catch((err) => done(err))
+// });
 
 
 

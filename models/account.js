@@ -28,21 +28,92 @@ function createAccount(userType, user) {
         return Promise.all([account, user]);
     }
 
-    function checkOwner(user) {
-            const ownerAcc = Account.findOne(
+    function checkUserType(user, userType) {
+
+            const acc = Account.findOne(
                 { users : {
                     $elemMatch : {
                             __user : user._id,
-                            userType : "Owner"
+                            userType : userType
                         }
             }})
             .exec()
-        return ownerAcc;
+        return acc;
     }
+
+    function getAccount(accId) {
+
+                const acc = Account.findOne({
+                    _id : accId
+                })
+                .exec()
+            return acc;
+    }
+
+    function addUserTOAccount(accId, userType, user) {
+
+        let account = Account.updateOne(
+            {_id : accId},
+                {$addToSet : {
+                    users : {
+                    userType : userType,
+                    __user : user._id,
+                    email : user.identities[0].email
+                    }
+                }}
+            )
+            .exec()
+            
+            return Promise.all([user, account]);
+    }
+
+    function findUser(accId, user) {
+
+        const account = Account.findOne({
+            _id : accId,
+            "users.__user" : user._id
+        })
+        .exec()
+
+        return account;
+        
+    }
+
+    function removeUserFromAccount(accId, userId) {
+
+        const deletedAcc = Account.updateOne(
+            {_id : accId},
+             { $pull : {
+                 users : {
+                     __user : userId
+                 }
+             }})
+             .exec()
+             
+         return deletedAcc;
+    }
+
+    function findAccounts(userId,count,changes) {
+
+        const accounts = Account.find({
+            "users.__user" : userId
+        })
+        .select('users')
+        .exec()
+
+        return Promise.all([count, changes, accounts]);
+    }
+    
+    
 
     
 
 module.exports = {
     createAccount : createAccount,
-    checkOwner : checkOwner
+    checkUserType : checkUserType,
+    getAccount : getAccount,
+    removeUserFromAccount : removeUserFromAccount,
+    addUserTOAccount : addUserTOAccount,
+    findUser : findUser,
+    findAccounts : findAccounts
 }
