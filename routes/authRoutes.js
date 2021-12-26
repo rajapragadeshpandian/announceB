@@ -8,11 +8,8 @@ const keys = require('../config/keys');
 const jwt = require('jsonwebtoken');
 const userConfirm = require('../Templates/userConfirm');
 
-
 const User = require('../models/users');
 const Account = require('../models/account');
-
-
 
 router.get('/', (req, res) => {
     console.log(keys);

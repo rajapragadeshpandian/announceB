@@ -28,19 +28,16 @@ router.get('/',(req, res, next) => {
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
 
 
-    function fetchChanges(changes) {
+    function getCount(changes) {
 
-        const count = changeLog.countDocuments(
-            {accId : accId,findText}
-        )
-        .exec()
+        const count = changeLog.getCount(accId, findText)
         .then((count) => count)
+        .catch(next)
 
         return Promise.all([count, changes]);
     }
 
     /*function getAccounts(count, changes) {
-
             const accounts = Account.find({
                 "users.__user" : userId
             })
@@ -52,16 +49,19 @@ router.get('/',(req, res, next) => {
         return Promise.all([count, changes, accounts]);
     }*/
     // have to add accountId
-        const changes =  changeLog.find({accId : accId, findText})
+        /*const changes =  changeLog.find({accId : accId, findText})
         .select('title category body _id disLike like')
         .sort({ createdAt : -1 })
         .skip(val)
         .limit(limit)
-        .exec()
-        .then((changes) => fetchChanges(changes))
+        .exec()*/
+        changeLog.getChanges(accId, findText, val, limit)
+        .then((changes) => getCount(changes))
         .then(([count, changes]) => Account.findAccounts(userId, count, changes))
-        .then((count, changes, accounts) => {
-            console.log(changes);
+        .then(([count, changes, accounts]) => {
+            console.log("$$$",changes);
+            console.log("###",count);
+            console.log(accounts);
             res.status(200).json({
                 changeList : changes,
                 count : count,
@@ -77,26 +77,17 @@ router.get('/',(req, res, next) => {
 router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
-    const  { title, body, category, accId} = req.body;
+    const  { title, body, category, accId, userId} = req.body;
+    const findText = {};
 
-    const changelog = new changeLog({
-        title : title,
-        category : category.split().map((item) => item.trim()),
-        body : body,
-        accId : accId
-    })
-    .save()
+    changeLog.createChanges(title, category, body, accId, userId)
+    .then(() => changeLog.getChanges(accId, findText, 0, 3))
+    //.then((changes) => getCount(changes))
     .then((change) => {
 // if post is successful inc count on client side
             res.status(200).json({
                 message : "changeLog successfully created",
-                createdChange : {
-                    id : change._id,
-                    title : change.title,
-                    category : change.category,
-                    body : change.body
-                },
-
+                change : change
             });
     })
     .catch(next);
@@ -104,51 +95,40 @@ router.post('/', (req, res, next) => {
 
 router.get('/:changelogId',(req, res, next) => {
 
-    console.log("changeLogid");
-    //accid has to be added
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
-
-    function getFeedbacks(change) {
-                const feedbacks = Feedback.find(
-                    {__change : change._id}
-                )
-                .sort({ createdAt : -1 })
-                .limit(5)
-                .exec()
-                .then((data) => data)
+    let val = 0;
+    let limit = 3;
+// check after feedback creation
+    function getFeedback(change) {
+         const feedbacks = Feedback.getFeedback(change._id,val, limit)
+        .then((feedback) => feedback)
+        .catch(next)
 
         return Promise.all([feedbacks,change]);
     }
 
-    function getFeedbackCount(feedbacks,change) {
-        console.log(feedbacks);
-        console.log(change);
+    function getCount(feedbacks,change) {
 
-        const count = Feedback.countDocuments(
-            {__change : change._id})
-        .exec()
+        const count = Feedback.count(change._id)
         .then((count) => count)
+        .catch(next)
 
-        return Promise.all([feedbacks, change,count]);
+        return Promise.all([feedbacks,change, count]);
     }
 
-    changeLog.findById({_id : id})
-    .select('title category body _id disLike like')
-    .exec()
-    .then((change) => getFeedbacks(change))
-    .then(([feedbacks,change]) => getFeedbackCount(feedbacks,change))
-    .then(([feedbacks, change,count]) => {
-                console.log("$$$$", change);
-                res.status(200).json({
-                    message : "changeLog found",
-                    change : change,
-                    feedbacks : feedbacks,
-                    count : count
-                });
+
+    changeLog.getChangeById(id)
+    .then((change) => getFeedback(change))
+    .then(([feedbacks,change]) => getCount(feedbacks,change))
+    .then(([feedbacks, change,count]) =>{
+        res.status(200).json({
+            change : change,
+            feedbacks : feedbacks,
+            count : count
+        });
     })
     .catch(next);
-
 });
 
 router.patch('/:changelogId',(req, res, next) => {
@@ -156,42 +136,41 @@ router.patch('/:changelogId',(req, res, next) => {
     const id  = req.params.changelogId;
     const { title, category, body} = req.body;
 
-    changeLog.findByIdAndUpdate({_id : id},
-         { $set : {
-            title : title,
-            category : category.split(','),
-            body : body
-         }}
-    )
-    .exec()
+    changeLog.updateChangelog(id, title, category, body)
+    .then(() => changeLog.getChangeById(id))
     .then((change) => {
         
             res.status(200).json({
-                message : "changelog updated successfully"
+                message : "changelog updated successfully",
+                change : change
             });
 
     })
-    .catch(next);
-
-    
+    .catch(next);    
 });
 
 
 
 router.delete('/:changelogId', (req, res, next) => {
 
+    const limit = 3;
+    const accId = req.body.accId;
+    const findText = req.body.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
+    const val  = req.body.pageNo ? (req.body.pageNo -1) * limit : 0;
+
     const id = req.params.changelogId;
-    changeLog.remove({ _id : id})
-    .exec()
-    .then((change) => {
-
-            res.status(200).json({
-                message : 'change deletd successfully'
-            });
-
+// get changes after removing the change
+    changeLog.removeChange(id)
+    .then(() => changeLog.getChanges(accId, findText, val, limit))
+    .then((changes) => {
+        res.status(200).json({
+            message : 'change deletd successfully',
+            changes : changes
+        });
+        
     })
-    .catch(next);
-
+    .catch(next)
+   
 });
 
 router.patch('/set/filter', (req, res, next) => {
@@ -199,17 +178,14 @@ router.patch('/set/filter', (req, res, next) => {
     console.log("setfilter", req.body);
     const id = req.body.changeId;
     console.log(req.body.condition);
-    
-            changeLog.updateOne({ _id : id},
-                        { $set :{
-                            conditions : req.body.condition                 
-                        } }
-                    )
-                    .exec()
-                    .then((changes) => {
+
+                    changeLog.setFilter(id, req.body.condition)
+                    .then(() => changeLog.getChangeById(id))
+                    .then((change) => {
 
                         res.status(200).json({
-                            message : "filter updated successfully"
+                            message : "filter updated successfully",
+                            change : change
                         });
 
                     })
