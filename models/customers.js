@@ -17,150 +17,108 @@ const customerSchema = mongoose.Schema({
          timestamps: true 
 });
 
-module.exports = mongoose.model('Customer', customerSchema);
+//module.exports = mongoose.model('Customer', customerSchema);
+const Customer = mongoose.model('Customer', customerSchema);
+
+function createCustomer(accId, name, email, customProps) {
+
+    let customer = new Customer({
+        accId : accId,
+        name : name,
+        email : email,
+        customizedProps : customProps
+    })
+    .save()
+
+    return customer;
+}
+
+function findCustomer(email, accId) {
+   let customer =  Customer.findOne({
+        email : email, 
+        accId : accId
+    })
+    .exec()
+    return customer;
+}
+
+function findCustomerById(id) {
+    let customerDetails = Customer.findOne({_id : id})
+    .exec()
+    return customerDetails;
+}
+
+function findByIdandCondition(id, condition) {
+    let customer = Customer.findOne(
+        { "$and" :
+            [
+                {_id : id},
+                condition
+            ]
+        })
+        .exec()
+        return customer;
+}
+
+function findByCondition(condition) {
+    const customers = Customer.find(condition)
+    .exec()
+    
+    return customers;
+}
 
 
-// customerDetails : [{
-//     name : String,
-//     email : String,
-//     subscription : String
-// }]
-// customerDetails : Array
+function updateProps(email, customProps) {
 
-// have to send both key and value to filter customer as we dont have
-//a fixed key to save the customer
+    let customer = Customer.updateOne({ email : email}, 
+        { $set : {
+            customizedProps : customProps
+        }})
+        .exec()
 
-// accId should get associated to each customer to 
-// get customers for specific accpunt
+        return customer;
+}
 
-  // var filter = {
-	// 	"$and" : [
-	// 		{
-	// 		"$or" : [{"name" : { "$eq" : "ram"}},{"name" : { "$eq" : "prag"}}]
-	// 		},
-	// 		{
-	// 		"$or" : [{ "email": {"$eq" : "prag@gmail.com" }}, { "email": {"$eq" :"ram@gmail.com"}}]
-	// 		}
-			
-	// 	]
-    // };
-
-
-
-    /*const renameKeys = (obj) =>
-    Object.keys(obj).reduce(
-      (acc, key) => ({
-        ...acc,
-        ...{ ["$"+key]: obj[key] }
-      }),
-      {}
-    );
-   var arr = [
-              {
-              "or" : [{"customizedProps.plan" : { "$eq" : "starter"}},{"customizedProps.plan" : { "$eq" : "prime"}}]
-              },
-              {
-              "or" : [{ "customizedProps.rental": {"$eq" : "monthly" }}, { "customizedProps.rental": {"$eq" :"yearly"}}]
-              }
-              
-          ];
-          
-      var finalval =	arr.map((item)  => {
-              return renameKeys(item);
-          });
-  
-  var queryObj = {};
-  queryObj["$and"] = finalval;
-  
-  console.log(queryObj);
-  
-  
-  var innerarr = [{"customizedProps.plan" : { "eq" : "starter"}},{"customizedProps.plan" : { "eq" : "prime"}}];
-  
-  
-  innerarr.map((item) =>{
-  
-      const keys = Object.keys(item);
-      var val1 = renameKeys(item[keys[0]]);
-      item[keys[0]] = val1;
-      
-      console.log(item);
-  })*/
+function findByLikedPost(custId, changelogId) {
+    
+   const customer = Customer.find({
+        "$and" : [
+            { _id : custId },
+            {"$or" : [
+                {likedPosts : changelogId },
+                {dislikedPosts : changelogId }]
+             }
+        ]
+     })
+    .exec()
+    return customer;
+}
 
 
- /*const renameKeys = (obj) =>
-    Object.keys(obj).reduce(
-      (acc, key) => ({
-        ...acc,
-        ...{ ["$"+key]: obj[key] }
-      }),
-      {}
-    );
-   var arr = [
-              {
-              "or" : [{"customizedProps.plan" : { "$eq" : "starter"}},{"customizedProps.plan" : { "$eq" : "prime"}}]
-              },
-              {
-              "or" : [{ "customizedProps.rental": {"$eq" : "monthly" }}, { "customizedProps.rental": {"$eq" :"yearly"}}]
-              }
-            ];
-          
-      var finalval =	arr.map((item)  => {
-              return renameKeys(item);
-          });
-  
-  var queryObj = {};
-  queryObj["$and"] = finalval;
-  
-  
-  var innerarr = [{"customizedProps.plan" : { "eq" : "starter"}},{"customizedProps.plan" : { "eq" : "prime"}}];
-  
-  
-  innerarr.map((item) =>{
-  
-      const keys = Object.keys(item);
-      var val1 = renameKeys(item[keys[0]]);
-      item[keys[0]] = val1;
-     
-  })
-  
-  
-  function keyChange(condition) {
-      
-      Object.keys(condition).map((item) => {
-          
-          if(item == "and" || item == "or") {
-              var outerCondition = renameKeys(condition);
+function updateLikeandDislike(custId, condition) {
+    
+    let result =  Customer.updateOne(
+        {_id : custId},
+        condition
+    )
+    .exec()
 
-              Object.keys(outerCondition).map((item) => {
-                  var innerCondition = outerCondition[item].map((item) => {
-                      var result = renameKeys(item);
-                      console.log(result);
-                  });
-                  
-              });
-          } else {
-               const keys = Object.keys(condition);
-                var val1 = renameKeys(condition[keys[0]]);
-                console.log(val1);
-          }
-         
-      })
-  }
-  
-  var condition = {
-       "and" : [
-              {
-              "or" : [{"customizedProps.plan" : { "$eq" : "starter"}},{"customizedProps.plan" : { "$eq" : "prime"}}]
-              },
-              {
-              "or" : [{ "customizedProps.rental": {"$eq" : "monthly" }}, { "customizedProps.rental": {"$eq" :"yearly"}}]
-              }
-            ]  
-   };
-  
-  
- keyChange(condition);*/
+    return result;
+}
+
+module.exports = {
+    findCustomer : findCustomer,
+    createCustomer : createCustomer,
+    updateProps : updateProps,
+    findCustomerById : findCustomerById,
+    findByIdandCondition : findByIdandCondition,
+    findByCondition : findByCondition,
+    findByLikedPost : findByLikedPost,
+    updateLikeandDislike : updateLikeandDislike
+}
+
+
+
   
   
   

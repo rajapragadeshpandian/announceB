@@ -126,24 +126,25 @@ router.get('/widget', (req, res, next) => {
 
         var results =  data.map((item) => {
             var properties = keyChange(item.conditions);
-            return {condition : properties, id : item._id}
+            return {condition : properties, changeId : item._id}
         });
 
         let updatedProps = results.map((item) => {
-    
-                let customer = Customer.findOne(
+    // below id is customerid from queryparam
+                /*let customer = Customer.findOne(
                     { "$and" :
                         [
                             {_id : id},
                             item.condition
                         ]
                     })
-                    .exec()
+                    .exec()*/
+                    let customer = Customer.findByIdandCondition(id, item.condition)
                     .then((customer) => {
                         if(!customer) {
                             return;
                         } else {
-                            return item.id;
+                            return item.changeId;
                         }
                     });
                     
@@ -172,21 +173,25 @@ router.get('/widget', (req, res, next) => {
             let condition = filteredId.length > 0 ? queryObj : {};
             console.log(queryObj);
 
-            function fetchCount(changes) {
-                console.log("$$$", changes);
-                        const count = changeLog.countDocuments(
+            function getCountByCondition(changes) {
+
+                const count = changeLog.getCountByCondition(condition,findText)
+                .then((count) => count)
+                .catch(next)
+            
+                        /*const count = changeLog.countDocuments(
                             {"$and":[
                                 condition,
                                 findText
                             ]}
                         )
                         .exec()
-                        .then((count) => count)
+                        .then((count) => count)*/
         
                 return Promise.all([count, changes]);
             }
 
-            const changes =  changeLog.find({
+            /*const changes =  changeLog.find({
                 "$and" : [
                     condition,
                     findText   
@@ -196,12 +201,12 @@ router.get('/widget', (req, res, next) => {
             .sort({ createdAt : -1 })
             .skip(val)
             .limit(limit)
-            .exec()
-            .then((change) => fetchCount(change))
+            .exec()*/
+           const changes = changeLog.getChangeByCondition(condition, findText, 0, 3)
+            .then((changes) => getCountByCondition(changes))
             .then(([count, changes]) => {
                 return {changes : changes, count: count};
-            })
-            
+            }) 
 
         return changes;
     
@@ -209,18 +214,20 @@ router.get('/widget', (req, res, next) => {
 
     function getCustomerDetails(changes) {
 
-        let customerDetails = Customer.findById({_id : id})
+        let customerDetails = Customer.findCustomerById(id)
+        .then((customer) => customer)
+        .catch(next)
+        /*Customer.findById({_id : id})
         .exec()
-        .then((customer) =>  customer)
+        .then((customer) =>  customer)*/
 
         return Promise.all([customerDetails, changes]);
     }
 
-    
-
-         changeLog.find({accId : accId})
+    /*changeLog.find({accId : accId})
             .select('_id conditions')
-            .exec()
+            .exec()*/
+            changeLog.getChangeByAcc(accId)
             .then((result) => filterChangeLog(result))
             .then((IdList) => fetchChangeLog(IdList))
             .then((changes) => getCustomerDetails(changes))
@@ -229,12 +236,10 @@ router.get('/widget', (req, res, next) => {
                 res.cookie("custId", req.query.id);
                 res.status(200).json({
                     changeList : changes,
-                    customerName : customerDetails.name
+                    customerDetails : customerDetails
                  });
             })  
             .catch(next);
-
-    
 })
 
 router.get('/identify', (req, res, next) => {
@@ -248,7 +253,7 @@ router.get('/identify', (req, res, next) => {
         Object.entries(req.query).slice(3)
     );
 
-    function getCustomer() {
+    /*function getCustomer() {
 
             let customer = Customer.findOne(
                 {email : email, accId : accId}
@@ -258,35 +263,38 @@ router.get('/identify', (req, res, next) => {
             .then((customer) =>  customer)
 
         return customer;
-    }
+    }*/
 
-    Customer.findOne({email : email, accId : accId})
-    .exec()
+    Customer.findCustomer(email, accId)
     .then((customer) => {
 
         if(!customer) {
             console.log("!!!","customer not exist");
-            let customer = new Customer({
+            let newCustomer = Customer.createCustomer(accId, name, email, customProps)
+            .then((customer) => customer)
+            .catch(next)
+            /*let customer = new Customer({
                 accId : accId,
                 name : name,
                 email : email,
                 customizedProps : customProps
-            });
-            return customer.save()
+            });*/
+            return newCustomer;
         } else {
             console.log("###", "customer exist");
             
-            let customer = Customer.updateOne({ email : email}, 
+            let customer = Customer.updateProps(email, customProps)
+            .then((customer) => customer)
+            .catch(next)
+            /*let customer = Customer.updateOne({ email : email}, 
             { $set : {
                 customizedProps : customProps
             }})
-            .exec()
-            .then((customer) => customer)
-
+            .exec()*/
             return customer;
         }
     })
-    .then(() => getCustomer())
+    .then(() => Customer.findCustomer(email, accId))
     .then((customer) => {
         console.log("id", customer);
         res.status(200).json({
@@ -437,31 +445,29 @@ router.post('/createSegment', (req, res, next) => {
     console.log(condition);
     
     function fetchCustomers(segment) {
+        var condition = keyChange(segment.condition);
 
-        console.log("senemt", segment);
-
-        const customers = Customer.find(segment.condition)
-            .exec()
-            .then((customers) => customers)
+        const customers = Customer.findByCondition(condition)
+        .then((customers) => customers) 
+        .catch(next)
         
         return Promise.all([segment, customers]);
     }
 
-    Segment.find({ title : title})
-        .exec()
-        .then((segments) => {  
+        Segment.getSegmentByTitle(title)
+        .then((segment) => {  
 
-            if(segments.length > 0) {
+            if(segment.length > 0) {
                 return res.status(200).json({
                     message : "Segment Name already exist"
                 });
-            }
-            const segment = new Segment({
-                title : title,
-                condition : condition
-            });
+            } else {
+                const newSegment  = Segment.createSegment(title, condition)
+                .then((segment) => segment)
+                .catch(next)
 
-            return segment.save();
+            return newSegment;
+        }
 
         })
         .then((segment) => fetchCustomers(segment))
@@ -484,25 +490,24 @@ router.get('/segment/:segmentId', (req, res, next) => {
     const {segmentId} = req.params;
 
     function fetchCustomers(segment) {
+        var condition = keyChange(segment.condition);
 
-
-         var Condition = keyChange(segment.condition);
-
-        const customers = Customer.find(Condition)
-            .exec()
-            .then((customers) => customers)
+        const customers = Customer.findByCondition(condition)
+        .then((customers) => customers) 
+        .catch(next)
         
-        return customers;
+        return Promise.all([segment, customers]);
     }
     
-    Segment.findById({ _id : segmentId})
-    .exec()
+
+    Segment.getSegmentById(segmentId)
     .then((segment) => fetchCustomers(segment))
-    .then((customers) => {
+    .then(([segment, customers]) => {
             res.status(200).json({
                 message: "customers returned successfully",
                 customers : customers,
-                length : customers.length
+                length : customers.length,
+                segment : segment
             });
     })
     .catch(next);
@@ -515,21 +520,28 @@ router.patch('/segment/:segmentId', (req, res, next) => {
     const {segmentId} = req.params;
     const { title, condition} = req.body;
 
-    Segment.findByIdAndUpdate({ _id : segmentId},
-        { $set : {
-           title : title,
-           condition : condition
-        }}
-   )
-   .exec()
-   .then((change) => {
-       
-           res.status(200).json({
-               message : "Segment updated successfully"
-           });
+    function fetchCustomers(segment) {
+        var condition = keyChange(segment.condition);
 
-   })
-   .catch(next);
+        const customers = Customer.findByCondition(condition)
+        .then((customers) => customers) 
+        .catch(next)
+        
+        return Promise.all([segment, customers]);
+    }
+    
+    Segment.updateSegment(segmentId, title, condition)
+    .then(() => Segment.getSegmentById(segmentId))
+    .then((segment) => fetchCustomers(segment))
+    .then(([segment, customers]) => {
+        res.status(200).json({
+            message: "customers returned successfully",
+            customers : customers,
+            length : customers.length,
+            segment : segment
+        });
+    })
+    .catch(next)
 
 })
 
@@ -537,11 +549,11 @@ router.delete('/segment/:segmentId', (req, res, next) => {
 
     const {segmentId} = req.params;
 
-    Segment.findByIdAndDelete({_id : segmentId})
-    .exec()
+    Segment.deleteSegment(segmentId)
     .then((segment) => {
         res.status(200).json({
-            message : "segment deleted successfully"
+            message : "segment deleted successfully",
+            segmentId : segmentId,
         });
     })
     .catch(next);
@@ -698,28 +710,6 @@ router.get('/custprops', (req, res, next) => {
     .catch(next);
 
 });
-
-router.patch('/change/update',(req, res, next) =>  {
-    console.log("change update");
-
-    var arr = ["new", "fix", "bug", "new", "impeovr", "bug"];
-
-    arr.map((item) => {
-        Customer.updateOne({"$and":[
-            {_id : "616009481b01a100dab5ff67"},
-            {name : "jill"}
-        ]},
-        {$addToSet : {
-            __changes : item
-        }}
-    ).exec()
-    .then(() => {
-        res.send("updated successfully");
-    })
-    .catch(next);
-
-    });
-
 
 });*/
 
