@@ -1,0 +1,40 @@
+<h1>Signup page</h1>
+
+<% if (message) { %>
+    <p style="color : red"><%= message %></p>
+    <% } %>
+
+<style>
+.fieldWrapper{
+    padding:20px;
+}
+.label {
+padding : 20px 0px;
+}
+</style>
+
+<form action="/auth/register" method="post">
+    <div class="fieldWrapper">
+            <div class="label"><label>Name :</label></div>
+            <input type="name" name="name" placeholder="name" class="name" required />
+            </div>
+            <div class="fieldWrapper">
+    <div class="label"><label>Email :</label></div>
+    <input type="email" name="email" placeholder="email" class="email" required />
+    </div>
+    <div class="fieldWrapper">
+            <div class="label"><label>password :</label></div>
+    <input type="password" name="password" class="password" placeholder="password" required />
+    </div>
+    <div class="fieldWrapper">
+            <button type="submit">submit</button>
+    </div>
+    </form>
+
+    <div class="fleldWrapper">
+            <a href="/auth/login">login</a>
+    </div>
+    <div class="fleldWrapper">
+            
+            <a href="/auth/google/signup">Google Signup</a>
+    </div>

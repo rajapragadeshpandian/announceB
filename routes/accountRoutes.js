@@ -108,7 +108,7 @@ router.get('/invite/accept/:token', (req, res, next) => {
                 function checkVerification(acc) {
 
                     if(user.verified && acc) {
-                        res.redirect('/auth/LogInPage');
+                        res.redirect('/auth/login');
                     } else {
 
                         User.verifyFlag(userId)

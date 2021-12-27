@@ -1,39 +1,55 @@
-<h1>Login page</h1>
+<html>
+    <head>
+         <link href= "/css/styles.css" rel="stylesheet" type="text/css" />   
+        
+    </head>
+    <body>
+        <div class="container">
+            <div class="main center flexColumn">  
+                <div class="title">
+                        AppCoach 
+                </div>
+                            <form action="/auth/login" method="post" class="loginform flexColumn" >
+                                
+                                <div class="label">
+                                <span style="color:red">*</span>
+                                <label>Work Email</label></div>
+                                <input type="email" name="email" placeholder="Work Email"  class="email"/>
 
-<% if (message) { %>
-    <p style="color : red"><%= message %></p>
-    <% } %>
-
+                                <div class="label">
+                                <span style="color:red">*</span>
+                                <label>Password</label></div>
+                                <input type="password" style="margin-bottom: 30px" name="password" placeholder="Password"  class="password"/>
+                                
+                                <button type="submit">
+                                    <span>Sign In to your account</span>
+                                </button>
+                                <div class="center">
+                                <a href="#" class="forgotPwd">
+                                        Forgot Password ?
+                                </a>
+                                </div>
+                                <div class="center">
+                                        <span class="signintext">
+                                            Don’t have an account ?
+                                        </span>
+                                 </div>
+                                 <div class="center">
+                                     <a href="/auth/signup" class="signuplink">
+                                            Sign Up
+                                     </a>
+                                 </div>
     
-
-<style>
-.fleldWrapper{
-    padding:20px;
-}
-.label {
-padding : 20px 0px;
-}
-</style>
-
-<form action="/auth/login" method="post">
-    <div class="fleldWrapper">
-    <div class="label"><label>Email :</label></div>
-    <input type="email" name="email" placeholder="email"
-     class="email"/>
-    </div>
-    <div class="fleldWrapper">
-            <div class="label"><label>password :</label></div>
-    <input type="password" name="password" class="password" placeholder="password" required />
-    </div>
-    <div class="fleldWrapper">
-            <button type="submit">submit</button>
-    </div>
-    </form>
-
-    <div class="fleldWrapper">
-            <a href="/auth/SignUpPage">Signup</a>
-    </div>
-    <div class="fleldWrapper">
-            
-            <a href="/auth/google/login">login with google</a>
-    </div>
+                        </form>
+                        <div class="center">
+                            <span class="or">or</span>
+                        </div>
+                        <a href="/auth/google/login" class="googleSignin"
+                         style="text-decoration:none; background : white; width:350px" >
+                            <span>Sign in with Google</span>
+                        </a>
+                        </div>             
+        </div>
+        
+    </body>
+</html>

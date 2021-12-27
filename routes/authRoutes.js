@@ -15,30 +15,42 @@ router.get('/', (req, res) => {
     console.log(keys);
 
     res.render("index");
-
 });
 
-router.get('/SignUpPage', (req, res) => {
+
+router.get('/register', (req, res) => {
+    res.render("register");
+});
+
+router.get('/applogin', (req, res) => {
+    res.render("applogin");
+});
+
+router.get('/signup', (req, res) => {
     res.render("signup", { message : req.flash('info')});
 });
 
-router.get('/LogInPage', (req, res) => {
+router.get('/login', (req, res) => {
     //res.render('dashboard', { changes : item });
     console.log(req.user);
     res.render("login", { message : req.flash('info')});
 });
 
+router.get('/reset', (req, res) => {
+    res.render("reset", { message : req.flash('info')});
+});
+
 router.post('/register', 
 passport.authenticate('localsignup',
 { successRedirect: '/auth/registerSuccess',
-failureRedirect: '/auth/SignUpPage',
+failureRedirect: '/auth/signup',
 failureFlash: true}
 ));
 
 router.post('/login',
 passport.authenticate('locallogin',
 { successRedirect : '/auth/loginSuccess',
-failureRedirect : '/auth/LogInPage',
+failureRedirect : '/auth/login',
 failureFlash: true}
 ));
 
@@ -51,7 +63,7 @@ state : "signup"}
 router.get('/google/callback/signup', 
 passport.authenticate('googlesignup',{
 successRedirect : '/auth/loginSuccess',
-failureRedirect : '/auth/SignUpPage',
+failureRedirect : '/auth/signup',
 failureFlash: true}
 ));
 
@@ -67,7 +79,7 @@ router.get('/google/login',
 router.get('/google/callback/login', 
 passport.authenticate('googlelogin',{
 successRedirect : '/auth/loginSuccess',
-failureRedirect : '/auth/SignUpPage',
+failureRedirect : '/auth/signup',
 failureFlash: true}
 )); 
 
@@ -172,11 +184,11 @@ router.get('/confirmation/:token', (req, res, next) => {
        function updateFlag(user) {
            
            if(user && user.verified) {
-               res.redirect(`/auth/LogInPage`);
+               res.redirect(`/auth/login`);
            } else {
                User.verifyFlag(userId)
                .then(() => {
-                res.redirect(`/auth/LogInPage`);
+                res.redirect(`/auth/login`);
                })
                .catch(next)
            }
@@ -200,13 +212,13 @@ router.post('/create/user', (req, res, next) => {
         if(user && user.verified) {
             // check if google id exist or no
             if(user.password) {
-            res.redirect('/auth/LogInPage');
+            res.redirect('/auth/login');
             } else  {
             function updateUser(hash) {
                 //email, name, hash
                 User.setNameAndPassword(email, name, hash)
                 .then(() => {
-                    res.redirect('/auth/LogInPage');
+                    res.redirect('/auth/login');
                 })
                 .catch(next)
                 /*User.updateOne(
