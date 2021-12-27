@@ -1,0 +1,308 @@
+body {
+    margin: 0px;
+}
+.container {
+    background: #E5E5E5;
+    width : 100%;
+    height : 100%;
+}
+.main {
+    width: 100%;
+    height : 100%;
+    display: flex;
+    flex-direction: row;
+}
+.center {
+    display : flex;
+    justify-content: center;
+    align-items:  center;
+    flex-direction: row;
+}
+.flexColumn {
+    display : flex;
+    flex-direction: column;
+}
+
+.signup {
+    width : 60%;
+    height: 100%;
+    background-color: white;
+}
+.review {
+    width : 40%;
+    height: 100%;
+}
+
+.form h2 {
+    height: 31px;
+    width : 278px;
+    font-family: sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 31px;
+    color: #000000;
+    margin-bottom: 10px;
+}
+.form .message {
+    height: 17px;
+    width : 294px;
+    font-family: sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #000000;
+    margin-top : 0px;
+    letter-spacing: 0.3px;
+    margin-bottom: 31px;
+}
+ .title {
+font-family: sans-serif;
+font-style: normal;
+font-weight: bold;
+font-size: 18px;
+line-height: 22px;
+color: #000000;
+margin-bottom: 20px;
+}
+form label {
+    font-family: sans-serif;
+font-style: normal;
+font-weight: 500;
+font-size: 14px;
+line-height: 22px;
+text-align: right;
+color: rgba(0, 0, 0, 0.85);
+margin-bottom: 6px;
+}
+form input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    width: 430px;
+    height: 40px;
+    background: #FFFFFF;
+    border: 1px solid #E0E8F0;
+    box-sizing: border-box;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.password {
+    margin-bottom: 10px;
+}
+
+.form .info {
+height: 12px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 10px;
+line-height: 12px;
+color: #000000;
+margin-bottom: 30px;
+letter-spacing: 0px;
+}
+
+.form button,.googleSignin, .loginform button,
+.resetform button {
+    display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 8px 25px;
+width: 430px;
+height: 40px;
+background: #EEF0F3;
+border: 1px solid #E0E8F0;
+box-sizing: border-box;
+border-radius: 6px;
+margin-bottom: 20px;
+
+}
+.form button span, .loginform button span,
+.resetform button span {
+height: 24px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 24px;
+color: #AAB0B7;
+flex: none;
+order: 1;
+flex-grow: 0;
+margin: 0px 8px;
+}
+
+.or {
+height: 22px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: 500;
+font-size: 20px;
+line-height: 22px;
+color: rgba(0, 0, 0, 0.5);
+margin-bottom: 20px;
+}
+
+.googleSignin span {
+height: 22px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 14px;
+line-height: 22px;
+color: #000000;
+}
+.review .logo {
+height: 25px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: 600;
+font-size: 26px;
+line-height: 42px;
+color: #000000;
+}
+
+.review blockquote {
+height: 252px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: 600;
+font-size: 26px;
+line-height: 42px;
+color: #000000;
+}
+
+.loginform {
+    width: 350px;
+    height: 339px;
+    
+    background: #FFFFFF;
+    box-shadow: 0px 1px 2px rgba(187, 187, 187, 0.08), 0px 2px 4px rgba(187, 187, 187, 0.08);
+    border-radius: 4px;
+    padding: 41px 35px 38px 35px;
+    box-sizing: border-box;
+}
+
+.loginform button {
+padding: 6px 20px;
+width: 280px;
+height: 34px;
+margin-bottom: 10px;
+}
+.loginform button span {
+width: 153px;
+height: 22px;
+font-size: 14px;
+line-height: 22px;
+}
+
+
+.loginform input , .loginform button{
+    width : 280px;
+}
+
+.forgotPwd {
+height: 10px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 10px;
+line-height: 10px;
+color: rgba(0, 0, 0, 0.4);
+text-decoration: none;
+margin-bottom: 10px;
+}
+.signintext {
+width: 114px;
+height: 10px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 10px;
+line-height: 10px;
+color: rgba(0, 0, 0, 0.8);
+margin-bottom: 5px;
+
+}
+
+.signuplink {
+width: 38px;
+height: 10px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 10px;
+line-height: 10px;
+text-decoration: none;
+color: #1890FF;
+
+}
+.signuplink:hover {
+    text-decoration: underline;
+}
+
+.resetForm {
+width: 350px;
+min-height: 245px;
+
+background: #FFFFFF;
+box-shadow: 0px 1px 2px rgba(187, 187, 187, 0.08), 0px 2px 4px rgba(187, 187, 187, 0.08);
+border-radius: 4px;
+padding: 41px 35px 28px 35px;
+    box-sizing: border-box;
+}
+.resetForm input {
+    width : 280px;
+    height : 32px;
+    margin-bottom: 30px;
+}
+.resetform button {
+
+padding: 6px 20px;
+width: 280px;
+height: 34px;
+background: #EEF0F3;
+border: 1px solid #E0E8F0;
+box-sizing: border-box;
+}
+.resetform button span {
+width: 197px;
+height: 22px;
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 14px;
+line-height: 22px;
+color: #AAB0B7;
+}
+
+.success {
+    display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 9px 16px;
+width: 280px;
+height: 40px;
+background: #F6FFED;
+border: 1px solid #B7EB8F;
+box-sizing: border-box;
+border-radius: 2px;
+}
+.success span {
+font-family: sans-serif;
+font-style: normal;
+font-weight: normal;
+font-size: 14px;
+line-height: 22px;
+color: #1D293F;
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+margin: 10px 0px;
+}
