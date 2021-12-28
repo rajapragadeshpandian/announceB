@@ -3,34 +3,32 @@
          <link href= "/css/styles.css" rel="stylesheet" type="text/css" />   
         
     </head>
-    
-
-    
     <body>
-            
+
         <div class="container" id="container">
                 
             <div class="main center flexColumn"> 
                     <div class="title">
                             AppCoach 
                     </div>
-                    <form action="/auth/login" method="post" class="resetForm flexColumn" >
+                    <form action="/auth/reset" method="post" class="resetForm flexColumn" >
                                 
-                        <div 
-                            class="success center" onclick="change(event)" style="margin-bottom: 30px;">
-                              <span>
-                                    Reset link sent successfully
-                              </span>  
-                        </div>
+                        
+                                    <% if (message.length > 0) { %>
+                                        <div class="success center"  style="margin-bottom: 30px;">
+                                        <span><%= message %></span>
+                                    </div>
+                                        <% } %>      
+
                         <div class="label">
                         <span style="color:red">*</span>
                         <label>Work Email</label></div>
                                 <input type="email" id="input" name="email" placeholder="Work Email" 
-                                class="email"></input>
+                                class="email input"></input>
                         
                         
-                        <button type="submit">
-                            <span>Reset your account password</span>
+                        <button type="submit" class="resetBtn">
+                            <span class="btnText">Reset your account password</span>
                         </button>
                 
                         <div class="center" style="margin-bottom:10px">
@@ -59,15 +57,20 @@
             </div>
         </div>
         <script>
-            document.getElementById("input").oninput = function() {
-                console.log("onchange called");
-                document.getElementById("container").style.background = "black";
-                console.log(document.getElementById("input").value);
-};
-                function change(event) {
-                    console.log("reset file", event.target);
-                    document.getElementById("container").style.background = "black";
+            document.getElementsByClassName('resetBtn')[0].disabled = true;
+            const email = document.getElementsByClassName("input")[0];
+            document.getElementsByClassName("input")[0].oninput = function() {
+                const emailVal = email.value;
+                const length = emailVal.length;
+                if(length == 0 || emailVal == "undefined") {
+                    document.getElementsByClassName('resetBtn')[0].disabled = true;
+                    document.getElementsByClassName('resetBtn')[0].classList.remove("enabled");
                 }
+                 else if(length > 0) {
+                    document.getElementsByClassName('resetBtn')[0].disabled = false;
+                    document.getElementsByClassName('resetBtn')[0].classList.add("enabled");
+                }
+};
             </script>
     </body>
     </html>

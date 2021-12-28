@@ -8,28 +8,35 @@
             <div class="main center">
                     <div  class="signup center">
                         <div class="form">
+                                
+                                        <% if (message.length > 0) { %>
+                                            <div class="failure center"  style="margin-bottom: 30px;">
+                                            <span><%= message %></span>
+                                        </div>
+                                            <% } %>      
+                            
                             <p class="title">AppCoach</p>
                             <h2>Start 14 days free trial</h2>
                             <p class="message">All features included, no credit card required</p>
                             <form action="/auth/register" method="post">
-                                <div class="label" onclick="reset()">
+                                <div class="label">
                                 <span style="color:red">*</span>
                                 <label>Full Name</label></div>
-                                <input  type="text" name="name" placeholder="Full Name"  class="name"/>
+                                <input  type="text" id="name"  name="name" placeholder="Full Name"  class="input name"/>
 
                                 <div class="label">
                                 <span style="color:red">*</span>
                                 <label>Work Email</label></div>
-                                <input type="email" name="email" placeholder="Work Email"  class="email"/>
+                                <input type="email" id="input" name="email" placeholder="Work Email"  class="input email"/>
 
                                 <div class="label">
                                 <span style="color:red">*</span>
                                 <label>Password</label></div>
-                                <input type="password" name="password" placeholder="Password"  class="password"/>
+                                <input type="password" id="input" name="password" placeholder="Password"  class="input password"/>
                                 
                                 <p class="info">Use atleast 6 characters, should have atleast one uppercase letter and a number</p>
-                                <button type="submit">
-                                    <span>Sign In to your account</span>
+                                <button type="submit" class="signinBtn">
+                                    <span class="btnText">Sign In to your account</span>
                                 </button>
                         </form>
                         <div class="center">
@@ -51,9 +58,38 @@
             </div>
         </div>
         <script>
-            function reset() {
-                console.log("change");
-            }
+            const name = document.getElementsByClassName('name')[0];
+            const email = document.getElementsByClassName('email')[0];
+            const password = document.getElementsByClassName('password')[0];
+             var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
+            document.getElementsByClassName('signinBtn')[0].disabled = true;
+            const length = document.getElementsByClassName('input').length;
+            
+            for(i=0;i<length;i++) {
+            document.getElementsByClassName("input")[i].oninput = function enableBtn() {
+                const nameLen = name.value.length;
+                const emailLen = email.value.length;
+                const nameValue = name.value;
+                const emailValue = email.value;
+                const passwordValue = password.value;
+                const passwordLen = password.value.length;
+                
+                console.log("called");
+                console.log(nameLen, emailLen, passwordValue);
+                if((nameLen == 0 || nameValue == "undefined") ||
+                 (emailLen == 0 || emailValue == "undefined") ||
+                  (!reg.test(passwordValue))) {
+                    document.getElementsByClassName('signinBtn')[0].disabled = true;
+                    document.getElementsByClassName('signinBtn')[0].classList.remove("enabled");
+
+                } else if((nameLen > 0) && (emailLen > 0) && (reg.test(passwordValue))) {
+                    document.getElementsByClassName('signinBtn')[0].disabled = false;
+                    document.getElementsByClassName('signinBtn')[0].classList.add("enabled");
+                }
+            };
+        }
+    
+        
         </script>
         
     </body>
