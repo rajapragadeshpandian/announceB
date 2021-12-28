@@ -7,6 +7,7 @@ const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
 const jwt = require('jsonwebtoken');
 const userConfirm = require('../Templates/userConfirm');
+const resetPwd = require('../Templates/resetPwd');
 
 const User = require('../models/users');
 const Account = require('../models/account');
@@ -33,12 +34,10 @@ router.get('/signup', (req, res) => {
 router.get('/login', (req, res) => {
     //res.render('dashboard', { changes : item });
     console.log(req.user);
-    res.render("login", { message : req.flash('info')});
+    res.render("login", { message : req.flash('info') || ""});
 });
 
-router.get('/reset', (req, res) => {
-    res.render("reset", { message : req.flash('info')});
-});
+
 
 router.post('/register', 
 passport.authenticate('localsignup',
@@ -221,26 +220,11 @@ router.post('/create/user', (req, res, next) => {
                     res.redirect('/auth/login');
                 })
                 .catch(next)
-                /*User.updateOne(
-                    {"identities.email" : email},
-                    {$set : {
-                        name : name,
-                        password : hash
-                    }}
-                )
-                .exec()
-                .then(() => {
-                    res.redirect('/auth/LogInPage');
-                })
-                .catch(next)*/
             }
             
             User.hashPassword(password)
             .then((hash) => updateUser(hash))
-            .catch(next)
-            /*bcrypt.hash(password, 10)
-            .then((hash) => updateUser(hash))
-            .catch(err => done(err))*/     
+            .catch(next)    
         }               
 
         } else {
@@ -254,6 +238,59 @@ router.post('/create/user', (req, res, next) => {
     .then((user) => updateDetails(user))
     .catch(next)
 
+})
+
+router.get('/reset', (req, res) => {
+    res.render("reset", { message : ""});
+});
+
+router.post('/reset', (req, res) => {
+    
+    const { email } = req.body;
+    function sendEmail(user) {
+        if(user) {
+            const token = jwt.sign({
+        userId: user._id
+    }, keys.emailSecret , { expiresIn: '1d' }  
+    );  
+
+
+console.log(keys);
+
+sgMail.setApiKey(keys.sendGridKey);
+const toEmail = user.identities[0].email;
+const subject = "Reset Password";
+
+const message = resetPwd(toEmail, subject, token);
+
+sgMail.send(message)
+.then(response => {
+    res.render("reset", { message : "reset link sent successful"});
+})
+.catch(next);
+
+        } else {
+            res.render("reset", { message : "email not exist"});
+
+        }
+    }
+    
+
+User.getUserByEmail(email)
+    .then((user) => sendEmail(user))
+    .catch(next)
+    
+});
+
+router.get('/change/password/:token', (req, res, next) => {
+// send token in cookie;
+// '/change/password/:token'
+res.cookie("token", req.params.token);
+    res.render('resetPwd');
+})
+
+router.post('/change/password', (req, res, next) => {
+    res.redirect(`/auth/login`);
 })
 
 router.get('/logout', (req, res) => {

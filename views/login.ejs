@@ -5,27 +5,44 @@
     </head>
     <body>
         <div class="container">
-            <div class="main center flexColumn">  
+            <div class="main center flexColumn">
+                   
                 <div class="title">
                         AppCoach 
                 </div>
                             <form action="/auth/login" method="post" class="loginform flexColumn" >
-                                
+                                <% if (message.length > 0) { %>
+                                    <div class="failure center"  style="margin-bottom: 30px;">
+                                    <span><%= message %></span>
+                                </div>
+                                    <% } %>      
+                    
                                 <div class="label">
                                 <span style="color:red">*</span>
-                                <label>Work Email</label></div>
-                                <input type="email" name="email" placeholder="Work Email"  class="email"/>
+                                <label>Work Email</label>
+                                </div>
+
+                                <div style="margin-bottom: 20px">
+                                <input type="email" style="margin-bottom: 5px"  onfocus="showmsg(event)" name="email" placeholder="Work Email"  class="input email"/>
+                                <label class="errorMsg emailError" style="color : red; position: relative; right: 20px">
+                                    Email cannot be empty</label>
+                                </div>
 
                                 <div class="label">
                                 <span style="color:red">*</span>
-                                <label>Password</label></div>
-                                <input type="password" style="margin-bottom: 30px" name="password" placeholder="Password"  class="password"/>
+                                <label>Password</label>
+                                </div>
                                 
-                                <button type="submit">
-                                    <span>Sign In to your account</span>
+                                <div style="margin-bottom: 30px">
+                                <input type="password" style="margin-bottom: 5px" onfocus="showmsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
+                                <label class="errorMsg pwdError" style="color : red">Password cannot be empty</label>
+                                 </div>
+                                
+                                <button type="submit" class="signinBtn">
+                                    <span class="btnText">Sign In to your account</span>
                                 </button>
                                 <div class="center">
-                                <a href="#" class="forgotPwd">
+                                <a href="/auth/reset" class="forgotPwd">
                                         Forgot Password ?
                                 </a>
                                 </div>
@@ -50,6 +67,55 @@
                         </a>
                         </div>             
         </div>
+        <script>
+            const email = document.getElementsByClassName('email')[0];
+            const password = document.getElementsByClassName('password')[0];
+            document.getElementsByClassName('signinBtn')[0].disabled = true;
+            const length = document.getElementsByClassName('input').length;
+            function showmsg(event) {
+                console.log("focus", event.target.name);
+                if((event.target.name == "email") &&
+                (email.value.length == 0)) {
+                    event.target.nextElementSibling.style.display = "block";
+                } else if((event.target.name == "password") &&
+                (password.value.length == 0)) {
+                    event.target.nextElementSibling.style.display = "block";
+                }
+            }
+            
+            for(i=0;i<length;i++) {
+            document.getElementsByClassName("input")[i].oninput = function enableBtn() {
+    
+                const emailLen = email.value.length;
+                const emailValue = email.value;
+                const passwordValue = password.value;
+                const passwordLen = password.value.length;
+                
+                
+                if((emailLen == 0) || (emailValue == "undefined")) {
+                    document.getElementsByClassName('emailError')[0].style.display="block";
+                } 
+                if((passwordLen == 0) || (passwordValue == "undefined")) {
+                    console.log("opassword");
+                    document.getElementsByClassName('pwdError')[0].style.display="block";
+                } if((emailLen == 0) || (passwordLen == 0)){
+                    document.getElementsByClassName('signinBtn')[0].disabled = true;
+                    document.getElementsByClassName('signinBtn')[0].classList.remove("enabled");
+                } 
+                if(emailLen > 0) {
+                    console.log("email called");
+                    document.getElementsByClassName('emailError')[0].style.display="none";   
+                }  if(passwordLen > 0) {
+                    document.getElementsByClassName('pwdError')[0].style.display="none";
+                }  if((emailLen > 0) && (passwordLen > 0)) {
+                    document.getElementsByClassName('signinBtn')[0].disabled = false;
+                    document.getElementsByClassName('signinBtn')[0].classList.add("enabled");
+
+                }
+            };
+        }
+    
+        </script>
         
     </body>
 </html>
