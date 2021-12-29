@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <link href= "/css/styles.css" rel="stylesheet" type="text/css" />   
+    </head>
+    <body>
+    
+    <div class="container">
+        <div class="main center flexColumn">
+               
+            <div class="title">
+                    AppCoach 
+            </div>
+                        <form action="/auth/change/password" method="post" class="loginform flexColumn" >
+                            <div class="label">
+                            <label> Email</label>
+                            </div>
+
+                            <div style="margin-bottom: 20px">
+                            <input type="email" style="margin-bottom: 5px" name="email" class="input email" readonly value=<%= email || "" %>></input>
+                            </div>
+
+                            <div class="label">
+                            <label>Password</label>
+                            </div>
+                            
+                            <div style="margin-bottom: 30px">
+                            <input type="password" style="margin-bottom: 5px" onfocus="showmsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
+                            <p class="info">Use atleast 6 characters, should have atleast one uppercase letter and a number</p>
+                             </div>
+                            
+                            <button type="submit" class="signinBtn">
+                                <span class="btnText">Change Password</span>
+                            </button>
+                    </form>            
+    </div>  
+</div> 
+<script>
+            const password = document.getElementsByClassName('password')[0];
+             var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
+            document.getElementsByClassName('signinBtn')[0].disabled = true;
+            const length = document.getElementsByClassName('input').length;
+            
+            for(i=0;i<length;i++) {
+            document.getElementsByClassName("input")[i].oninput = function enableBtn() {
+                const passwordValue = password.value;
+                const passwordLen = password.value.length;
+                
+                console.log("called");
+                console.log(passwordValue);
+                if((!reg.test(passwordValue))) {
+                    document.getElementsByClassName('signinBtn')[0].disabled = true;
+                    document.getElementsByClassName('signinBtn')[0].classList.remove("enabled");
+
+                } else if((reg.test(passwordValue))) {
+                    document.getElementsByClassName('signinBtn')[0].disabled = false;
+                    document.getElementsByClassName('signinBtn')[0].classList.add("enabled");
+                }
+            };
+        }
+    
+
+</script>
+</body>
+    </html>

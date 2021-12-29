@@ -72,9 +72,6 @@ router.get('/google/login',
     state : 'login'}
 ));  
 
-//http://localhost:5000/auth/google/callback/signup
-//http://localhost:5000/auth/google/callback/login
-
 router.get('/google/callback/login', 
 passport.authenticate('googlelogin',{
 successRedirect : '/auth/loginSuccess',
@@ -110,9 +107,7 @@ router.get('/registerSuccess', (req, res, next) => {
     .catch(next);
 });
 
-
 router.get('/loginSuccess', (req, res, next) => {
-
 //checked
         console.log("active user",req.user._id);
         const id = req.user._id;
@@ -151,7 +146,6 @@ router.get('/loginSuccess', (req, res, next) => {
                 message : "user doesnt exist"
             })
         }
-
      }
 
      User.getUserById(id)
@@ -169,7 +163,6 @@ router.get('/inviteteam', (req, res, next) => {
     }
 
 });
-
 
 router.get('/confirmation/:token', (req, res, next) => {
 //checked
@@ -197,9 +190,7 @@ router.get('/confirmation/:token', (req, res, next) => {
             .then((user) => updateFlag(user))
             .catch(next)
    }
-
 });
- 
 });
 
 router.post('/create/user', (req, res, next) => {
@@ -244,17 +235,16 @@ router.get('/reset', (req, res) => {
     res.render("reset", { message : ""});
 });
 
-router.post('/reset', (req, res) => {
+router.post('/reset', (req, res, next) => {
     
     const { email } = req.body;
     function sendEmail(user) {
+        console.log(user._id);
         if(user) {
             const token = jwt.sign({
         userId: user._id
     }, keys.emailSecret , { expiresIn: '1d' }  
     );  
-
-
 console.log(keys);
 
 sgMail.setApiKey(keys.sendGridKey);
@@ -268,29 +258,44 @@ sgMail.send(message)
     res.render("reset", { message : "reset link sent successful"});
 })
 .catch(next);
-
         } else {
             res.render("reset", { message : "email not exist"});
-
         }
     }
     
-
 User.getUserByEmail(email)
     .then((user) => sendEmail(user))
-    .catch(next)
-    
+    .catch(next)  
 });
 
 router.get('/change/password/:token', (req, res, next) => {
-// send token in cookie;
 // '/change/password/:token'
-res.cookie("token", req.params.token);
-    res.render('resetPwd');
+jwt.verify(req.params.token, keys.emailSecret,
+    function(err, decoded) {
+   if (err) {
+       res.send("Email verification failed, possibly the link is invalid or expired");
+   }
+   else {
+       const userId = decoded.userId;
+            User.getUserById(userId)
+            .then((user) => {
+                res.render('changePwd', {email : user.identities[0].email || ""});
+            })
+            .catch(next)
+   }
+});
 })
 
 router.post('/change/password', (req, res, next) => {
-    res.redirect(`/auth/login`);
+    const {email, password} = req.body;
+    User.hashPassword(password)
+            .then((hash) => User.setPassword(email, hash))
+            .then((user) => {
+                console.log(user);
+                res.redirect(`/auth/login`)
+            })
+            .catch(next) 
+    
 })
 
 router.get('/logout', (req, res) => {
