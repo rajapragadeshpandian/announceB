@@ -23,7 +23,7 @@
                                 </div>
 
                                 <div style="margin-bottom: 20px">
-                                <input type="email" style="margin-bottom: 5px"  onfocus="showmsg(event)" name="email" placeholder="Work Email"  class="input email"/>
+                                <input type="email" style="margin-bottom: 5px" onblur="hidemsg(event)" onfocus="showmsg(event)" name="email" placeholder="Work Email"  class="input email"/>
                                 <label class="errorMsg emailError" style="color : red; position: relative; right: 20px">
                                     Email cannot be empty</label>
                                 </div>
@@ -34,7 +34,7 @@
                                 </div>
                                 
                                 <div style="margin-bottom: 30px">
-                                <input type="password" style="margin-bottom: 5px" onfocus="showmsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
+                                <input type="password" style="margin-bottom: 5px" onblur="hidemsg(event)" onfocus="showmsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
                                 <label class="errorMsg pwdError" style="color : red">Password cannot be empty</label>
                                  </div>
                                 
@@ -81,6 +81,9 @@
                 (password.value.length == 0)) {
                     event.target.nextElementSibling.style.display = "block";
                 }
+            }
+            function hidemsg(event) {
+                event.target.nextElementSibling.style.display = "none";
             }
             
             for(i=0;i<length;i++) {

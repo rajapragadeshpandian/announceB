@@ -105,6 +105,17 @@ function setNameAndPassword(email, name, hash) {
         return user;
 }
 
+function setPassword(email, hash) {
+        const user = User.updateOne(
+                {"identities.email" : email},
+                {$set : {
+                    password : hash
+                }}
+            )
+            .exec()
+        return user;
+}
+
 
 module.exports = {
         getUserByEmail : getUserByEmail,
@@ -115,7 +126,8 @@ module.exports = {
         createGoogleUser : createGoogleUser,
         updateGoogleId : updateGoogleId,
         verifyFlag : verifyFlag,
-        setNameAndPassword : setNameAndPassword
+        setNameAndPassword : setNameAndPassword,
+        setPassword : setPassword
         
 }
 
