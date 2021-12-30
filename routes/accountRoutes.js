@@ -113,7 +113,7 @@ router.get('/invite/accept/:token', (req, res, next) => {
 
                         User.verifyFlag(userId)
                         .then(() => {
-                            res.redirect(`/account/userdetails?email=${user.identities[0].email}`);  
+                            res.redirect(`/auth/userdetails?email=${user.identities[0].email}`);  
                         })
                         .catch(next)
                     }
@@ -136,9 +136,10 @@ router.get('/invite/accept/:token', (req, res, next) => {
 });
 
 
-router.get('/userdetails', (req, res, next) => {
-    res.render('userDetails', {email : req.query.email || ""});
-});
+// router.get('/userdetails', (req, res, next) => {
+//     //change it to auth route
+//     res.render('userDetails', {email : req.query.email || ""});
+// });
 
 
 router.get('/invite/decline/:token', (req, res, next) => {
