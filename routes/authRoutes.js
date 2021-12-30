@@ -80,8 +80,10 @@ failureFlash: true}
 )); 
 
 router.get('/success', (req, res, next) => {
+    console.log("success");
     res.render('success');
 }) 
+
 
 router.get('/registerSuccess', (req, res, next) => {
 //checked
@@ -268,7 +270,8 @@ User.getUserByEmail(email)
     .catch(next)  
 });
 
-router.get('/change/password/:token', (req, res, next) => {
+router.get('/change/password', (req, res, next) => {
+    
 // '/change/password/:token'
 jwt.verify(req.params.token, keys.emailSecret,
     function(err, decoded) {
@@ -317,6 +320,10 @@ router.get('/logout', (req, res) => {
 //                     .catch((err) => done(err))
 // });
 
+router.get('/userdetails', (req, res, next) => {
+    //change it to auth route
+    res.render('userDetails', {email : req.query.email || ""});
+});
 
 
 

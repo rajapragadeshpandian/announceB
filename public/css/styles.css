@@ -1,3 +1,4 @@
+@import url('https://rsms.me/inter/inter.css');
 body {
     margin: 0px;
 }
@@ -24,19 +25,27 @@ body {
 }
 
 .signup {
-    width : 60%;
+    width : 54%;
     height: 100%;
     background-color: white;
 }
 .review {
-    width : 40%;
+    width : 46%;
     height: 100%;
+    flex-direction: column; 
+    background: rgba(234, 234, 244, 0.5);
+}
+
+.review span {
+    position: absolute;
+    left : 30px;
+    top : 0px;
 }
 
 .form h2 {
     height: 31px;
     width : 278px;
-    font-family: sans-serif;
+    font-family: inter;
     font-style: normal;
     font-weight: 600;
     font-size: 26px;
@@ -47,18 +56,17 @@ body {
 .form .message {
     height: 17px;
     width : 294px;
-    font-family: sans-serif;
+    font-family: inter;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
     line-height: 17px;
     color: #000000;
     margin-top : 0px;
-    letter-spacing: 0.3px;
     margin-bottom: 31px;
 }
  .title {
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: bold;
 font-size: 18px;
@@ -67,12 +75,12 @@ color: #000000;
 margin-bottom: 20px;
 }
 form label {
-    font-family: sans-serif;
+    font-family: inter;
 font-style: normal;
 font-weight: 500;
 font-size: 14px;
 line-height: 22px;
-text-align: right;
+/* text-align: right; */
 color: rgba(0, 0, 0, 0.85);
 margin-bottom: 6px;
 }
@@ -82,12 +90,31 @@ form input {
     align-items: center;
     padding: 8px 12px;
     width: 430px;
-    height: 40px;
+    height: 32px;
     background: #FFFFFF;
     border: 1px solid #E0E8F0;
     box-sizing: border-box;
     border-radius: 6px;
     margin-bottom: 20px;
+}
+
+.signup form input {
+    height: 40px;
+}
+
+form input:hover {
+background: #FFFFFF;
+border: 1px solid #40A9FF;
+box-sizing: border-box;
+border-radius: 6px;
+}
+form input:focus {
+border: 1px solid #1890FF;
+border-color: 1px solid #1890FF;
+box-sizing: border-box;
+box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5);
+border-radius: 6px;
+outline: none;
 }
 
 .form .password {
@@ -100,7 +127,7 @@ form input {
 
 form .info {
 height: 12px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 10px;
@@ -113,7 +140,6 @@ letter-spacing: 0px;
 .form button,.googleSignin, .loginform button,
 .resetform button {
     display: flex;
-flex-direction: column;
 justify-content: center;
 align-items: center;
 padding: 8px 25px;
@@ -129,10 +155,10 @@ margin-bottom: 20px;
 .form button span, .loginform button span,
 .resetform button span {
 height: 24px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
-font-weight: 500;
-font-size: 16px;
+font-weight: normal;
+font-size: 14px;
 line-height: 24px;
 color: #AAB0B7;
 flex: none;
@@ -143,42 +169,45 @@ margin: 0px 8px;
 
 .or {
 height: 22px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: 500;
 font-size: 20px;
 line-height: 22px;
 color: rgba(0, 0, 0, 0.5);
-margin-bottom: 20px;
 }
 
 .googleSignin span {
 height: 22px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 14px;
 line-height: 22px;
 color: #000000;
 }
-.review .logo {
+/* .review .logo {
 height: 25px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: 600;
 font-size: 26px;
 line-height: 42px;
 color: #000000;
-}
+} */
 
 .review blockquote {
-height: 252px;
-font-family: sans-serif;
+min-height: 252px;
+font-family: inter;
 font-style: normal;
 font-weight: 600;
 font-size: 26px;
 line-height: 42px;
 color: #000000;
+position: absolute;
+    left : 30px;
+    top : 50px;
+     margin : 0px;
 }
 
 .loginform {
@@ -199,7 +228,7 @@ height: 34px;
 margin-bottom: 10px;
 }
 .loginform button span {
-width: 153px;
+width: 154px;
 height: 22px;
 font-size: 14px;
 line-height: 22px;
@@ -212,7 +241,7 @@ line-height: 22px;
 
 .forgotPwd {
 height: 10px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 10px;
@@ -227,7 +256,7 @@ margin-bottom: 10px;
 .signintext {
 width: 114px;
 height: 10px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 10px;
@@ -240,7 +269,7 @@ margin-bottom: 5px;
 .signuplink {
 width: 38px;
 height: 10px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 10px;
@@ -268,7 +297,7 @@ padding: 41px 35px 28px 35px;
     height : 32px;
     margin-bottom: 30px;
 }
-.resetform button {
+.resetForm button {
 
 padding: 6px 20px;
 width: 280px;
@@ -277,10 +306,10 @@ background: #EEF0F3;
 border: 1px solid #E0E8F0;
 box-sizing: border-box;
 }
-.resetform button span {
+.resetFrom button span {
 width: 197px;
 height: 22px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 14px;
@@ -306,7 +335,7 @@ border-radius: 2px;
 }
 
 .success span, .failure span {
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 14px;
@@ -324,17 +353,24 @@ margin: 10px 0px;
 
 
 .signinBtn.enabled, .resetBtn.enabled {
-    background-color: white;
+    background: #1890FF;
     cursor: pointer;
 }
-.enabled .btnText {
-    color : black;
+.signinBtn.enabled:hover, .resetBtn.enabled:hover {
+    background: #40A9FF;
 }
+.signinBtn.enabled span, .resetBtn.enabled span{
+    color : white;
+}
+
+/* .enabled .btnText {
+    color : black;
+} */
 
 .errorMsg {
 width: 129px;
 height: 12px;
-font-family: sans-serif;
+font-family: inter;
 font-style: normal;
 font-weight: normal;
 font-size: 10px;
@@ -342,3 +378,19 @@ line-height: 12px;
 color: rgba(211, 36, 36, 0.8);
 display: none;
 }
+
+::placeholder {
+    position: static;
+    width: 406px;
+    height: 24px;
+    left: 12px;
+    top: 8px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+    color: rgba(0, 0, 0, 0.85);
+    
+    opacity: 0.5;
+  }
