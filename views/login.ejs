@@ -108,17 +108,28 @@
                 console.log(emailValue, emailLen);
                 if((emailLen == 0) || (emailValue == "undefined") ||
                 (!regexEmail.test(emailValue))) {
+                    document.getElementsByClassName('email')[0].classList.add('error');
                     document.getElementsByClassName('emailError')[0].style.display="block";
                 } 
+                if(emailLen > 0 && regexEmail.test(emailValue)) {
+                    document.getElementsByClassName('email')[0].classList.remove('error');
+                    document.getElementsByClassName('emailError')[0].style.display="none";
+                }
                 if((passwordLen == 0) || (passwordValue == "undefined") ||
                 (!reg.test(passwordValue))) {
                     console.log("password");
+                    document.getElementsByClassName('password')[0].classList.add('error');
                     document.getElementsByClassName('pwdError')[0].style.display="block";
+                }
+                if(passwordLen > 0 && !reg.test(passwordValue)) {
+                    document.getElementsByClassName('password')[0].classList.remove('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="none";
                 }
 
             }
 
             function hidemsg(event) {
+                event.target.classList.remove('error');
                 event.target.nextElementSibling.style.display = "none";
             }
             
