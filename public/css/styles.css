@@ -84,7 +84,7 @@ line-height: 22px;
 color: rgba(0, 0, 0, 0.85);
 margin-bottom: 6px;
 }
-form input {
+    .input {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -98,24 +98,12 @@ form input {
     margin-bottom: 20px;
 }
 
-.signup form input {
+
+.signup .input {
     height: 40px;
 }
 
-form input:hover {
-background: #FFFFFF;
-border: 1px solid #40A9FF;
-box-sizing: border-box;
-border-radius: 6px;
-}
-form input:focus {
-border: 1px solid #1890FF;
-border-color: 1px solid #1890FF;
-box-sizing: border-box;
-box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5);
-border-radius: 6px;
-outline: none;
-}
+ 
 
 .form .password {
     margin-bottom: 10px;
@@ -235,7 +223,7 @@ line-height: 22px;
 }
 
 
-.loginform input , .loginform button{
+.loginform .input , .loginform button{
     width : 280px;
 }
 
@@ -292,7 +280,7 @@ border-radius: 4px;
 padding: 41px 35px 28px 35px;
     box-sizing: border-box;
 }
-.resetForm input {
+.resetForm .input {
     width : 280px;
     height : 32px;
     margin-bottom: 30px;
@@ -330,8 +318,8 @@ box-sizing: border-box;
 border-radius: 2px;
 }
 .failure {
-    border: 1px solid black;
-    background: whitesmoke;
+background: #FFF1F0;
+border: 1px solid #FFA39E;
 }
 
 .success span, .failure span {
@@ -347,9 +335,42 @@ align-self: stretch;
 flex-grow: 0;
 margin: 10px 0px;
 }
-.failure span {
-    color: black;
+
+
+.input.error, .input.error:hover {
+    background: #FFFFFF;
+border: 1px solid #D32424;
 }
+.input.error::placeholder {
+    color : red;
+}
+
+
+.input:hover {
+    background: #FFFFFF;
+    border: 1px solid #40A9FF;
+    box-sizing: border-box;
+    border-radius: 6px;
+    }
+   
+   
+    .input:focus {
+        border: 1px solid #1890FF;
+        border-color: 1px solid #1890FF;
+        box-sizing: border-box;
+        box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5);
+        border-radius: 6px;
+        outline: none;
+        }
+        .input:-internal-autofill-selected {
+            box-shadow: 0 0 0px 30px white inset;
+            /* box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5); */
+        }
+    /* .input:focus:-autofill {
+        box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5);
+    } */
+    
+
 
 
 .signinBtn.enabled, .resetBtn.enabled {
@@ -379,18 +400,27 @@ color: rgba(211, 36, 36, 0.8);
 display: none;
 }
 
+
 ::placeholder {
-    position: static;
-    width: 406px;
-    height: 24px;
-    left: 12px;
-    top: 8px;
+    
+    width: 256px;
+    height: 22px;
     font-family: Inter;
     font-style: normal;
     font-weight: normal;
+    font-size: 14px;
+    line-height: 22px;
+    color: rgba(0, 0, 0, 0.85);
+    opacity: 0.5;
+    flex: none;
+    order: 0;
+    flex-grow: 1;
+    margin: 0px 10px;
+}
+.signup::placeholder {
+    
+    width: 406px;
+    height: 24px;
     font-size: 16px;
     line-height: 24px;
-    color: rgba(0, 0, 0, 0.85);
-    
-    opacity: 0.5;
   }
