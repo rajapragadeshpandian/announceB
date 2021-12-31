@@ -3,27 +3,23 @@ const  router = express.Router();
 const sgMail = require('@sendgrid/mail');
 const keys = require('../config/keys');
 const jwt = require('jsonwebtoken');
+const inviteUser = require('../Templates/inviteUser');
 
 const Account = require('../models/account');
 const User = require('../models/users');
 
 const requireLogin = require('../middlewares/requireLogin');
 
-router.get('/', requireLogin,  (req, res, next) => {
-
+router.get('/',  (req, res, next) => {
+//checked
                 const {accId} = req.query;
-                console.log(accId);
-                Account.find({_id : accId})
-                .find()
-                .exec()
+                Account.getAccount(accId)
                 .then((account) => {
                     res.status(200).json({
                         accountDetails : account
                     })
-                    
                 })
                 .catch(next)
-
 })
 
 router.post('/invite', (req, res, next) => {
@@ -41,21 +37,10 @@ router.post('/invite', (req, res, next) => {
                         }, keys.emailSecret , { expiresIn: '1d' }  
                         ); 
 
-                        
-                            const message = {};
-                            message.to = req.body.email;
-                            message.from = "pragadesh72@gmail.com";
-                            message.subject = `Invite from AnnounceB as ${req.body.userType}`;
-                            message.text = "Please click on below links to accept or decline the invite";
-                            message.html = `
-                            <p>Please click on below links to accept or decline the invite<p>
-                            <div>
-                            <a href="http://localhost:5000/account/invite/accept/${token}">Accept</a>
-                            </div>
-                            <div>
-                            <a href="http://localhost:5000/account/invite/decline/${token}">Decline</a>
-                            </div>
-                            `;
+                        const toEmail = req.body.email;
+                        const subject = `Invite from AnnounceB as ${req.body.userType}`;
+
+                const message = inviteUser(toEmail, subject, token);
 
                             sgMail.send(message)
                             .then(response => {
@@ -81,69 +66,28 @@ router.post('/invite', (req, res, next) => {
                      });
                     } else {
 
-                        let account = Account.updateOne(
-                            {_id : accId},
-                                {$addToSet : {
-                                    users : {
-                                    userType : userType,
-                                    __user : user._id,
-                                    email : user.identities[0].email
-                                    }
-                                }}
-                            )
-                            .exec()
-                            .then((account) => account)
-                            .catch(next);
-
-                        return Promise.all([user, account]);
-                    }
-                   
+                        Account.addUserTOAccount(accId, userType, user)
+                        .then(([user, account]) => sendMail(user))
+                        .catch(next)
+                    } 
                 }
                
-                Account.findOne({
-                    _id : accId,
-                    "users.__user" : user._id
-                })
-                .exec()
+                Account.findUser(accId, user)
                 .then((acc) => checkaccount(acc))
-                .then(([user, account]) => sendMail(user))
                 .catch(next)
 
              } else {
 
-                function createAccount(user) {
-
-                    let account = Account.updateOne(
-                        {_id : accId},
-                            {$addToSet : {
-                                users : {
-                                userType : userType,
-                                __user : user._id,
-                                email : user.identities[0].email
-                                }
-                            }}
-                        )
-                        .exec()
-                        .then((account) => account)
-                        .catch(next)
-    
-                        return Promise.all([user, account]);
-                }
-
-                let newUser = new User({
-                    identities : [{ email : email}]
-                })
-                .save()
-                .then((user) => createAccount(user))
+                User.createNewUser(null, null, email)
+                .then((user) => Account.addUserTOAccount(accId, userType, user))
                 .then(([user, account]) => sendMail(user))
                 .catch(next)
              }
          }
 
-        User.findOne({"identities.email" : email})
-        .exec()
-        .then((user) => createNewUser(user))
-        .catch(next)       
+         User.getUserByEmail(email)
+         .then((user) => createNewUser(user))
+         .catch(next)     
 });
 
 router.get('/invite/accept/:token', (req, res, next) => {
@@ -151,14 +95,11 @@ router.get('/invite/accept/:token', (req, res, next) => {
     jwt.verify(req.params.token, keys.emailSecret,
         function(err, decoded) {
        if (err) {
-           console.log(err);
            res.send("Email verification failed, possibly the link is invalid or expired");
        }
        else {
            console.log(decoded);
            const userId = decoded.userId;
-           //res.send("Email verifified successfully");
-           // check flag is verified or owner acount exist
            
            function checkOwnerAcc(user) {
 
@@ -167,26 +108,18 @@ router.get('/invite/accept/:token', (req, res, next) => {
                 function checkVerification(acc) {
 
                     if(user.verified && acc) {
-                        res.redirect('/auth/LogInPage');
+                        res.redirect('/auth/login');
                     } else {
-                        User.updateOne({_id : userId},
-                            { "$set" : {
-                            verified : true
-                            }}
-                            )
-                            .exec()
-                            .then(() => {
-                                res.redirect(`/account/userdetails?email=${user.identities[0].email}`);
-                            })
-                            .catch(next)
+
+                        User.verifyFlag(userId)
+                        .then(() => {
+                            res.redirect(`/auth/userdetails?email=${user.identities[0].email}`);  
+                        })
+                        .catch(next)
                     }
                 }
 
-                Account.find({
-                    "users.__user" : userId,
-                    "users.userType" : "Owner"
-                })
-                .exec()
+                Account.checkUserType(user, "Owner")
                 .then((acc) => checkVerification(acc))
                 .catch(next)
 
@@ -195,19 +128,19 @@ router.get('/invite/accept/:token', (req, res, next) => {
                 }
            }
         
-
-        User.findOne({_id : userId})
-        .exec()
-        .then((user) => checkOwnerAcc(user))
-        .catch(next)
+           User.getUserById(userId)
+           .then((user) => checkOwnerAcc(user))
+           .catch(next)
        }
     });
-
 });
 
-router.get('/userdetails', (req, res, next) => {
-    res.render('userDetails', {email : req.query.email || ""});
-});
+
+// router.get('/userdetails', (req, res, next) => {
+//     //change it to auth route
+//     res.render('userDetails', {email : req.query.email || ""});
+// });
+
 
 router.get('/invite/decline/:token', (req, res, next) => {
     //send mail to one who invites you once declines
@@ -219,40 +152,13 @@ router.delete('/delete' , (req, res, next) => {
 
     const {userId, accId} = req.body;
 
-            function deleteAccount() {
-
-               let deletedAcc = Account.updateOne(
-                   {_id : accId},
-                    { $pull : {
-                        users : {
-                            __user : userId
-                        }
-                    }})
-                    .exec()
-                    .then((acc) => acc)
-                    
-                return deletedAcc;
-            }
-
-                function fetchAccount() {
-
-                    let account = Account.findOne(
-                        {_id : accId})
-                    .exec()
-                    .then(account => account)
-    
-                    return account;
-                }
-
-                User.deleteOne({_id : userId })
-                .exec()
-                .then(() => deleteAccount())
-                .then(() => fetchAccount())
+            
+                Account.removeUserFromAccount(accId, userId)
+                .then(() => Account.getAccount(accId))
                 .then((account) => {
                     res.status(200).json({
                         account : account
                     })
-
                 })
                 .catch(next)
 });

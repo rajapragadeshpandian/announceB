@@ -29,86 +29,44 @@ passport.use(
         passReqToCallback: true
     },
      (req, email, password, done) => {
-
+//checked
                 function createUser(user) {
 
                     if(user) {
-
-                         function checkAccount(acc) {
-
-                                if(acc){
-                                    return done(null, false, req.flash('info' , 'User and Owner account Aready exist Please login'));
-                                } else {
-
-                                    let account = new Account({
-                                        accName : "announceB",
-                                        users : [{
-                                            userType : "Owner",
-                                            __user : user._id,
-                                            email : user.identities[0].email
-                                        }]
-                                    })
-                                    .save()
-                                    .then((account) => {
-                                         done(null, user);
-                                    })
-                                    .catch((err) => done(err))       
-                                }
-                        }
-
-                     Account.findOne(
-                            { users : {
-                                $elemMatch : {
-                                        __user : user._id,
-                                        userType : "Owner"
-                                     }
-                        }})
-                        .exec()
-                        .then((acc) => checkAccount(acc))
-                        .catch((err) => done(err))
+                        function createAccount(acc) {
+                            if(acc){
+                             done(null, false, req.flash('info' , 'User and Owner account Aready exist Please login'));
+                            } else {
+                                Account.createAccount("Owner", user)
+                                .then(() => done(null, user))
+                                .catch(err => done(err))      
+                            }
+                    }
+                      
+                     Account.checkUserType(user,"Owner")
+                     .then((acc) => createAccount(acc))
+                     .catch((err) => done(err))
 
                     } else {
 
-                        function saveUser(hash) {
+                        function saveUser(hash) {  
 
-                            function createAccount(user) {
-
-                                let account = new Account({
-                                    accName : "announceB",
-                                    users : [{
-                                        userType : "Owner",
-                                        __user : user._id,
-                                        email : user.identities[0].email
-                                    }]
-                                })
-                                .save()
-                                .then((account) => {
-                                        done(null, user);
-                                })
-                                .catch((err) => done(err))
-
-                            }
-
-                        let newUser = new User({
-                            name : req.body.name,
-                            password  : hash,
-                            identities : [{ email : email}]
-                        })
-                        .save()
-                        .then((user) => createAccount(user))
-                        .catch((err) => done(err))
+                            User.createNewUser(req.body.name, hash, email)
+                            .then((user) => Account.createAccount("Owner", user))
+                            .then(([acc, user]) => done(null, user))
+                            .catch(err => done(err));
                     }
 
-                    bcrypt.hash(password, 10)
+                    User.hashPassword(password)
                     .then((hash) => saveUser(hash))
-                    .catch(err => done(err))
+                    .catch(err => done(err));
                     }
               }
-        
-             User.findOne({"identities.email"  : email})
-            .exec()
-            .then((user) => createUser(user))
-            .catch(err => done(err));
+
+                User.getUserByEmail(email)
+                .then((user) => createUser(user))
+                .catch(err => done(err));
+
     })
 );
 
@@ -120,43 +78,37 @@ passport.use(
         passReqToCallback: true
     },
      (req, email, password, done) => {
+//checked
         function verifyPassword(user) {
                 
-            if(user) {
+            if(user && user.verified) {
 
                 if(user.password) {
-                    bcrypt.compare(password, user.password)
+                    User.comparePassword(password, user.password)
                     .then((result) => {
-                        
                         if(result) {
                             done(null, user);
                         } else {
                             done(null, false, req.flash('info' , 'Passwod is incorrect'));
                         }
                     })
-                    .catch(err => done(err));
+                    .catch(err => done(err))
                 } else {
                     done(null, false, req.flash('info' , "Password not set to your account.  try login with google"));
-
                 }
             } else {
-
                 console.log("else part called");
                 done(null, false, req.flash('info' , 'User not Exist or yet to be verified'));
             }
     }
-        User.findOne({
-            "identities.email" : email,
-            verified : true
-        })
-        .exec()
+
+        User.getUserByEmail(email)
         .then((user) => verifyPassword(user))
-        .catch(err => done(err))    
+        .catch(err => done(err));   
 
      })
     );
 
-//GoogleStrategy.passReqToCallback = true;
 passport.use(
     'googlesignup',
     new GoogleStrategy(
@@ -168,82 +120,41 @@ passport.use(
         proxy : true
     },
     (req, accessToken, refreshToken, profile, done) => {
-
+//checked
         const id = profile.id;
         const email = profile.emails[0].value;
         function createUser(user) {
              if(user) {
-                const googleId = user.identities[0].googleId;
+                //const googleId = user.identities[0].googleId;
 
-                function checkAccount(acc) {
+                function createAccount(acc) {
 
                 if(acc) {
-                    return done(null, false, req.flash('info' , 'Account already exist.Plese login with google'));
+                done(null, false, req.flash('info' , 'Account already exist.Plese login with google'));
                 } else {
 
-                    let account = new Account({
-                        accName : "announceB",
-                        users : [{
-                            userType : "Owner",
-                            __user : user._id,
-                            email : user.identities[0].email
-                        }]
-                    })
-                    .save()
-                    .then((account) => {
-                        done(null, user);
-                    })
-                    .catch((err) => done(err))
-
+                    Account.createAccount("Owner", user)
+                    .then(() => done(null, user))
+                    .catch(err => done(err)) 
                 } 
             }  
-                Account.findOne(
-                    { users : {
-                        $elemMatch : {
-                                __user : user._id,
-                                userType : "Owner"
-                             }
-                }})
-                .exec()
-                .then((acc) => checkAccount(acc))
-                .catch((err) => done(err))
+
+            Account.checkUserType(user,"Owner")
+            .then((acc) => createAccount(acc))
+            .catch((err) => done(err))
                         
-             } else {
-
-                        function createAccount(user) {
-
-                            let account = new Account({
-                                accName : "announceB",
-                                users : [{
-                                    userType : "Owner", 
-                                    __user : user._id,
-                                    email : user.identities[0].email
-                                }]
-                            })
-                            .save()
-                            .then((account) => {
-                                done(null, user);
-                            })
-                            .catch((err) => done(err))
-                        }           
-
-                    let newUser = new User({
-                        name : profile.displayName,
-                        identities : [{ 
-                            email : email,
-                            googleId : id
-                            }],
-                            verified : true
-                    })
-                    .save()
-                    .then((user) => createAccount(user))
-                    .catch(err => done(err))
+             } else {       
+                 //checked   
+                User.createGoogleUser(profile.displayName, email, id)
+                .then((user) => Account.createAccount("Owner",user))
+                .then(([acc, user]) => done(null, user))
+                .catch((err) => done(err))
              }
         }
-            User.findOne({"identities.email" : email})
-            .exec()
-            .then((user) => createUser(user))
-            .catch((err) => done(err))       
+
+        User.getUserByEmail(email)
+        .then((user) => createUser(user))
+        .catch(err => done(err));      
     })
 );
 
@@ -267,34 +178,22 @@ passport.use(
              function checkId(user) {
 
                 if(user) {
-
                     if(user.identities[0].googleId) {
-                        console.log("call here");   
+                        //checked
                         done(null, user);
-
                     } else {
-                        console.log("else called")
-                        User.updateOne({"identities.email" : email},
-                        { "$set" : {
-                        "identities.$.googleId" : profile.id,
-                        verified : true
-                        }}
-                        )
-                        .exec()
-                        .then(() => {
-                            done(null, user)
-                        })
-                        .catch((err) => done(err))
+                        //checked
+                        User.updateGoogleId(email, profile.id)
+                        .then(() => done(null, user))
+                        .catch(err => done(err))
                     }
-                   
                 } else {
+                    //checked
                     done(null, false, req.flash('info' , 'User Not exist. Please register with google'));
                 }
              }
-    
-            User.findOne({"identities.email" : email})
-            .exec()
-            .then((user) => checkId(user))
-            .catch((err) => done(err))
+             User.getUserByEmail(email)
+             .then((user) => checkId(user))
+             .catch(err => done(err));
     }));
 

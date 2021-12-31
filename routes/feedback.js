@@ -9,44 +9,18 @@ router.get('/', (req, res, next) => {
 
     const limit = 3;
     const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
-    const { customerId = null } = req.query;
+    //const { customerId = null } = req.query;
 
     // count code has to be added for pagination
 
-    function getCustomerId(feedback) {
-
-            if(customerId) {
-                 let custId =  Customer.findOne(
-                     {_id : customerId}
-                    )
-                .select('_id')
-                .exec()
-                .then((id) => id)
-        
-            return Promise.all([custId, feedback]);
-            } 
-
-      return Promise.all([null, feedback]);
-            
-    }
-
-    Feedback.find({ __change : req.query.changeLogId})
-    .select('_id title content __change')
-    .sort({ createdAt : -1 })
-    .skip(val)
-    .limit(limit)
-    .exec()
-    .then((feedback) => getCustomerId(feedback))
-    .then(([custId, feedback]) => {
-        
-            console.log("$$$", feedback);
-                res.status(200).json({
-                    message: "feedback returned sucessfully",
-                    feedback : feedback,
-                    customerId : custId
-                });
-
-    }).catch(next);
+    Feedback.getFeedbackById(req.query.changeLogId, val, limit)
+    .then((feedback) => {
+        res.status(200).json({
+            message: "feedback returned sucessfully",
+            feedback : feedback
+        });
+    })
+    .catch(next);
     
 });
 
@@ -56,69 +30,53 @@ router.post('/', (req, res, next) => {
 
     const { title, content, customerId, changeId} = req.body;
 
-    function createFeedback(customer) {
+// inc count on post on client side
+    Customer.findCustomerById(customerId)
+    .then((customer) => Feedback.createFeedback(title, content,changeId, customer))
+    .then(() =>Feedback.getFeedbackById(changeId, 0, 3))
+    .then((feedback) =>  {
+        res.status(200).json({
+            feedback : feedback,
+            customerId : customerId
 
-        console.log(customer);
-
-                const feedback = new Feedback({
-
-                        title: title,
-                        content : content,
-                        __change : changeId,
-                        __customer : {
-                            name : customer.name,
-                            id : customer._id
-                        }
-                })
-                .save()
-                .then((feedback) =>  feedback)
-
-         return feedback;
-    }
-
-        Customer.findOne({_id : customerId})
-        .select('_id name')
-        .exec()
-        .then((customer) => createFeedback(customer))
-        .then((feedback) =>  {
-            res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
-        })
-        .catch(next)
+        });
+    })
+    .catch(next)
                                               
 });
 
 
-router.patch('/', (req, res, next) => {
+router.patch('/:feedbackId', (req, res, next) => {
 
-    console.log("$$$", "feedback updated successfully");
-    const {title, content, changeId, feedbackId, customerId} = req.body;
+    const {title, content} = req.body;
+    const {feedbackId} = req.params;
     console.log("$$$", req.body);
     
-    Feedback.findByIdAndUpdate({ _id : feedbackId },
-    {
-        $set : {
-            title: title,
-            content : content
-        }}
-    )
-    .exec()
+    Feedback.updateFeedback(feedbackId, title, content)
+    //.then(() => Feedback.getFeedbackById(feedbackId))
     .then(() => {
-
-        res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
+        res.status(200).json({
+            title : title,
+            content : content,
+            feedbackId : feedbackId
+        });
     })
-    .catch(next);
+    .catch(next)
 
 });
 
-router.delete("/", (req, res, next) => {
+router.delete("/:feedbackId", (req, res, next) => {
 
-    const { changeId, feedbackId, customerId} = req.body;
-     
-     Feedback.findByIdAndDelete({ _id : feedbackId})
-     .exec()
-     .then(() => {
-        res.redirect(`/feedback?changeLogId=${changeId}&&customerId=${customerId}`);
-     })
+    const { changeId,val, limit} = req.body;
+    const {feedbackId } = req.params;
+
+     Feedback.deleteFeedback(feedbackId)
+     .then(() => Feedback.getFeedbackById(changeId, val, limit))
+     .then((feedback) =>  {
+        res.status(200).json({
+            feedback : feedback
+        });
+    })
      .catch(next);
 
 });

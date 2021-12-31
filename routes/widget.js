@@ -4,95 +4,9 @@ const Customer = require('../models/customers');
 const Feedback = require('../models/feedback');
 const changeLog = require('../models/changeLog');
 
-/*const renameKeys = (obj) =>
-                Object.keys(obj).reduce(
-                (acc, key) => ({
-                    ...acc,
-                    ...{ ["$"+key]: obj[key] }
-                }),
-                {}
-            );
 
-    function keyChange(condition) {
 
-         if(condition == null) {
-                    return {};
-              }
-          
-                let queryObj =  Object.keys(condition).map((item) => {
-        
-                     
-                if(item == "and" || item == "or") {
-                     let outerCondition = renameKeys(condition);
-           
-                        var innerQuery =  Object.keys(outerCondition).map((item) => {
-                             
-                             var innerCondition = outerCondition[item].map((item) => {
-                                 
-                                 let innerProp = Object.keys(item).map((data) => {
-                                     console.log("$$",item);
-                                     console.log("$$$",data);
-                                     if(data == "and" || data == "or") {
-                                        var properties = renameKeys(item);
-                                   
-                                            let innerProperties = Object.keys(properties).map((item) => {
-                                           
-                                
-                                                   var props = properties[item].map((item) => {
-                                                       let keys = Object.keys(item);
-                                                       let val = renameKeys(item[keys[0]]);
-                                                       item[keys[0]] = val;
-                                                       return item;
-                                                       
-                                                   });
-                                                   properties[item] = props;
-                                                   //console.log(props);
-                                                   //console.log("$$$",properties);
-                                                   return properties;
-                                                   
-                                               
-                                            });
-                                            
-                                                return innerProperties[0];
-                                     } else {
-                            
-                                        const keys = Object.keys(item);
-                                         var val = renameKeys(item[keys[0]]);
-                                         item[keys[0]] = val; 
-                                         return item;
-    
-                                     }
-    
-                                 });
-                                  
-                            console.log(innerProp[0]);
-                             return innerProp[0];
-                                 
-                             });
-                             console.log("####",innerCondition);
-                            
-                         return innerCondition;
-                             
-                         });
-                         outerCondition["$"+item] = innerQuery[0];
-                         console.log(outerCondition);
-            
-                         return outerCondition;
-                     } else {
-                         console.log("else part");
-                          const keys = Object.keys(condition);
-                           var val = renameKeys(condition[keys[0]]);
-                           condition[keys[0]] = val; 
-                           return condition;
-                     }
-                    
-                 });
-                console.log("###",queryObj);
-               return queryObj[0];
-                 
-             }
-
-router.get('/', (req, res, next) => {
+/*router.get('/', (req, res, next) => {
 
     const limit = 3;
 
@@ -230,43 +144,55 @@ router.get('/:changelogId',(req, res, next) => {
 
     function getFeedbacks(change) {
         
-                const feedbacks = Feedback.find(
+        const feedbacks = Feedback.getFeedbackById(change._id, 0, 5)
+        .then((feedback) => feedback)
+        .catch(next)
+                /*const feedbacks = Feedback.find(
                     {__change : change._id}
                 )
+                .select('_id title content __change')
                 .sort({ createdAt : -1 })
-                .limit(limit)
+                .skip(0)
+                .limit(5)
                 .exec()
-                .then((data) => data)
+                .then((data) => data)*/
 
         return Promise.all([feedbacks,change]);
     }
 
     function getFeedbackCount(feedbacks,change) {
 
-        const count = Feedback.countDocuments(
+        const count = Feedback.count(change._id)
+        .then((count) => count)
+        .catch(next)
+
+        /*const count = Feedback.countDocuments(
             {__change : change._id})
         .exec()
-        .then((count) => count)
+        .then((count) => count)*/
 
         return Promise.all([feedbacks, change,count]);
     }
 
     function fetchCustomerDetails(feedbacks, change,count) {
 
-        let customer = Customer.findOne(
+        let customer = Customer.findCustomerById(custId)
+        .then((customer) => customer)
+        .catch(next)
+        /*let customer = Customer.findOne(
             {_id : custId}
         )
         .select('dislikedPosts likedPosts')
         .exec()
-        .then((customer) => customer)
+        .then((customer) => customer)*/
 
         return Promise.all([feedbacks, change,count, customer]);
     }
 
-
-    changeLog.findById({_id : id})
+/*changeLog.findById({_id : id})
     .select('title category body _id disLike like')
-    .exec()
+    .exec()*/
+    changeLog.getChangeById(id)
     .then((change) => getFeedbacks(change))
     .then(([feedbacks,change]) => getFeedbackCount(feedbacks,change))
     .then(([feedbacks, change,count]) => fetchCustomerDetails(feedbacks, change,count))
@@ -279,6 +205,7 @@ router.get('/:changelogId',(req, res, next) => {
                     change : change,
                     feedbackCount : count,
                     customer : customer
+                    // customer liked and disliked post
                 });
 
     })
@@ -344,7 +271,7 @@ console.log(req.cookies);
         }
         console.log(condition);
 
-        function updateChangeLog() {
+        /*function updateChangeLog() {
 
                 let change =   changeLog.updateOne(
                     {_id : req.query.changelogId },
@@ -356,18 +283,21 @@ console.log(req.cookies);
             return change;
         }
 
-            let result =  Customer.updateOne(
+         let result =  Customer.updateOne(
                 {_id : req.query.custId},
                 condition
             )
-            .exec()
-            .then(() =>  updateChangeLog())
+            .exec()*/
+            let result = Customer.updateLikeandDislike(req.query.custId, condition) 
+            .then(() => changeLog.updateLikeandDislike(req.query.changelogId,choice))
             .then((data) =>  data)
+            .catch(next)
 
 return result;
+
     }
 
-            function getCount() {
+            /*function getCount() {
 
                 let count = changeLog.find(
                     {_id : req.query.changelogId}
@@ -377,20 +307,23 @@ return result;
                 .then((result) => result )
 
             return count;
-            }
+            }*/
 
             function fetchCustomer(results) {
 
-                let updatedCustomer = Customer.find({
+                let updatedCustomer = Customer.findCustomerById(req.query.custId)
+                .then(customer => customer)
+                .catch(next)
+                /*let updatedCustomer = Customer.find({
                     _id : req.query.custId
                 })
                 .exec()
-                .then((customer) =>  customer)
+                .then((customer) =>  customer)*/
 
                 return Promise.all([results,updatedCustomer]);
             }
 
-    Customer.find({
+    /*Customer.find({
         "$and" : [
             { _id : req.query.custId },
             {"$or" : [
@@ -399,9 +332,10 @@ return result;
              }
         ]
      })
-    .exec()
+    .exec()*/
+    Customer.findByLikedPost(req.query.custId,req.query.changelogId)
     .then((customer) => updateCustomerAndCount(customer))
-    .then(() =>  getCount())
+    .then(() =>  changeLog.getChangeById(req.query.changelogId))
     .then((results) => fetchCustomer(results))
     .then(([results,updatedCustomer]) => {
 

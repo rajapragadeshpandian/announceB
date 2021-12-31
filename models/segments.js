@@ -9,13 +9,64 @@ const segmentSchema = mongoose.Schema(
 
 );
 
-module.exports = mongoose.model('Segment',segmentSchema);
+//module.exports = mongoose.model('Segment',segmentSchema);
+const Segment = mongoose.model('Segment',segmentSchema);
 
-// it should be one to many relatioship == >  child referencing
+function getSegmentByTitle(title) {
 
-// two separate routes for create segment and get segment
+    const segment = Segment.find({
+         title : title
+        })
+        .exec()
+    return segment;
+}
+
+function getSegmentById(segmentId) {
+    const segment = Segment.findById(
+        { _id : segmentId}
+    )
+    .exec()
+
+    return segment;
+}
 
 
-// if customer login save the customer if new
-// check the segment schema in which segments the customers are assciated
-// show the relevant chnages to customer 
+function createSegment(title, condition) {
+    const segment = new Segment({
+        title : title,
+        condition : condition
+    })
+    .save()
+
+    return segment;
+}
+
+function updateSegment(segmentId, title, condition) {
+  const segment =  Segment.findByIdAndUpdate(
+      { _id : segmentId},
+        { $set : {
+           title : title,
+           condition : condition
+        }}
+    )
+    .exec()
+
+    return segment;
+}
+
+function deleteSegment(segmentId) {
+    const segment = Segment.findByIdAndDelete(
+        {_id : segmentId})
+    .exec()
+
+    return segment;
+}
+
+module.exports = {
+    getSegmentByTitle : getSegmentByTitle,
+    createSegment : createSegment,
+    getSegmentById : getSegmentById,
+    updateSegment : updateSegment,
+    deleteSegment : deleteSegment
+}
+

@@ -57,7 +57,7 @@ app.use((req, res, next) => {
     }
     next();
 });
-
+app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 
 app.use('/changelog',changeLogDetails);
@@ -66,6 +66,7 @@ app.use('/customer', customerDetails);
 app.use('/widget', widget);
 app.use('/auth', userDetails);
 app.use('/account', accountDetails);
+
 
 
 app.get('/changes/uniqueTags', (req, res, next) => {
