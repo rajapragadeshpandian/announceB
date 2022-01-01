@@ -113,20 +113,32 @@ padding : 20px 0px;
                 const nameLen = name.value.length;
                 
                 let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
-             
-                
+
                 if((nameLen == 0) || (nameValue == "undefined")) {
+                    document.getElementsByClassName('name')[0].classList.add('error');
                     document.getElementsByClassName('nameError')[0].style.display="block";
+                    
                 } 
+                if(nameLen > 0) {
+                    document.getElementsByClassName('name')[0].classList.remove('error');
+                    document.getElementsByClassName('nameError')[0].style.display="none";
+                }
+
                 if((passwordLen == 0) || (passwordValue == "undefined") ||
                 (!reg.test(passwordValue))) {
                     console.log("password");
+                    document.getElementsByClassName('password')[0].classList.add('error');
                     document.getElementsByClassName('pwdError')[0].style.display="block";
+                }
+                if(passwordLen > 0 && !reg.test(passwordValue)) {
+                    document.getElementsByClassName('password')[0].classList.remove('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="none";
                 }
 
             }
 
             function hidemsg(event) {
+                event.target.classList.remove('error');
                 event.target.nextElementSibling.style.display = "none";
             }
         

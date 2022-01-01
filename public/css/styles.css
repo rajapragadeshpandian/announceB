@@ -310,7 +310,7 @@ color: #AAB0B7;
 flex-direction: column;
 align-items: flex-start;
 padding: 9px 16px;
-width: 280px;
+min-width: 280px;
 height: 40px;
 background: #F6FFED;
 border: 1px solid #B7EB8F;
