@@ -287,6 +287,7 @@ jwt.verify(req.params.token, keys.emailSecret,
             .catch(next)
    }
 });
+//res.render('changePwd', {email : "prag@gmail.com" || ""});
 })
 
 router.post('/change/password', (req, res, next) => {
@@ -322,7 +323,8 @@ router.get('/logout', (req, res) => {
 
 router.get('/userdetails', (req, res, next) => {
     //change it to auth route
-    res.render('userDetails', {email : req.query.email || ""});
+    //res.render('userDetails', {email : req.query.email || ""});
+    res.render('userDetails', {email : "prag@gmail.com" || ""});
 });
 
 
