@@ -241,19 +241,20 @@ router.post('/reset', (req, res, next) => {
     
     const { email } = req.body;
     function sendEmail(user) {
-        console.log(user._id);
+        console.log(user);
         if(user) {
             const token = jwt.sign({
         userId: user._id
-    }, keys.emailSecret , { expiresIn: '1d' }  
+    }, user.password , { expiresIn: '1d' }  
     );  
 console.log(keys);
 
 sgMail.setApiKey(keys.sendGridKey);
 const toEmail = user.identities[0].email;
 const subject = "Reset Password";
+const userId = user._id;
 
-const message = resetPwd(toEmail, subject, token);
+const message = resetPwd(toEmail, subject, token, userId);
 
 sgMail.send(message)
 .then(response => {
@@ -265,28 +266,41 @@ sgMail.send(message)
         }
     }
     
-User.getUserByEmail(email)
+    User.getUserByEmail(email)
     .then((user) => sendEmail(user))
     .catch(next)  
+
 });
 
-router.get('/change/password', (req, res, next) => {
+router.get('/change/password/:userId/:token', (req, res, next) => {
     
+    const {userId, token} = req.params;
 // '/change/password/:token'
-jwt.verify(req.params.token, keys.emailSecret,
+// set keys secrert as password hash 
+// so we can can use a link onlyonce
+function checkToken(user) {
+
+    jwt.verify(token, user.password,
     function(err, decoded) {
    if (err) {
        res.send("Email verification failed, possibly the link is invalid or expired");
    }
    else {
-       const userId = decoded.userId;
-            User.getUserById(userId)
-            .then((user) => {
-                res.render('changePwd', {email : user.identities[0].email || ""});
-            })
-            .catch(next)
+    res.render('changePwd', {email : user.identities[0].email || ""});
+    //    const userId = decoded.userId;
+    //         User.getUserById(userId)
+    //         .then((user) => { 
+            // })
+            // .catch(next)
    }
 });
+
+}
+
+    User.getUserById(userId)
+    .then((user) => checkToken(user))
+    .catch(next)
+
 //res.render('changePwd', {email : "prag@gmail.com" || ""});
 })
 
@@ -295,7 +309,6 @@ router.post('/change/password', (req, res, next) => {
     User.hashPassword(password)
             .then((hash) => User.setPassword(email, hash))
             .then((user) => {
-                console.log(user);
                 res.redirect(`/auth/login`)
             })
             .catch(next) 
