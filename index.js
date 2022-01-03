@@ -73,17 +73,26 @@ app.get('/changes/uniqueTags', (req, res, next) => {
 
     console.log("###", "uniqueTags");
 
-    changeLog.aggregate([
-        { $unwind : "$category"},
-        { $group : {_id :"$category"}} 
-    ]).exec()
+    changeLog.uniqueTags()
     .then((tags) => {
-                console.log(tags);
-                    res.status(200).json({
-                        tags : tags,
-                        noOftags : tags.length,
-                    });
-    }).catch(next);
+        res.status(200).json({
+            tags : tags,
+          noOftags : tags.length
+        })
+    })
+    .catch(next)
+
+    // changeLog.aggregate([
+    //     { $unwind : "$category"},
+    //     { $group : {_id :"$category"}} 
+    // ]).exec()
+    // .then((tags) => {
+    //             console.log(tags);
+    //                 res.status(200).json({
+    //                     tags : tags,
+    //                     noOftags : tags.length,
+    //                 });
+    // }).catch(next);
 
 });
 
