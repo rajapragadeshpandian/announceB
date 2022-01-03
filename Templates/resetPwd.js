@@ -1,5 +1,5 @@
 
-module.exports = (toEmail, subject, token) => { 
+module.exports = (toEmail, subject, token, userId) => { 
 
     const message = {};
         message.to = toEmail;
@@ -11,7 +11,7 @@ module.exports = (toEmail, subject, token) => {
                 
                 <h2>Please click on below links to reset the password</h2>
                             <div>
-                            <a href="http://localhost:5000/auth/change/password/${token}">Reset password</a>
+                            <a href="http://localhost:5000/auth/change/password/${userId}/${token}">Reset password</a>
                             </div>
                 
 

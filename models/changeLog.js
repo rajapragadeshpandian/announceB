@@ -145,6 +145,16 @@ function updateLikeandDislike(changelogId, choice) {
     return change;
 }
 
+function uniqueTags() {
+    let tags = changeLog.aggregate([
+        { $unwind : "$category"},
+        { $group : {_id :"$category"}} 
+    ]).exec()
+    
+    return tags;
+}
+
+
 
 
 
@@ -159,7 +169,8 @@ module.exports = {
     updateChangelog : updateChangelog,
     getChangeById : getChangeById,
     updateLikeandDislike : updateLikeandDislike,
-    removeChange : removeChange  
+    removeChange : removeChange  ,
+    uniqueTags : uniqueTags
 
     //remove : remove
 }

@@ -25,12 +25,12 @@ body {
 }
 
 .signup {
-    width : 54%;
+    width : 50%;
     height: 100%;
     background-color: white;
 }
 .review {
-    width : 46%;
+    width : 50%;
     height: 100%;
     flex-direction: column; 
     background: rgba(234, 234, 244, 0.5);
@@ -362,10 +362,10 @@ border: 1px solid #D32424;
         border-radius: 6px;
         outline: none;
         }
-        .input:-internal-autofill-selected {
+        /* .input:-internal-autofill-selected {
             box-shadow: 0 0 0px 30px white inset;
-            /* box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5); */
-        }
+             box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5); 
+        } */
     /* .input:focus:-autofill {
         box-shadow: 0px 0px 4px rgba(24, 144, 255, 0.5);
     } */
