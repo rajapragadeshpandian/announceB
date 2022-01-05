@@ -104,9 +104,6 @@ function createAccount(userType, user) {
         return Promise.all([count, changes, accounts]);
     }
     
-    
-
-    
 
 module.exports = {
     createAccount : createAccount,

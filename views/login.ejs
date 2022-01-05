@@ -20,9 +20,16 @@
                     </svg>
                             <form action="/auth/login" method="post" class="loginform flexColumn" >
                                 <% if (message.length > 0) { %>
-                                    <div class="failure center"  style="margin-bottom: 30px;">
+                                    <% if (message.success) { %>
+                                    <div class="success center"  style="margin-bottom: 30px;">
                                     <span><%= message %></span>
                                 </div>
+                                <% } %>
+                                <% if (!message.success) { %>
+                                    <div class="failure center"  style="margin-bottom: 30px;">
+                                        <span><%= message %></span>
+                                    </div>
+                                    <% } %>
                                     <% } %>      
                     
                                 <div class="label">
@@ -31,7 +38,7 @@
                                 </div>
 
                                 <div style="margin-bottom: 20px">
-                                <input type="email" style="margin-bottom: 5px" onblur="showmsg()" onfocus="hidemsg(event)" name="email" placeholder="Work Email"  class="input email"/>
+                                <input type="email" style="margin-bottom: 5px" onblur="showEmailError()" onfocus="hidemsg(event)" name="email" placeholder="Work Email"  class="input email"/>
                                 <label class="errorMsg emailError" style="color : red;">
                                     Email cannot be empty
                                 </label>
@@ -43,7 +50,7 @@
                                 </div>
                                 
                                 <div style="margin-bottom: 30px">
-                                <input type="password" style="margin-bottom: 5px" onblur="showmsg()" onfocus="hidemsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
+                                <input type="password" style="margin-bottom: 5px" onblur="showPasswordError()" onfocus="hidemsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
                                 <label class="errorMsg pwdError" style="color : red">Password cannot be empty</label>
                                  </div>
                                 
@@ -97,7 +104,44 @@
                 let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
              let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-            function showmsg() {
+// call every blur in separate functions
+
+        function showEmailError() {
+                const emailValue = email.value;
+                const emailLen = email.value.length;
+                let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                if((emailLen == 0) || (emailValue == "undefined") ||
+                (!regexEmail.test(emailValue))) {
+                    document.getElementsByClassName('email')[0].classList.add('error');
+                    document.getElementsByClassName('emailError')[0].style.display="block";
+                } 
+                if(emailLen > 0 && regexEmail.test(emailValue)) {
+                    document.getElementsByClassName('email')[0].classList.remove('error');
+                    document.getElementsByClassName('emailError')[0].style.display="none";
+                }
+            }
+
+            function showPasswordError() {
+                const passwordValue = password.value;
+                const passwordLen = password.value.length;
+                let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
+
+                if((passwordLen == 0) || (passwordValue == "undefined") ||
+                (!reg.test(passwordValue))) {
+                    console.log("password");
+                    console.log("passerror");
+                    document.getElementsByClassName('password')[0].classList.add('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="block";
+                }
+                if(passwordLen > 0 && reg.test(passwordValue)) {
+                    console.log("passwordsuccess");
+                    document.getElementsByClassName('password')[0].classList.remove('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="none";
+                }
+            }
+
+
+            /*function showmsg() {
                 const emailValue = email.value;
                 const emailLen = email.value.length;
                 const passwordValue = password.value;
@@ -126,7 +170,7 @@
                     document.getElementsByClassName('pwdError')[0].style.display="none";
                 }
 
-            }
+            }*/
 
             function hidemsg(event) {
                 event.target.classList.remove('error');
