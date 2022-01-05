@@ -59,7 +59,7 @@ padding : 20px 0px;
                             <label>Full Name</label></div>
 
                             <div style="margin-bottom: 20px">
-                                    <input type="text" style="margin-bottom: 5px" onblur="showmsg()" onfocus="hidemsg(event)" name="name" placeholder="Full Name"  class="input name"/>
+                                    <input type="text" style="margin-bottom: 5px" onblur="showNameError()" onfocus="hidemsg(event)" name="name" placeholder="Full Name"  class="input name"/>
                                     <label class="errorMsg nameError" style="color : red;">
                                      Name cannot be empty
                                     </label>
@@ -83,7 +83,7 @@ padding : 20px 0px;
                             <label>Password</label></div>
 
                             <div >
-                                    <input type="password" style="margin-bottom: 5px" onblur="showmsg()" onfocus="hidemsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
+                                    <input type="password" style="margin-bottom: 5px" onblur="showPasswordError()" onfocus="hidemsg(event)"  name="password" placeholder="Password"  class="input marginBtm0 password"/>
                                     <label class="errorMsg pwdError" style="color : red">Password cannot be empty</label>
                                 </div>
                             
@@ -106,7 +106,38 @@ padding : 20px 0px;
         document.getElementsByClassName('signinBtn')[0].disabled = true;
         const length = document.getElementsByClassName('input').length;
 
-        function showmsg() {
+function showNameError() {
+                const nameValue = name.value;
+                const nameLen = name.value.length;
+                if((nameLen == 0) || (nameValue == "undefined")) {
+                    document.getElementsByClassName('name')[0].classList.add('error');
+                    document.getElementsByClassName('nameError')[0].style.display="block";
+                    
+                } 
+                if(nameLen > 0) {
+                    document.getElementsByClassName('name')[0].classList.remove('error');
+                    document.getElementsByClassName('nameError')[0].style.display="none";
+                }
+            }
+            function showPasswordError() {
+                const passwordValue = password.value;
+                const passwordLen = password.value.length;
+                let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d[\]{};:=<>_+^#$@!%*?&]{6,}$/;
+
+                if((passwordLen == 0) || (passwordValue == "undefined") ||
+                (!reg.test(passwordValue))) {
+                    console.log("password");
+                    console.log("passerror");
+                    document.getElementsByClassName('password')[0].classList.add('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="block";
+                }
+                if(passwordLen > 0 && reg.test(passwordValue)) {
+                    console.log("passwordsuccess");
+                    document.getElementsByClassName('password')[0].classList.remove('error');
+                    document.getElementsByClassName('pwdError')[0].style.display="none";
+                }
+            }
+        /*function showmsg() {
                 const passwordValue = password.value;
                 const passwordLen = password.value.length;
                 const nameValue = name.value;
@@ -135,7 +166,7 @@ padding : 20px 0px;
                     document.getElementsByClassName('pwdError')[0].style.display="none";
                 }
 
-            }
+            }*/
 
             function hidemsg(event) {
                 event.target.classList.remove('error');
