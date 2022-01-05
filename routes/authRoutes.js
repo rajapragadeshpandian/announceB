@@ -34,7 +34,7 @@ router.get('/signup', (req, res) => {
 router.get('/login', (req, res) => {
     //res.render('dashboard', { changes : item });
     console.log(req.user);
-    res.render("login", { message : req.flash('info') || ""});
+    res.render("login", { message : req.flash('info') || {success : req.query.message } || ""});
 });
 
 
@@ -294,7 +294,6 @@ function checkToken(user) {
             // .catch(next)
    }
 });
-
 }
 
     User.getUserById(userId)
@@ -309,7 +308,8 @@ router.post('/change/password', (req, res, next) => {
     User.hashPassword(password)
             .then((hash) => User.setPassword(email, hash))
             .then((user) => {
-                res.redirect(`/auth/login`)
+                res.redirect(`/auth/login?message=password reset success`)
+                //res.redirect(`/auth/userdetails?email=${user.identities[0].email}`); 
             })
             .catch(next) 
     
