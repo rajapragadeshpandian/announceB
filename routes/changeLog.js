@@ -81,17 +81,26 @@ router.post('/', (req, res, next) => {
     const findText = {};
 
     changeLog.createChanges(title, category, body, accId, userId)
-    .then(() => changeLog.getChanges(accId, findText, 0, 3))
+    .then(() => changeLog.getChanges(accId, findText, 0, 10))
     //.then((changes) => getCount(changes))
-    .then((change) => {
+    .then((changes) => {
 // if post is successful inc count on client side
             res.status(200).json({
                 message : "changeLog successfully created",
-                change : change
+                changeList : changes,
             });
     })
     .catch(next);
 });
+
+router.get('/sample', (req, res, next) => {
+    res.status(200).json({
+        title : "Appcoach announceB changelog",
+        id : 1,
+        category : "new",
+        accId : "announceB"
+    })
+})
 
 router.get('/:changelogId',(req, res, next) => {
 
