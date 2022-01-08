@@ -21,9 +21,9 @@ router.get('/',(req, res, next) => {
     
     console.log(req.query.value);
     console.log(req.user);
-    console.log(req.user);
+    console.log(req.cookies);
     const userId = req.user ? req.user._id : {};
-    const accId = req.query.accId;
+    const accId = req.cookies.accId;
     const findText = req.query.text ? { title : { $regex : req.query.text , $options : "i" }} : {};
      const val  = req.query.pageNo ? (req.query.pageNo -1) * limit : 0;
 

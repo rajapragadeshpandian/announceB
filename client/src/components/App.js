@@ -1,9 +1,9 @@
 import React from 'react';
-import Hook from './Hook';
-import HookEffect from './HookEffect';
-import ComponentC from './ComponentC';
-import HookCounter from './HookCounter';
-import Users from './Users';
+import Hook from './Test/Hook';
+import HookEffect from './Test/HookEffect';
+import ComponentC from './Test/ComponentC';
+import HookCounter from './Test/HookCounter';
+import Users from './Test/Users';
 import {useSelector} from 'react-redux';
 import ChangeLogs from './ChangeLogs';
 
