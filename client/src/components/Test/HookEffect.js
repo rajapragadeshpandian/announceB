@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import * as actions from '../state/actions';
+import * as actions from '../../state/actions';
 import {bindActionCreators} from 'redux';
 
 const HookEffect = () => {
@@ -17,9 +17,12 @@ console.log(fetchChanges);
     // const logName = () => {
     //     console.log("rajapragadesh");
     // }
-    
+    const tick = () => {
+        console.log("ticking");
+    }
     useEffect(() => {
         fetchChanges()
+        // setInterval(tick, 5000);
         // fetch('https://jsonplaceholder.typicode.com/users')
         // .then((res) => res.json())
         // .then(data => setData(data))
