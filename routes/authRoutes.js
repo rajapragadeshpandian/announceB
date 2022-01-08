@@ -121,11 +121,13 @@ router.get('/loginSuccess', (req, res, next) => {
                  function checkOwner(acc) {
                     if(acc) {
                         console.log("OwnerAcc",acc);
+                        res.cookie("accId", "announceB");
                         res.redirect(`/changelog?accId=announceB`);
                     } else {
                             function checkEditor(editAcc) {
                                 if(editAcc) {
                                     console.log(editAcc);
+                                    res.cookie("accId", "announceB");
                                     res.redirect(`/changelog?accId=announceB`);            
                                 } else {
                                     res.status(404).json({
