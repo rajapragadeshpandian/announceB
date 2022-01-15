@@ -6,6 +6,7 @@ import HookCounter from './Test/HookCounter';
 import Users from './Test/Users';
 import { useSelector } from 'react-redux';
 import ChangeLogs from './ChangeLogs';
+import Customers from './Customers';
 import Header from './Header';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -23,6 +24,8 @@ function App() {
             element={<Header />} exact />
           <Route path='/dashboard'
             element={<ChangeLogs />} exact />
+          <Route path='/customers/details'
+            element={<Customers />} exact />
         </Routes>
       </BrowserRouter>
 
