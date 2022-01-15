@@ -47,6 +47,12 @@ const HookEffect = () => {
                 <li key={item.id}>{item.name}</li>
             ))} */}
 
+            {/* <div>
+    {this.state.filterVal && (
+        <FilterVal />
+    )}  
+            </div> */}
+
         </div>
     )
 }

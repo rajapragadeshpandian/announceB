@@ -76,7 +76,7 @@ function addDollar(condition1) {
             return appendDollarObj(condition1);
         }
 
-    }, {})
+    }, {})//queryObj end
     console.log(queryObj);
     return queryObj;
 
@@ -190,6 +190,27 @@ addDollar(filter.condition);
 
 // 		]
 // 	}
+
+
+// "condition" : {
+// 		"and" : [
+// 			{
+// 			"or" : [
+// 				{"or" : [{"name" : {"eq" : "raj"}},{"age" : {"eq" : "6"}} ]},
+// 				{"or" : [{"sex" : {"eq" : "male"}},{"id" : {"eq" : "2"}} ]}	
+// 				]
+// 			},
+// 			{
+// 			"or" : [
+// 				{"or" : [{"name" : {"eq" : "raj"}},{"age" : {"eq" : "6"}} ]},
+// 				{"or" : [{"name" : {"eq" : "raj"}},{"age" : {"eq" : "6"}} ]}
+// 				]
+// 			}
+
+
+// 		]
+// 	}
+
 
 
 

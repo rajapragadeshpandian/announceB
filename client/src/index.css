@@ -9,3 +9,51 @@ body {
     width : 100vw;
     background-color: palevioletred;
 }
+
+.custContainer {
+    padding: 20px;
+}
+
+.filters {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 30px;
+    background-color: whitesmoke;
+    margin-bottom: 30px;
+    position: relative;
+}
+.filterConditions {
+    height: 32px;
+    background-color: darkgrey;
+    margin-right: 5px;
+    display: flex;
+}
+
+.filterConditions.separator:hover {
+    cursor: pointer;
+}
+.operators {
+width: 266px;
+height: 247px;
+background: #FFFFFF;
+box-shadow: 0px 10px 20px rgba(171, 174, 176, 0.5);
+border-radius: 4px;
+margin-top: 10px;
+padding: 25px;
+box-sizing: border-box;
+/* position: fixed; */
+z-index: 100000;
+}
+
+/* .operators input {
+width: 192px;
+height: 22px;
+
+opacity: 0.5;
+
+flex: none;
+order: 0;
+flex-grow: 1;
+margin: 0px 10px;
+} */
