@@ -187,3 +187,18 @@
     "customerId" : "61600a631b01a100dab5ff6b",
     "changeId" : "615d9fcd36fa39b22fc2e92e"
 }
+
+
+<select>
+  <option>one</option>
+  <option>two</option>
+  <option>three</option>
+
+</select>
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-indent: 1px;
+  text-overflow: '';
+}   

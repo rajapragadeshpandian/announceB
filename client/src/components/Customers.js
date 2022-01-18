@@ -5,18 +5,24 @@ import { Layout } from 'antd';
 import { Menu, Dropdown, Button, Space, Radio, Input } from 'antd';
 import { Card } from 'antd';
 
-
-
-
 // onClick={() => setType('posts')}
 const Customers = () => {
     const style = {
         display: "flex",
         flexDirection: "row",
         position: "relative",
-        flexWrap: "wrap"
+        flexWrap: "wrap",
+        marginBottom: 80
         //backgroundColor: '#FF6D00'
     };
+
+    const initialSytle = {
+        display: 'flex',
+        width: 100,
+        backgroundColor: 'grey',
+        justifyContent: "center",
+        padding: 5
+    }
 
     const textstyle = {
         marginRight: 3,
@@ -24,41 +30,90 @@ const Customers = () => {
         height: 32,
         borderradius: 4
     }
+    const separatorStyle = {
+        height: 32,
+        width: 32,
+        borderradius: 4
+    }
     const [initialFilter, toggleFilter] = useState(true);
     const [newFilter, setFilter] = useState(false);
     const [newFilterValue, setFilterValue] = useState([]);
-    const [conditionsValue, setConditionsValue] = useState([]);
+    const [separatorKey, setSeparatorKey] = useState('');
     const [value, setRadioValue] = useState("is");
     const [showOperatos, toggleOperators] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [AddButton, showAddButton] = useState(false);
     const [showConditions, setConditions] = useState(false);
+    const [conditionIndex, setIndex] = useState(0);
+    const [OuterConditionIndex, setOuterIndex] = useState(0);
     const [clickCount, setClickCount] = useState(0);
+
     console.log(newFilterValue);
+    console.log(separatorKey);
+    console.log(conditionIndex);
+    console.log(OuterConditionIndex);
+
     function handleMenuClick(e) {
 
         const value = e.domEvent.target.innerHTML;//c
         toggleFilter(false);
-        setFilter(true);
+        //setFilter(true);
         //setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
         toggleOperators(true);
         if (clickCount > 0) {
-            // setConditionsValue([{ separator: "and" }]);
-            // setFilterValue([{ name: value, operator: "is", value: "" }]);
-            newFilterValue.push({ separator: "and" });
-            setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
+            if (separatorKey == "separator") {
+                let obj = {};
+                console.log(separatorKey);
+                obj[separatorKey] = "and";
+                //let index = newFilterValue.length - 1;
+                console.log(newFilterValue);
+                newFilterValue[OuterConditionIndex].push(obj);
+                console.log(newFilterValue);
+                newFilterValue[OuterConditionIndex].push({ name: value, operator: "is", value: "" });
+                setFilterValue([...newFilterValue]);
+            } else {
+                let obj = {};
+                console.log(separatorKey);
+                obj[separatorKey] = "and";
+                newFilterValue.push([obj]);
+                setFilterValue([...newFilterValue, [{ name: value, operator: "is", value: "" }]]);
+                console.log(newFilterValue.length);
+                setOuterIndex(newFilterValue.length);
+            }
+
+            //setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
         } else {
-            setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
+            setFilterValue([...newFilterValue, [{ name: value, operator: "is", value: "" }]]);
         }
         setClickCount(clickCount + 1);
     }
     function handleconditionMenuClick(e) {
         let value = e.domEvent.target.innerHTML;
         console.log(value);
+        console.log(conditionIndex);
+        console.log(OuterConditionIndex);
+
+        newFilterValue.map((item, index) => {
+
+            if (index == OuterConditionIndex) {
+                item.map((item, index) => {
+                    const key = Object.keys(item);
+                    if (index == conditionIndex) {
+                        item[key[0]] = value;
+                    }
+                    return item;
+                })
+            }
+
+            return item;
+        });
+        console.log(newFilterValue);
+        setFilterValue([...newFilterValue]);
+        //console.log(document.getElementsByClassName('filterWrap'));
+        //const child = Array.prototype.slice.call(document.getElementsByClassName('filterWrap')[0].children);
         // toggleFilter(false);
-        // setFilter(true);
-        // setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
         // toggleOperators(true);
+
     }
     const onChange = e => {
         console.log('radio checked', e.target.value);
@@ -70,18 +125,60 @@ const Customers = () => {
         setInputValue(e.target.value);
 
     }
+    const separatorClick = e => {
+
+        console.log(e.target.getAttribute('name'));
+        console.log(e.target.parentNode.parentNode);
+        let index;
+        let parentNode = e.target.parentNode.parentNode;
+        const outerIndex = parentNode.getAttribute('data');
+        if (e.target.getAttribute('name') == "separator") {
+            index = e.target.getAttribute('data');
+        } else {
+            index = 0;
+        }
+
+        setOuterIndex(outerIndex);
+        setIndex(index);
+    }
+    const addBtnClick = e => {
+
+        console.log(e.target.parentNode.getAttribute('data'));
+        let addBtnIndex = e.target.parentNode.getAttribute('data')
+        setOuterIndex(addBtnIndex);
+        setSeparatorKey("separator");
+    }
+    const filterBtnClick = e => {
+        console.log(clickCount);
+        if (clickCount > 0) {
+            setSeparatorKey("joiner");
+        } else {
+            setSeparatorKey('');
+        }
+
+    }
 
     const formQuery = e => {
         console.log(value, inputValue);
         console.log(newFilterValue);
-        const addValue = newFilterValue.splice(-1).map((item) => {
-            item.operator = value;
-            item.value = inputValue;
+
+        const addValue = newFilterValue.map((item, index) => {
+            console.log(index);
+            console.log(newFilterValue.length);
+            console.log(item);
+            if (newFilterValue.length - 1 == index) {
+                const newItem = item.splice(-1).map((item) => {
+                    item.operator = value;
+                    item.value = inputValue;
+                    return item;
+                });
+                item.push(newItem[0]);
+            }
             return item;
         })
-        newFilterValue.push(addValue[0]);
-        console.log(newFilterValue);
-        // setFilterValue(newFilterValue);
+        console.log(addValue);
+        //newFilterValue.push(addValue[0]);
+        setFilterValue([...addValue]);
         toggleOperators(false);
         setRadioValue("is");
         setInputValue('');
@@ -146,77 +243,65 @@ const Customers = () => {
                 <div className="filters">
 
                     {initialFilter && (
-                        <div align="center" className="filterConditions">
-                            <span style={textstyle}>
-                                All Customers
-                    </span>
-                        </div>
+                        <span style={initialSytle}>
+                            All Customers
+                        </span>
                     )}
-                    {/* <div>
-  {data.map((record) => (
-    record.list.length > 0
-      ? (<YourRenderComponent record={record} key={record.id} />)
-      : null
-  ))}
-</div> */}
 
-                    {newFilter && (
-                        <div align="center" style={style} className="filterWrap">
+                    {!initialFilter && newFilterValue.length > 0 && newFilterValue.map((item, index, arr) => (
+
+                        < div align="center" style={style} className="filterWrap" data={index}>
                             {
-                                newFilterValue.length > 0 && newFilterValue.map(item => (
-                                    item.separator ?
-                                        (<div className="filterConditions" style={{ marginBottom: 20 }}>
-                                            <span style={textstyle}>
-                                                {item.separator}
-                                            </span>
-                                        </div>)
+                                item.length > 0 && item.map((item, index, arr) => (
+                                    (item.separator) ?
+                                        (
+                                            <div className={`filterConditions `}>
+                                                <Dropdown overlay={conditionsMenu} trigger={['click']}
+                                                    placement="bottomLeft">
+                                                    <span data={index} name="separator" onClick={separatorClick} style={separatorStyle}>{item.separator}</span>
+                                                </Dropdown>
+                                            </div>
+
+                                        )
                                         :
-                                        <div className="filterConditions" style={{ marginBottom: 20 }}>
-                                            <span style={textstyle}>
-                                                {item.name}
-                                            </span>
-                                            <span style={textstyle}>
-                                                {item.operator}
-                                            </span>
-                                            <span style={textstyle}>
-                                                {item.value}
-                                            </span>
-                                        </div>
+                                        (item.joiner) ?
+                                            (
+                                                <div className={`filterConditions `}>
+                                                    <Dropdown overlay={conditionsMenu} trigger={['click']}
+                                                        placement="bottomLeft">
+                                                        <span data={index} name="joiner" onClick={separatorClick} style={separatorStyle}>{item.joiner}</span>
+                                                    </Dropdown>
+                                                </div>
+
+                                            )
+                                            :
+                                            <div className="filterConditions">
+                                                <span style={textstyle}>
+                                                    {item.name}
+                                                </span>
+                                                <span style={textstyle}>
+                                                    {item.operator}
+                                                </span>
+                                                <span style={textstyle}>
+                                                    {item.value}
+                                                </span>
+                                            </div>
 
                                 ))
                             }
-                            {
-                                conditionsValue.length > 0 && conditionsValue.map(item => (
-                                    <div className="filterConditions" style={{ marginBottom: 20 }}>
-                                        <span style={textstyle}>
-                                            {item.separator}
-                                        </span>
-                                    </div>
 
-                                ))
-                            }
-                            {showConditions && (
-                                <Space direction="vertical" className="filterConditions separator" style={{ marginBottom: 20 }}>
-                                    <Space wrap >
-                                        <Dropdown overlay={conditionsMenu} trigger={['click']}
-                                            placement="bottomLeft">
-                                            <span style={textstyle}>and</span>
-                                        </Dropdown>
-                                    </Space>
-                                </Space>
-                            )}
-                            {AddButton && (
-                                <Space direction="vertical">
-                                    <Space wrap>
-                                        <Dropdown overlay={menu} trigger={['click']}
-                                            placement="bottomLeft">
-                                            <Button type="primary">+</Button>
-                                        </Dropdown>
-                                    </Space>
-                                </Space>
+                            {(AddButton && !item[0].joiner) && (
+                                // <Space direction="vertical">
+                                //     <Space wrap>
+                                <Dropdown overlay={menu} trigger={['click']}
+                                    placement="bottomLeft">
+                                    <Button type="primary" data={index} onClick={addBtnClick}>+</Button>
+                                </Dropdown>
+                                //     </Space>
+                                // </Space>
                             )}
 
-                            {showOperatos && (
+                            {(showOperatos && !item[0].joiner && (OuterConditionIndex == index)) && (
                                 <div className="operators">
                                     <div>
                                         {radio}
@@ -226,27 +311,23 @@ const Customers = () => {
                             )}
 
                         </div>
-                    )}
-                    {/* {showOperatos && (
-                        <div className="operators">
-                            <div>
-                                {radio}
-                                <Button onClick={formQuery} type="primary">Done</Button>
-                            </div>
-                        </div>
-                    )} */}
+                    ))
+                    }
+                    {/* filterWrap */}
+
 
                 </div>
+                {/* filters */}
 
                 <div>
-                    <Space direction="vertical">
-                        <Space wrap>
-                            <Dropdown overlay={menu} trigger={['click']}
-                                placement="bottomLeft">
-                                <Button type="primary">Add Filter Group</Button>
-                            </Dropdown>
-                        </Space>
-                    </Space>
+                    {/* <Space direction="vertical">
+                        <Space wrap> */}
+                    <Dropdown overlay={menu} trigger={['click']}
+                        placement="bottomLeft">
+                        <Button type="primary" onClick={filterBtnClick}>Add Filter Group</Button>
+                    </Dropdown>
+                    {/* </Space>
+                    </Space> */}
                 </div>
 
                 {/* {showOperatos && (
@@ -260,6 +341,7 @@ const Customers = () => {
 
 
             </div>
+            {/* custcontainers */}
         </>
     )
 };
