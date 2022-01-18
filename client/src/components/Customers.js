@@ -12,7 +12,7 @@ const Customers = () => {
         flexDirection: "row",
         position: "relative",
         flexWrap: "wrap",
-        marginBottom: 80
+        marginBottom: 25
         //backgroundColor: '#FF6D00'
     };
 
@@ -25,16 +25,12 @@ const Customers = () => {
     }
 
     const textstyle = {
-        marginRight: 3,
-        marginBottom: 5,
-        height: 32,
-        borderradius: 4
+        marginRight: 3
     }
-    const separatorStyle = {
-        height: 32,
-        width: 32,
-        borderradius: 4
-    }
+    // const separatorStyle = {
+    //     height: 32,
+
+    // }
     const [initialFilter, toggleFilter] = useState(true);
     const [newFilter, setFilter] = useState(false);
     const [newFilterValue, setFilterValue] = useState([]);
@@ -238,14 +234,16 @@ const Customers = () => {
 
         <>
             <div className="custContainer">
-                <h1>Customers</h1>
-
                 <div className="filters">
 
                     {initialFilter && (
-                        <span style={initialSytle}>
-                            All Customers
-                        </span>
+                        <div className="filterConditions allCustomers">
+                            <span className="filterValue">
+                                <span>
+                                    All Customers
+                                </span>
+                            </span>
+                        </div>
                     )}
 
                     {!initialFilter && newFilterValue.length > 0 && newFilterValue.map((item, index, arr) => (
@@ -255,35 +253,39 @@ const Customers = () => {
                                 item.length > 0 && item.map((item, index, arr) => (
                                     (item.separator) ?
                                         (
-                                            <div className={`filterConditions `}>
-                                                <Dropdown overlay={conditionsMenu} trigger={['click']}
-                                                    placement="bottomLeft">
-                                                    <span data={index} name="separator" onClick={separatorClick} style={separatorStyle}>{item.separator}</span>
-                                                </Dropdown>
-                                            </div>
+
+                                            <Dropdown overlay={conditionsMenu} trigger={['click']}
+                                                placement="bottomLeft">
+                                                <div className={`filterConditions `}>
+                                                    <span data={index} name="separator" className="separator" onClick={separatorClick}
+                                                    >{item.separator}</span>
+                                                </div>
+                                            </Dropdown>
 
                                         )
                                         :
                                         (item.joiner) ?
                                             (
-                                                <div className={`filterConditions `}>
-                                                    <Dropdown overlay={conditionsMenu} trigger={['click']}
-                                                        placement="bottomLeft">
-                                                        <span data={index} name="joiner" onClick={separatorClick} style={separatorStyle}>{item.joiner}</span>
-                                                    </Dropdown>
-                                                </div>
 
+                                                <Dropdown overlay={conditionsMenu} trigger={['click']}
+                                                    placement="bottomLeft">
+                                                    <div className={`filterConditions `}>
+                                                        <span data={index} name="joiner" className="separator" onClick={separatorClick}>{item.joiner}</span>
+                                                    </div>
+                                                </Dropdown>
                                             )
                                             :
                                             <div className="filterConditions">
-                                                <span style={textstyle}>
-                                                    {item.name}
-                                                </span>
-                                                <span style={textstyle}>
-                                                    {item.operator}
-                                                </span>
-                                                <span style={textstyle}>
-                                                    {item.value}
+                                                <span className="filterValue">
+                                                    <span style={textstyle}>
+                                                        {item.name}
+                                                    </span>
+                                                    <span style={textstyle}>
+                                                        {item.operator}
+                                                    </span>
+                                                    <span style={textstyle}>
+                                                        {item.value}
+                                                    </span>
                                                 </span>
                                             </div>
 
@@ -291,14 +293,10 @@ const Customers = () => {
                             }
 
                             {(AddButton && !item[0].joiner) && (
-                                // <Space direction="vertical">
-                                //     <Space wrap>
                                 <Dropdown overlay={menu} trigger={['click']}
                                     placement="bottomLeft">
                                     <Button type="primary" data={index} onClick={addBtnClick}>+</Button>
                                 </Dropdown>
-                                //     </Space>
-                                // </Space>
                             )}
 
                             {(showOperatos && !item[0].joiner && (OuterConditionIndex == index)) && (
@@ -315,30 +313,15 @@ const Customers = () => {
                     }
                     {/* filterWrap */}
 
-
                 </div>
                 {/* filters */}
 
                 <div>
-                    {/* <Space direction="vertical">
-                        <Space wrap> */}
                     <Dropdown overlay={menu} trigger={['click']}
                         placement="bottomLeft">
-                        <Button type="primary" onClick={filterBtnClick}>Add Filter Group</Button>
+                        <Button type="primary" onClick={filterBtnClick}>+ Add Filter Group</Button>
                     </Dropdown>
-                    {/* </Space>
-                    </Space> */}
                 </div>
-
-                {/* {showOperatos && (
-                    <div className="operators">
-                        <div>
-                            {radio}
-                            <Button onClick={formQuery} type="primary">Done</Button>
-                        </div>
-                    </div>
-                )} */}
-
 
             </div>
             {/* custcontainers */}
