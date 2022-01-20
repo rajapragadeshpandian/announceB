@@ -578,6 +578,42 @@ router.get('/adhoc', (req, res, next) => {
 
 });
 
+router.get('/uniqueProps', (req, res, next) => {
+
+    function getCustProps(count) {
+
+        const custProps = Customer.uniqueCategory()
+            .then((category) => {
+                console.log(category);
+                const result = category.map((item) => {
+                    const keys = Object.keys(item._id);
+                    return [...keys]
+                });
+                let customProps = [].concat.apply([], result).filter(
+                    (item, index, arr) => {
+                        return index === arr.indexOf(item);
+                    })
+                return customProps;
+            })
+            .catch(next)
+
+        return Promise.all([count, custProps]);
+
+    }
+
+    const customers = Customer.getCustomerCount({})
+        .then((count) => getCustProps(count))
+        .then(([count, custProps]) => {
+            res.status(200).json({
+                count: count,
+                custProps: custProps,
+                props: custProps.concat("name", "email")
+            })
+        })
+        .catch(next)
+
+});
+
 
 
 /*router.post('/segment', (req, res,next) => {
