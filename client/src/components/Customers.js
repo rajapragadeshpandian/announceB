@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import 'antd/dist/antd.css';
+import { useSelector, useDispatch } from 'react-redux';
+import * as actions from '../state/actions';
+import { bindActionCreators } from 'redux';
 import { Row, Col } from 'antd';
 import { Layout } from 'antd';
 import { Menu, Dropdown, Button, Space, Radio, Input } from 'antd';
 import { Card } from 'antd';
+import '../index';
+
 
 // onClick={() => setType('posts')}
 const Customers = () => {
+
     const style = {
         display: "flex",
         flexDirection: "row",
         position: "relative",
         flexWrap: "wrap",
         marginBottom: 25
-        //backgroundColor: '#FF6D00'
     };
 
     const initialSytle = {
@@ -27,27 +31,37 @@ const Customers = () => {
     const textstyle = {
         marginRight: 3
     }
-    // const separatorStyle = {
-    //     height: 32,
 
-    // }
+    const state = useSelector((state) => state);
+    console.log(state.customers.customers);
+    const allProps = state.customers.customers.props || [];
+    const customerCount = state.customers.customers.count || 0;
+    console.log(allProps);
+
+    const dispatch = useDispatch();
+
+    const { fetchCustomer } = bindActionCreators(actions, dispatch);
+
+    useEffect(() => {
+        console.log("use effect on customer called");
+        fetchCustomer();
+    }, [])
+
     const [initialFilter, toggleFilter] = useState(true);
-    const [newFilter, setFilter] = useState(false);
     const [newFilterValue, setFilterValue] = useState([]);
     const [separatorKey, setSeparatorKey] = useState('');
     const [value, setRadioValue] = useState("is");
     const [showOperatos, toggleOperators] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [AddButton, showAddButton] = useState(false);
-    const [showConditions, setConditions] = useState(false);
     const [conditionIndex, setIndex] = useState(0);
     const [OuterConditionIndex, setOuterIndex] = useState(0);
     const [clickCount, setClickCount] = useState(0);
 
-    console.log(newFilterValue);
-    console.log(separatorKey);
-    console.log(conditionIndex);
-    console.log(OuterConditionIndex);
+    // console.log(newFilterValue);
+    // console.log(separatorKey);
+    // console.log(conditionIndex);
+    // console.log(OuterConditionIndex);
 
     function handleMenuClick(e) {
 
@@ -188,7 +202,7 @@ const Customers = () => {
     let menu = (
         <Menu onClick={handleMenuClick}>
             {
-                menuarr.map(item => (
+                allProps.map(item => (
                     <Menu.Item key={item}>
                         {item}
                     </Menu.Item>
@@ -316,11 +330,15 @@ const Customers = () => {
                 </div>
                 {/* filters */}
 
-                <div>
+                <div style={{ marginBottom: 15 }}>
                     <Dropdown overlay={menu} trigger={['click']}
                         placement="bottomLeft">
-                        <Button type="primary" onClick={filterBtnClick}>+ Add Filter Group</Button>
+                        <Button style={{ borderRadius: 4 }} type="primary" onClick={filterBtnClick}>+ Add Filter Group</Button>
                     </Dropdown>
+                </div>
+
+                <div className="showCount">
+                    Survey will be shown to {customerCount} customer
                 </div>
 
             </div>

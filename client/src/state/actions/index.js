@@ -15,3 +15,19 @@ export const fetchChanges = (amount) => {
 
     }
 }
+
+export const fetchCustomer = () => {
+    return (dispatch) => {
+        fetch('/customer/uniqueProps')
+            .then((res) => res.json())
+            .then(data => {
+                console.log("customerData", data);
+                dispatch({
+                    type: "FETCH_CUSTOMER",
+                    payload: data
+                });
+            })
+            .catch(err => console.log(err))
+
+    }
+}

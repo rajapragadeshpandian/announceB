@@ -1,15 +1,10 @@
 @import url('https://rsms.me/inter/inter.css');
-body {
+
+body,.App,#root {
     height : 100vh;
     width : 100vw;
     
 }
-
-#root, .App {
-    height : 100vh;
-    width : 100vw;
-}
-
 .custContainer {
     padding: 20px;
 }
@@ -51,7 +46,7 @@ body {
         
         }
 
-        .filterConditions .separator {
+.filterConditions .separator {
 width: 22px;
 height: 15px;
 font-family: Inter;
@@ -60,10 +55,8 @@ font-weight: 600;
 font-size: 12px;
 line-height: 15px;
 color: #0786FC;
-
-        }
+}
         
-
 .separator:hover {
     cursor: pointer;
 }
@@ -83,24 +76,15 @@ top : 30px;
 z-index: 100000;
 }
 
+.showCount {
+    min-width: 202px;
+    height: 15px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;    
+    line-height: 15px;
+    color: #000000;
+}
 
 
-
-
-/* .joiner {
-    position: absolute;
-    left: 0px;
-    top: 50px;
-} */
-
-/* .operators input {
-width: 192px;
-height: 22px;
-
-opacity: 0.5;
-
-flex: none;
-order: 0;
-flex-grow: 1;
-margin: 0px 10px;
-} */
