@@ -578,7 +578,11 @@ router.get('/adhoc', (req, res, next) => {
 
 });
 
-router.get('/uniqueProps', (req, res, next) => {
+router.post('/uniqueProps', (req, res, next) => {
+    console.log(req.body);
+    const condition = keyChange(req.body);
+    console.log(condition);
+    //pass condition to add dollar
 
     function getCustProps(count) {
 
@@ -601,7 +605,7 @@ router.get('/uniqueProps', (req, res, next) => {
 
     }
 
-    const customers = Customer.getCustomerCount({})
+    const customers = Customer.getCustomerCount(condition)
         .then((count) => getCustProps(count))
         .then(([count, custProps]) => {
             res.status(200).json({

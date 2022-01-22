@@ -35,6 +35,7 @@ const Customers = () => {
     const state = useSelector((state) => state);
     console.log(state.customers.customers);
     const allProps = state.customers.customers.props || [];
+    const custProps = state.customers.customers.custProps || [];
     const customerCount = state.customers.customers.count || 0;
     console.log(allProps);
 
@@ -44,7 +45,8 @@ const Customers = () => {
 
     useEffect(() => {
         console.log("use effect on customer called");
-        fetchCustomer();
+        //fetchCustomer({ email: { eq: "ram@gmail.com" } });
+        fetchCustomer({});
     }, [])
 
     const [initialFilter, toggleFilter] = useState(true);
@@ -67,7 +69,6 @@ const Customers = () => {
 
         const value = e.domEvent.target.innerHTML;//c
         toggleFilter(false);
-        //setFilter(true);
         //setFilterValue([...newFilterValue, { name: value, operator: "is", value: "" }]);
         toggleOperators(true);
         if (clickCount > 0) {
@@ -120,9 +121,6 @@ const Customers = () => {
         console.log(newFilterValue);
         setFilterValue([...newFilterValue]);
         //console.log(document.getElementsByClassName('filterWrap'));
-        //const child = Array.prototype.slice.call(document.getElementsByClassName('filterWrap')[0].children);
-        // toggleFilter(false);
-        // toggleOperators(true);
 
     }
     const onChange = e => {
@@ -171,6 +169,7 @@ const Customers = () => {
     const formQuery = e => {
         console.log(value, inputValue);
         console.log(newFilterValue);
+        let condition;
 
         const addValue = newFilterValue.map((item, index) => {
             console.log(index);
@@ -186,19 +185,50 @@ const Customers = () => {
             }
             return item;
         })
-        console.log(addValue);
         //newFilterValue.push(addValue[0]);
         setFilterValue([...addValue]);
         toggleOperators(false);
         setRadioValue("is");
         setInputValue('');
         showAddButton(true);
+
+        //below code to convert obj in correct format
+
+
+        if (addValue.length == 1) {
+            console.log(addValue);
+            const filters = addValue[0];
+            if (filters.length == 1) {
+                const result = filters.map((item) => {
+                    const obj = {};
+                    let innerObj = {};
+                    let operator;
+                    if (item.operator == "is") {
+                        operator = "eq"
+                    } else {
+                        operator = item.operator;
+                    }
+                    innerObj[operator] = item.value;
+                    const name = custProps.indexOf(item.name) === -1 ? item.name : "customizedProps." + item.name;
+                    console.log(name);
+                    obj[name] = innerObj;
+                    return obj;
+                });
+                //{"email" : { "eq" : "ram@gmail.com"}}*/
+                console.log(result[0]);
+                condition = result[0];
+                fetchCustomer(condition);
+            } else {
+                console.log("separator exist");
+            }
+
+        } else {
+            console.log("joiner is there!!!");
+        }
+
+
     }
-    const menuarr = ["name", "email", "plan"];
     const conditionsArr = ["and", "or"];
-    {/* {data.map(item => (
-                <li key={item.id}>{item.name}</li>
-            ))} */}
     let menu = (
         <Menu onClick={handleMenuClick}>
             {
