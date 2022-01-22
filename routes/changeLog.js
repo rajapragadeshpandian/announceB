@@ -27,7 +27,6 @@ router.get('/', (req, res, next) => {
     const findText = req.query.text ? { title: { $regex: req.query.text, $options: "i" } } : {};
     const val = req.query.pageNo ? (req.query.pageNo - 1) * limit : 0;
 
-
     function getCount(changes) {
 
         const count = changeLog.getCount(accId, findText)
