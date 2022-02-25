@@ -1,13 +1,9 @@
 import React from 'react';
-import Hook from './Test/Hook';
-import HookEffect from './Test/HookEffect';
-import ComponentC from './Test/ComponentC';
-import HookCounter from './Test/HookCounter';
-import Users from './Test/Users';
 import { useSelector } from 'react-redux';
 import ChangeLogs from './ChangeLogs';
 import Customers from './Customers';
 import Header from './Header';
+import Page from './Page';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 export const UserContext = React.createContext();
@@ -26,7 +22,12 @@ function App() {
             element={<ChangeLogs />} exact />
           <Route path='/customers/details'
             element={<Customers />} exact />
+
+
+          <Route path='*' element={<Page />} />
+
         </Routes>
+
       </BrowserRouter>
 
       {/* <HookCounter /> */}
