@@ -37,14 +37,12 @@ const Customers = () => {
     const allProps = state.customers.customers.props || [];
     const custProps = state.customers.customers.custProps || [];
     const customerCount = state.customers.customers.count || 0;
-    console.log(allProps);
 
     const dispatch = useDispatch();
 
-    const { fetchCustomer } = bindActionCreators(actions, dispatch);
+    const { fetchCustomer, filterCustomer } = bindActionCreators(actions, dispatch);
 
     useEffect(() => {
-        console.log("use effect on customer called");
         //fetchCustomer({ email: { eq: "ram@gmail.com" } });
         fetchCustomer({});
     }, [])
@@ -60,7 +58,7 @@ const Customers = () => {
     const [OuterConditionIndex, setOuterIndex] = useState(0);
     const [clickCount, setClickCount] = useState(0);
 
-    // console.log(newFilterValue);
+    console.log(newFilterValue);
     // console.log(separatorKey);
     // console.log(conditionIndex);
     // console.log(OuterConditionIndex);
@@ -74,21 +72,16 @@ const Customers = () => {
         if (clickCount > 0) {
             if (separatorKey == "separator") {
                 let obj = {};
-                console.log(separatorKey);
                 obj[separatorKey] = "and";
                 //let index = newFilterValue.length - 1;
-                console.log(newFilterValue);
                 newFilterValue[OuterConditionIndex].push(obj);
-                console.log(newFilterValue);
                 newFilterValue[OuterConditionIndex].push({ name: value, operator: "is", value: "" });
                 setFilterValue([...newFilterValue]);
             } else {
                 let obj = {};
-                console.log(separatorKey);
                 obj[separatorKey] = "and";
                 newFilterValue.push([obj]);
                 setFilterValue([...newFilterValue, [{ name: value, operator: "is", value: "" }]]);
-                console.log(newFilterValue.length);
                 setOuterIndex(newFilterValue.length);
             }
 
@@ -100,9 +93,6 @@ const Customers = () => {
     }
     function handleconditionMenuClick(e) {
         let value = e.domEvent.target.innerHTML;
-        console.log(value);
-        console.log(conditionIndex);
-        console.log(OuterConditionIndex);
 
         newFilterValue.map((item, index) => {
 
@@ -118,13 +108,10 @@ const Customers = () => {
 
             return item;
         });
-        console.log(newFilterValue);
         setFilterValue([...newFilterValue]);
-        //console.log(document.getElementsByClassName('filterWrap'));
 
     }
     const onChange = e => {
-        console.log('radio checked', e.target.value);
         setRadioValue(e.target.value);
         setInputValue('');
     };
@@ -134,9 +121,6 @@ const Customers = () => {
 
     }
     const separatorClick = e => {
-
-        console.log(e.target.getAttribute('name'));
-        console.log(e.target.parentNode.parentNode);
         let index;
         let parentNode = e.target.parentNode.parentNode;
         const outerIndex = parentNode.getAttribute('data');
@@ -150,20 +134,40 @@ const Customers = () => {
         setIndex(index);
     }
     const addBtnClick = e => {
-
-        console.log(e.target.parentNode.getAttribute('data'));
         let addBtnIndex = e.target.parentNode.getAttribute('data')
         setOuterIndex(addBtnIndex);
         setSeparatorKey("separator");
     }
     const filterBtnClick = e => {
-        console.log(clickCount);
         if (clickCount > 0) {
             setSeparatorKey("joiner");
         } else {
             setSeparatorKey('');
         }
 
+    }
+
+    const formatObjects = (filters) => {
+        const result = filters.map((item) => {
+
+            if (item.separator) {
+                return item;
+            } else {
+                const obj = {};
+                let innerObj = {};
+                let operator;
+                if (item.operator == "is") {
+                    operator = "eq"
+                } else {
+                    operator = item.operator;
+                }
+                innerObj[operator] = item.value;
+                const name = custProps.indexOf(item.name) === -1 ? item.name : "customizedProps." + item.name;
+                obj[name] = innerObj;
+                return obj;
+            }
+        });
+        return result;
     }
 
     const formQuery = e => {
@@ -194,32 +198,52 @@ const Customers = () => {
 
         //below code to convert obj in correct format
 
-
         if (addValue.length == 1) {
             console.log(addValue);
             const filters = addValue[0];
-            if (filters.length == 1) {
-                const result = filters.map((item) => {
-                    const obj = {};
-                    let innerObj = {};
-                    let operator;
-                    if (item.operator == "is") {
-                        operator = "eq"
-                    } else {
-                        operator = item.operator;
-                    }
-                    innerObj[operator] = item.value;
-                    const name = custProps.indexOf(item.name) === -1 ? item.name : "customizedProps." + item.name;
-                    console.log(name);
-                    obj[name] = innerObj;
-                    return obj;
-                });
+            console.log(filters);
+            //fetchCustomer(filters);
+            if (filters.length <= 3) {
                 //{"email" : { "eq" : "ram@gmail.com"}}*/
-                console.log(result[0]);
-                condition = result[0];
-                fetchCustomer(condition);
+                condition = formatObjects(filters);
+                console.log(condition);
+                const filterSeparator = condition.filter((item) => {
+                    return item.separator;
+                });
+                console.log(filterSeparator);
+                const filterGroup = condition.filter((item) => {
+                    return !item.separator;
+                });
+                console.log(filterGroup);
+                if (filterGroup.length <= 1) {
+                    fetchCustomer(filterGroup[0]);
+                } else {
+                    const result = {};
+                    result[filterSeparator[0].separator] = filterGroup;
+                    console.log(result);
+                    filterCustomer({ filter: {}, condition: result })
+                }
+
+
             } else {
+
+                // send every object incudign eparator without filtering it
+                // to formatObjects and put conditiop there
+                // below conditopn to check if array has same value
+                // const allEqual = arr => arr.every( v => v === arr[0] );
                 console.log("separator exist");
+                const filters = addValue[0];
+                console.log(filters);
+                const filterSeparator = filters.filter((item) => {
+                    return item.separator;
+                });
+                console.log(filterSeparator);
+                const filterGroup = filters.filter((item) => {
+                    return !item.separator;
+                });
+                console.log(filterGroup);
+                console.log(formatObjects(filterGroup));
+
             }
 
         } else {

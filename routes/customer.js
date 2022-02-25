@@ -618,6 +618,39 @@ router.post('/uniqueProps', (req, res, next) => {
 
 });
 
+router.post('/filter', (req, res, next) => {
+
+    console.log(req.body);
+    const condition = keyChange(req.body.condition);
+    console.log(condition);
+    //function filterCustomer() {
+    const filterCustomer = Customer.filterCustomer(req.body.filter, condition)
+        .then((customer) => {
+            console.log("filter", customer);
+            res.status(200).json({
+                customerData: customer,
+                count: customer.length
+            })
+            //return customer
+        })
+        .catch(next)
+
+    //return filterCustomer;
+    //}
+
+    // const customers = Customer.getCustomerCount({})
+    //     .then((count) => filterCustomer())
+    //     .then((results) => {
+    //         res.status(200).json({
+    //             message: "done",
+    //             results: results,
+    //             count: results.length
+    //         })
+    //     })
+    //     .catch(next)
+
+})
+
 
 
 /*router.post('/segment', (req, res,next) => {

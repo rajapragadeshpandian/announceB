@@ -26,6 +26,7 @@ body,.App,#root {
     justify-content: center;
     align-items: center;
     padding : 9px 19px 9px 19px;
+    margin-bottom: 20px;
 }
 .filterConditions.allCustomers {
     width: 140px;
@@ -86,5 +87,94 @@ z-index: 100000;
     line-height: 15px;
     color: #000000;
 }
+
+.sampleContainer {
+    display : flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    height : 500px;
+}
+
+.sample,.colorBlockWrapper {
+    width : 50%;
+    padding: 15px;
+}
+.colorBlock {
+    width : 100%;
+    height : 100%;
+    background-color: red;
+}
+.colorBlock.red{
+    background-color: red;
+}
+.colorBlock.green{
+    background-color: green;
+}
+.colorBlock.yellow{
+    background-color: yellow;
+}
+.colorBlock.blue{
+    background-color: blue;
+}
+
+.colorBtn {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 20px;
+    user-select: none;
+    cursor: pointer;
+    font-size : 22px;
+}
+
+.colorBtn input {
+    position : absolute;
+    display : none;
+}
+
+.checkmark {
+    position : absolute;
+    top : 0px;
+    left : 0px;
+    height : 30px;
+    width : 30px;
+    border-radius: 50%;
+}
+
+.checkmark::after {
+    position : absolute;
+    content : '';
+}
+
+.checkmark::after {
+    height : 18px;
+    width : 18px;
+    left : 5px;
+    top : 5px;
+    border-radius: 50%;
+}
+.checkmark.red::after {
+    background-color: red;
+}
+.checkmark.blue::after {
+    background-color: blue;
+}
+.checkmark.green::after {
+    background-color: green;
+}
+.checkmark.yellow::after {
+    background-color: yellow;
+}
+.colorBtn input:checked ~ .checkmark {
+    border : 1px solid black;
+}
+
+
+.close:after{
+    display: inline-block;
+    content: "\00d7"; /* This will render the 'X' */
+    height : 20px;
+    width : 20px;
+  }
 
 
