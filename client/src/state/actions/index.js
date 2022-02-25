@@ -16,11 +16,53 @@ export const fetchChanges = (amount) => {
     }
 }
 
+
+export const fetchUser = () => {
+    console.log("user");
+    return (dispatch) => {
+        fetch('http://jsonplaceholder.typicode.com/users')
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                dispatch({ type: "GET_USERS", data: data })
+            })
+            .catch((err) => err)
+    }
+}
+
 export const fetchCustomer = (values) => {
     console.log(values);
     return (dispatch) => {
         // fetch('/customer/uniqueProps')
         fetch('/customer/uniqueProps', {
+            // Adding method type
+            method: "POST",
+            // Adding body or contents to send
+            body: JSON.stringify(values),
+            //body : token,
+            // Adding headers to the request
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+            .then((res) => res.json())
+            .then(data => {
+                console.log("customerData", data);
+                dispatch({
+                    type: "FETCH_CUSTOMER",
+                    payload: data
+                });
+            })
+            .catch(err => console.log(err))
+
+    }
+}
+
+export const filterCustomer = (values) => {
+    console.log(values);
+    return (dispatch) => {
+        // fetch('/customer/uniqueProps')
+        fetch('/customer/filter', {
             // Adding method type
             method: "POST",
             // Adding body or contents to send

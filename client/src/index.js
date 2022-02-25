@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
-import {Provider} from 'react-redux';
-import {createStore, applyMiddleware} from 'redux';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
 import reducers from './state/reducers';
-import  thunk  from 'redux-thunk';
+import thunk from 'redux-thunk';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const store = createStore(reducers,{}, applyMiddleware(thunk));
+const store = createStore(reducers, {}, applyMiddleware(thunk));
 ReactDOM.render(
   <Provider store={store}>
     <App />
