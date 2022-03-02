@@ -14,9 +14,7 @@ const renameKeys = (obj) =>
         }),
         {}
     );
-
-
-function keyChange(condition) {
+/*function keyChange(condition) {
 
     if (condition == null) {
         return {};
@@ -93,6 +91,43 @@ function keyChange(condition) {
     });
     console.log("###", queryObj);
     return queryObj[0];
+
+}*/
+
+function keyChange(condition) {
+
+    const key = Object.keys(condition);
+
+    for (let i = 0; i < key.length; i++) {
+
+
+        if (Array.isArray(condition[key[i]])) {
+
+            const obj = {};
+
+            console.log("array");
+            for (let j = 0; j < condition[key[i]].length; j++) {
+                dollar(condition[key[i]][j]);
+            }
+
+            condition["$" + key] = condition[key[i]];
+            delete condition[key];
+            //obj["$" + key] = condition[key[i]] 
+            console.log(condition);
+
+
+        } else {
+
+            const keys = Object.keys(condition);
+            var val = renameKeys(condition[keys[0]]);
+            condition[keys[0]] = val;
+
+
+        }
+
+    }
+
+    return condition;
 
 }
 
