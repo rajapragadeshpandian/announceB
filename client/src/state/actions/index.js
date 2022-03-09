@@ -1,8 +1,9 @@
-export const fetchChanges = (amount) => {
+export const fetchChanges = (url) => {
     return (dispatch) => {
         //fetch('https://jsonplaceholder.typicode.com/posts/1')
         //fetch('/changelog')
-        fetch('/changelog')
+        console.log(url)
+        fetch(url)
             .then((res) => res.json())
             .then(data => {
                 console.log(data);

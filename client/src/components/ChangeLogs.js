@@ -1,36 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../state/actions';
 import { bindActionCreators } from 'redux';
+import { useTable } from 'react-table';
+import { columns, data } from './data/column';
+import './css/changelog.css';
+import { Table } from 'antd';
+import { Pagination } from 'antd';
+
+
+
 
 const ChangeLogs = () => {
 
+    // const columns = useMemo(() => COLUMNS, [])
+    //const data = useMemo(() => , [])
+    const [selectedRowKeys, setSelectedRows] = useState([]);
+    const [searchText, setSearchText] = useState(null);
     const state = useSelector((state) => state.changeLogs);
 
+    const changeLogs = state && state.changes && state.changes.changeList;
+    const length = changeLogs && changeLogs.length ? changeLogs.length : 0;
+    const count = state && state.changes && state.changes.count;
+    let url = '/changelog';
     const dispatch = useDispatch();
 
     const { fetchChanges } = bindActionCreators(actions, dispatch);
 
     console.log(state);
-    console.log(fetchChanges);
-    // const logName = () => {
-    //     console.log("rajapragadesh");
-    // }
+    console.log(changeLogs);
+    console.log(columns, data);
+
+
     const tick = () => {
         console.log("ticking");
     }
     useEffect(() => {
-        fetchChanges()
+
+        fetchChanges(url)
         // setInterval(tick, 5000);
     }, [])
 
+    const onSelectChange = selectedRowKeys => {
+        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        setSelectedRows([...selectedRowKeys]);
+    };
 
+    const onpageChange = (pageNumber) => {
+        console.log("page change", pageNumber);
+        //url + `?pageNo=${pageNumber}`
+        //console.log(url);
+        fetchChanges(url + `?pageNo=${pageNumber}`);
+    }
+
+    const searchChange = (e) => {
+        console.log(e.target.value);
+        setSearchText(e.target.value);
+        const value = e.target.value;
+        fetchChanges(url + `?text=${value}`);
+    }
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange
+    };
 
     return (
-        <div>
-            <h2>ChangeLogs</h2>
-            <span><a href="/auth/logout">Logout</a></span>
-            {/* {
+        <>
+            <div className="sideBar">
+                <li> chnageLog</li>
+                <li> customer</li>
+                <li> Home</li>
+            </div>
+
+            <div className="changelog_container">
+                {/* <span><a href="/auth/logout">Logout</a></span> */}
+                {/* {
                 (state && state.changes) && (
                     <div>
                         <li>{state.changes.count}</li>
@@ -38,20 +83,46 @@ const ChangeLogs = () => {
 
                 )
             } */}
-            {state && state.changes && state.changes.changeList &&
-                state.changes.changeList.map(item => (
-                    <div id={item._id} key={item._id}>
-                        <div><p>{item.title}</p></div>
+                <div className="changelog_header">
+                    <p>Changelogs</p>
+                    <button className="createBtn">
+                        <span>New Changelog</span>
+                    </button>
+                </div>
 
-                        <div><p>{item._id}</p></div>
-                        <div><p>{item.body}</p></div>
-                        <div><p>{item.like}</p></div>
+                <div className="changelog_main">
+                    <div className="changelog_body">
+                        <div className="change_search">
+                            <p>Showing {length} of {count} Changes</p>
+                            <input type="text"
+                                placeholder="Search Change"
+                                onChange={(e) => searchChange(e)}
+                                value={searchText}
+                                className="search" />
+                        </div>
+
+                        <div className="change_table">
+                            <Table
+                                columns={columns}
+                                dataSource={changeLogs}
+                                pagination={false}
+                                rowSelection={rowSelection}
+                            />
+                        </div>
+
+                        <div className="change_pagination">
+                            <Pagination
+                                defaultCurrent={1}
+                                total={50}
+                                onChange={onpageChange}
+                            />
+                        </div>
+
                     </div>
 
-
-                ))}
-        </div>
-
+                </div>
+            </div>
+        </>
     )
 };
 
