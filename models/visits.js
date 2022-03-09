@@ -54,7 +54,7 @@ module.exports = mongoose.model('Visits', visitSchema);
 
 //              const visits = new Visits({
 //                 name : "visit",
-//                 visited : new Date(date)
+//                 createdAt : new Date(date)
 
 //             }).save((err, visit) => {
 //                 console.log("####", visit);
