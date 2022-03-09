@@ -1,5 +1,29 @@
 const mongoose = require('mongoose');
 
+
+var todaysDate = new Date();
+
+function convertDate(date) {
+    var yyyy = date.getFullYear().toString();
+    var mm = (date.getMonth() + 1).toString();
+    var dd = date.getDate().toString();
+
+    var mmChars = mm.split('');
+    var ddChars = dd.split('');
+
+    return yyyy + '-' + (mmChars[1] ? mm : "0" + mmChars[0]) + '-' + (ddChars[1] ? dd : "0" + ddChars[0]);
+}
+
+var date = convertDate(todaysDate);
+
+console.log(date);
+
+// const opts = {
+//     // Make Mongoose use Unix time (seconds since Jan 1, 1970)
+//     timestamps: new Date(date)
+// };
+// console.log(opts);
+
 const changeLogSchema = mongoose.Schema(
 
     {
@@ -10,14 +34,16 @@ const changeLogSchema = mongoose.Schema(
         dislike: { type: Number, default: 0 },
         visits: { type: Number, default: 0 },
         accId: { type: String, default: null },
+        status: { type: String, default: null },
         conditions: { type: mongoose.Schema.Types.Mixed, default: null },
-        __user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-    },
-    {
-        timestamps: true
-    }
+        __user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
+        createdAt: Date,
+        updatedAt: Date
+    }
 );
+
+
 
 changeLogSchema.index({ title: 'text' });
 //module.exports = mongoose.model('Changelog',changeLogSchema);
@@ -31,7 +57,9 @@ function createChanges(title, category, body, accId, userId) {
         category: category.split(',').map((item) => item.trim()),
         body: body,
         accId: accId,
-        __user: userId
+        __user: userId,
+        createdAt: new Date(date),
+        updatedAt: new Date(date)
     })
         .save()
 
@@ -39,10 +67,14 @@ function createChanges(title, category, body, accId, userId) {
 }
 
 function getChanges(accId, findText, val, limit) {
-
-    const changes = changeLog.find({ accId: accId, findText })
-        .select('title category body _id disLike like conditions')
-        .sort({ createdAt: -1 })
+    console.log(findText);
+    const obj = { accId: accId }
+    if (findText) {
+        obj.title = findText
+    }
+    const changes = changeLog.find(obj)
+        .select('title category body _id disLike like conditions visits status createdAt')
+        // .sort({ createdAt: -1 })
         .skip(val)
         .limit(limit)
         .exec()
@@ -161,6 +193,24 @@ function uniqueTags() {
     return tags;
 }
 
+function adhoc() {
+    //62286323e35d5039ff0396cb
+    let data = changeLog.update(
+        {
+            _id: "62286323e35d5039ff0396cb"
+        },
+        {
+            $set: {
+                visits: 0,
+                status: "scheduled"
+            }
+        }
+    )
+        .exec()
+
+    return data;
+}
+
 
 
 
@@ -177,7 +227,8 @@ module.exports = {
     getChangeById: getChangeById,
     updateLikeandDislike: updateLikeandDislike,
     removeChange: removeChange,
-    uniqueTags: uniqueTags
+    uniqueTags: uniqueTags,
+    adhoc: adhoc
 
     //remove : remove
 }

@@ -129,14 +129,14 @@ router.get('/loginSuccess', (req, res, next) => {
             function checkOwner(acc) {
                 if (acc) {
                     console.log("OwnerAcc", acc);
-                    res.cookie("accId", "announceB");
+                    res.cookie("accId", acc._id || "announceB");
                     // res.redirect(`/changelog?accId=announceB`);
                     res.redirect('http://localhost:3000/dashboard');
                 } else {
                     function checkEditor(editAcc) {
                         if (editAcc) {
                             console.log(editAcc);
-                            res.cookie("accId", "announceB");
+                            res.cookie("accId", editAcc._id || "announceB");
                             // res.redirect(`/changelog?accId=announceB`);
                             res.redirect('http://localhost:3000/dashboard');
                         } else {

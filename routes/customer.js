@@ -102,9 +102,6 @@ function keyChange(condition) {
 
 
         if (Array.isArray(condition[key[i]])) {
-
-            const obj = {};
-
             console.log("array");
             for (let j = 0; j < condition[key[i]].length; j++) {
                 dollar(condition[key[i]][j]);
@@ -114,17 +111,11 @@ function keyChange(condition) {
             delete condition[key];
             //obj["$" + key] = condition[key[i]] 
             console.log(condition);
-
-
         } else {
-
             const keys = Object.keys(condition);
             var val = renameKeys(condition[keys[0]]);
             condition[keys[0]] = val;
-
-
         }
-
     }
 
     return condition;

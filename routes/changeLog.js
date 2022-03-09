@@ -8,6 +8,8 @@ const Feedback = require('../models/feedback');
 
 const requireLogin = require('../middlewares/requireLogin');
 
+
+
 // get changeLog
 // req.user check in all routes
 router.get('/', (req, res, next) => {
@@ -17,14 +19,14 @@ router.get('/', (req, res, next) => {
 
     // regex { title : { "$regex" : req.query.text , $options : "i" }}
     // { $text : {$search : req.query.value }}
-    const limit = 3;
+    const limit = 10;
 
-    console.log(req.query.value);
+    console.log(req.query.text);
     console.log(req.user);
     console.log(req.cookies);
-    const userId = req.user ? req.user._id : {};
-    const accId = req.cookies.accId;
-    const findText = req.query.text ? { title: { $regex: req.query.text, $options: "i" } } : {};
+    const userId = req.user ? req.user._id : "61cd520774e8839a71b0218e";
+    const accId = req.cookies.accId || "61cd520874e8839a71b02191";
+    const findText = req.query.text ? { $regex: req.query.text, $options: "i" } : null;
     const val = req.query.pageNo ? (req.query.pageNo - 1) * limit : 0;
 
     function getCount(changes) {
@@ -107,7 +109,7 @@ router.get('/:changelogId', (req, res, next) => {
     const id = req.params.changelogId;
     console.log("####", req.params.changelogId);
     let val = 0;
-    let limit = 3;
+    let limit = 5;
     // check after feedback creation
     function getFeedback(change) {
         const feedbacks = Feedback.getFeedback(change._id, val, limit)
@@ -162,7 +164,7 @@ router.patch('/:changelogId', (req, res, next) => {
 
 router.delete('/:changelogId', (req, res, next) => {
 
-    const limit = 3;
+    const limit = 5;
     const accId = req.body.accId;
     const findText = req.body.text ? { title: { $regex: req.query.text, $options: "i" } } : {};
     const val = req.body.pageNo ? (req.body.pageNo - 1) * limit : 0;
@@ -202,6 +204,16 @@ router.patch('/set/filter', (req, res, next) => {
 
 })
 
+router.post('/adhoc', (req, res, next) => {
+
+
+    changeLog.adhoc()
+        .then(() => {
+            res.send("updated successfully")
+        })
+        .catch(next)
+})
+
 router.get('/active/users', (req, res, next) => {
 
     let days = req.query.days;
@@ -224,6 +236,8 @@ router.get('/active/users', (req, res, next) => {
             });
         }).catch(next);
 });
+
+
 
 
 
