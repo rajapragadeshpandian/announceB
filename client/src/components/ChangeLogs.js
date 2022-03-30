@@ -7,6 +7,8 @@ import { columns, data } from './data/column';
 import './css/changelog.css';
 import { Table } from 'antd';
 import { Pagination } from 'antd';
+import CreateChange from './CreateChange'
+import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 
 
 
@@ -67,8 +69,14 @@ const ChangeLogs = () => {
 
     return (
         <>
+            {/* <BrowserRouter>
+                <Routes>
+                    <Route path='/create/change'
+                        element={<CreateChange />} exact />
+                </Routes>
+            </BrowserRouter> */}
             <div className="sideBar">
-                <li> chnageLog</li>
+                <li> changeLog</li>
                 <li> customer</li>
                 <li> Home</li>
             </div>
@@ -86,7 +94,7 @@ const ChangeLogs = () => {
                 <div className="changelog_header">
                     <p>Changelogs</p>
                     <button className="createBtn">
-                        <span>New Changelog</span>
+                        <Link to="/create/change">New Changelog</Link>
                     </button>
                 </div>
 
