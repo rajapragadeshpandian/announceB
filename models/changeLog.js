@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 
 var todaysDate = new Date();
+console.log(todaysDate);
 
 function convertDate(date) {
     var yyyy = date.getFullYear().toString();
@@ -49,17 +50,31 @@ changeLogSchema.index({ title: 'text' });
 //module.exports = mongoose.model('Changelog',changeLogSchema);
 const changeLog = mongoose.model('Changelog', changeLogSchema);
 
-function createChanges(title, category, body, accId, userId) {
+function createChanges(title, category, body, accId, userId, createdDate) {
     // add user reference here
     console.log(category);
+    console.log(createdDate);
+
+    let status, publishDate;
+    console.log(date);
+    //createdDate
+    if (createdDate > date) {
+        status = "scheduled";
+        publishDate = createdDate;
+    } else {
+        status = "published";
+        publishDate = date;
+    }
+
     const changes = new changeLog({
         title: title,
         category: category.split(',').map((item) => item.trim()),
         body: body,
         accId: accId,
         __user: userId,
-        createdAt: new Date(date),
-        updatedAt: new Date(date)
+        status: status,
+        createdAt: new Date(publishDate),
+        updatedAt: new Date(publishDate),
     })
         .save()
 
@@ -67,14 +82,16 @@ function createChanges(title, category, body, accId, userId) {
 }
 
 function getChanges(accId, findText, val, limit) {
-    console.log(findText);
+
+    console.log(limit);
+    console.log(val);
     const obj = { accId: accId }
     if (findText) {
         obj.title = findText
     }
     const changes = changeLog.find(obj)
         .select('title category body _id disLike like conditions visits status createdAt')
-        // .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 })
         .skip(val)
         .limit(limit)
         .exec()
@@ -87,7 +104,7 @@ function getChangeById(id) {
     const change = changeLog.findById(
         { _id: id }
     )
-        .select('title category body _id dislike like conditions')
+        .select('title category body _id dislike like conditions visits status createdAt')
         .exec()
 
     return change;
@@ -193,26 +210,57 @@ function uniqueTags() {
     return tags;
 }
 
-function adhoc() {
-    //62286323e35d5039ff0396cb
-    let data = changeLog.update(
+function incrementVisit(id) {
+
+    let data = changeLog.updateOne(
         {
-            _id: "62286323e35d5039ff0396cb"
+            _id: id
         },
-        {
-            $set: {
-                visits: 0,
-                status: "scheduled"
-            }
-        }
+        { $inc: { visits: 1 } }
     )
         .exec()
 
     return data;
 }
 
+function adhoc() {
 
+    //problem with accid on pagination
+    //62286323e35d5039ff0396cb
+    //62286357e35d5039ff0396d1
+    //62286323e35d5039ff0396cb
+    //622860e6e35d5039ff0396bc
+    //2022-03-25T11:32:14.925Z
+    //2023-04-15T11:00:00.000Z
 
+    //createdAt
+    // :
+    // 2022-03-09T00:00:00.000+00:00
+    // updatedAt
+    // :
+    // 2022-03-09T00:00:00.000+00:00
+    //let createdDate = convertDate('2023-04-15T11:32:14.925Z');
+    let status;
+    // console.log(date);
+    // if ('2022-02-15' > date) {
+    //     status = "scheduled"
+    // } else {
+    //     status = "published"
+    // }
+    console.log(status);
+    let data = changeLog.updateMany(
+        {
+            $or: [{ _id: "622860e6e35d5039ff0396bc" },
+            { _id: "62286323e35d5039ff0396cb" }]
+        },
+        {
+            status: "scheduled"
+        }
+    )
+        .exec()
+
+    return data;
+}
 
 
 module.exports = {
@@ -228,6 +276,7 @@ module.exports = {
     updateLikeandDislike: updateLikeandDislike,
     removeChange: removeChange,
     uniqueTags: uniqueTags,
+    incrementVisit: incrementVisit,
     adhoc: adhoc
 
     //remove : remove

@@ -45,9 +45,27 @@ export const columns = [
         key: 'createdAt',
         render: (date) => {
             let formatDate = date.substring(0, 10);
+            let duration;
+            const date1 = new Date(formatDate);
+            const date2 = new Date();
+            const diffTime = Math.abs(date2 - date1);
+            const publishCheck = date2 - date1 > 0 ? 'ago' : ' from now';
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            console.log(diffDays + " days");
+
+            if (diffDays > 0 && diffDays <= 30) {
+                duration = `${diffDays} days ${publishCheck}`
+            } else if (diffDays > 30 && diffDays <= 365) {
+                let months = Math.ceil(diffDays / 12);
+                duration = `${months} months ${publishCheck}`;
+            } else if (diffDays > 365) {
+                let years = Math.ceil(diffDays / 365);
+                duration = `${years} years ${publishCheck}`;
+            }
+            console.log(duration);
             return (
                 <>
-                    <span>{formatDate}</span>
+                    <span>{duration}</span>
                 </>
             )
         }

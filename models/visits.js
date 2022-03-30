@@ -1,15 +1,33 @@
 const mongoose = require('mongoose');
 
+var todaysDate = new Date();
+
+function convertDate(date) {
+    var yyyy = date.getFullYear().toString();
+    var mm = (date.getMonth() + 1).toString();
+    var dd = date.getDate().toString();
+
+    var mmChars = mm.split('');
+    var ddChars = dd.split('');
+
+    return yyyy + '-' + (mmChars[1] ? mm : "0" + mmChars[0]) + '-' + (ddChars[1] ? dd : "0" + ddChars[0]);
+}
+
+var date = convertDate(todaysDate);
+
+console.log(date);
+
 const visitSchema = mongoose.Schema(
 
     {
-        __change: { type: Schema.Types.ObjectId, ref: 'change' },
+        __change: { type: mongoose.Schema.Types.ObjectId, ref: 'change' },
         createdAt: Date //ISODate("2020-04-22T10:19:24.653Z"
     }
 
 );
 
-module.exports = mongoose.model('Visits', visitSchema);
+//module.exports = mongoose.model('Visits', visitSchema);
+const Visits = mongoose.model('Visits', visitSchema);
 
 // var todaysDate = new Date();
 
@@ -84,5 +102,21 @@ module.exports = mongoose.model('Visits', visitSchema);
 //         res.render('visits', { count : count });
 
 //     })
+
+function createVisits(id) {
+    console.log("crate visit");
+
+    const visits = new Visits({
+        __change: id,
+        createdAt: date
+    })
+        .save()
+
+    return visits;
+}
+
+module.exports = {
+    createVisits: createVisits
+}
 
 

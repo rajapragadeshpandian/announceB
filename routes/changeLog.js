@@ -5,6 +5,7 @@ const changeLog = require('../models/changeLog');
 const Customer = require('../models/customers');
 const Account = require('../models/account');
 const Feedback = require('../models/feedback');
+const Visits = require('../models/visits');
 
 const requireLogin = require('../middlewares/requireLogin');
 
@@ -61,6 +62,7 @@ router.get('/', (req, res, next) => {
         .then(([count, changes]) => Account.findAccounts(userId, count, changes))
         .then(([count, changes, accounts]) => {
             console.log("$$$", changes);
+            console.log(changes.length);
             console.log("###", count);
             console.log(accounts);
             res.status(200).json({
@@ -78,11 +80,11 @@ router.get('/', (req, res, next) => {
 router.post('/', (req, res, next) => {
 
     console.log("$$$", req.body);
-    const { title, body, category, accId, userId } = req.body;
-    const findText = {};
+    const { title, body, category, accId, userId, createdDate } = req.body;
+    //const findText = req.query.text ? { $regex: req.query.text, $options: "i" } : null;
 
-    changeLog.createChanges(title, category, body, accId, userId)
-        .then(() => changeLog.getChanges(accId, findText, 0, 10))
+    changeLog.createChanges(title, category, body, accId, userId, createdDate)
+        .then(() => changeLog.getChanges(accId, 0, 10))
         //.then((changes) => getCount(changes))
         .then((changes) => {
             // if post is successful inc count on client side
@@ -111,6 +113,14 @@ router.get('/:changelogId', (req, res, next) => {
     let val = 0;
     let limit = 5;
     // check after feedback creation
+
+    // Visits.createVisits(changeId)
+    //     .then(() => changeLog.adhoc())
+    //     .then(() => {
+    //         res.send("updated successfully")
+    //     })
+    //     .catch(next)
+
     function getFeedback(change) {
         const feedbacks = Feedback.getFeedback(change._id, val, limit)
             .then((feedback) => feedback)
@@ -128,8 +138,9 @@ router.get('/:changelogId', (req, res, next) => {
         return Promise.all([feedbacks, change, count]);
     }
 
-
-    changeLog.getChangeById(id)
+    Visits.createVisits(id)
+        .then(() => changeLog.incrementVisit(id))
+        .then(() => changeLog.getChangeById(id))
         .then((change) => getFeedback(change))
         .then(([feedbacks, change]) => getCount(feedbacks, change))
         .then(([feedbacks, change, count]) => {
@@ -141,6 +152,8 @@ router.get('/:changelogId', (req, res, next) => {
         })
         .catch(next);
 });
+
+
 
 router.patch('/:changelogId', (req, res, next) => {
     console.log("changelog updated");

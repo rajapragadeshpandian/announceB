@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux';
 import ChangeLogs from './ChangeLogs';
 import Customers from './Customers';
 import Header from './Header';
-import Page from './Page';
+import CreateChange from './CreateChange';
+import NoRoute from './NoRoute';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 export const UserContext = React.createContext();
@@ -22,10 +23,11 @@ function App() {
             element={<ChangeLogs />} exact />
           <Route path='/customers/details'
             element={<Customers />} exact />
-
-
-          <Route path='*' element={<Page />} />
-
+          <Route path='*' element={<NoRoute />} />
+          <Route path='/'
+            element={<Header />} exact />
+          <Route path='/create/change'
+            element={<CreateChange />} exact />
         </Routes>
 
       </BrowserRouter>

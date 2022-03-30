@@ -1,10 +1,10 @@
 
 import React from 'react';
 
-const Page = () => {
+const NoRoute = () => {
     return (
         <div>no routes exist</div>
     )
 }
 
-export default Page;
+export default NoRoute;
