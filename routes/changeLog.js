@@ -1,11 +1,12 @@
 const express = require('express');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
 const router = express.Router();
 const changeLog = require('../models/changeLog');
 const Customer = require('../models/customers');
 const Account = require('../models/account');
 const Feedback = require('../models/feedback');
 const Visits = require('../models/visits');
+const Blog = require('../models/blog');
 
 const requireLogin = require('../middlewares/requireLogin');
 
@@ -217,12 +218,32 @@ router.patch('/set/filter', (req, res, next) => {
 
 })
 
-router.post('/adhoc', (req, res, next) => {
+router.get('/blog/get', (req, res, next) => {
 
+    console.log("changes for blog");
+    Blog.getBlogs()
+        .then((blog) => {
+            res.status(200).json({
+                blog: blog,
+                len: blog.length
+            })
+        })
+        .catch(next)
+})
 
-    changeLog.adhoc()
-        .then(() => {
-            res.send("updated successfully")
+router.post('/blog/create', (req, res, next) => {
+
+    const { content } = req.body;
+    console.log(req.body);
+    console.log("createBlog");
+
+    Blog.createBlog(content)
+        .then((blog) => {
+            res.status(200).json({
+                blog: blog,
+                length: blog.length
+            })
+            // res.redirect('http://localhost:3000/blog');
         })
         .catch(next)
 })

@@ -5,6 +5,10 @@ import Customers from './Customers';
 import Header from './Header';
 import CreateChange from './CreateChange';
 import NoRoute from './NoRoute';
+
+import Blog from './component/Blog/Blog';
+import CreateBlog from './component/Blog/CreateBlog';
+import PostPage from './component/post/PostPage';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 export const UserContext = React.createContext();
@@ -28,6 +32,13 @@ function App() {
             element={<Header />} exact />
           <Route path='/create/change'
             element={<CreateChange />} exact />
+          <Route path='/blog'
+            element={<Blog />} exact />
+          <Route path='/blog/create'
+            element={<CreateBlog />} exact />
+          <Route path='/blog/post/:postId'
+            element={<PostPage />} exact />
+          <Route path='*' element={<NoRoute />} />
         </Routes>
 
       </BrowserRouter>

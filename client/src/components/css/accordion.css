@@ -8,8 +8,6 @@
   cursor : pointer;
 }
 
-
-
 .accordion_title {
 
 
@@ -36,5 +34,18 @@ margin-right: 20px;
   .accordion_section {
     margin-bottom: 30px;
    
+  }
+
+  .blogPosts {
+    background: black;
+    color: white;
+    width : 100%;
+  }
+  .blogPosts li {
+    background: black;
+    color: white;
+    padding: 15px;
+    list-style: none;
+    cursor: pointer;
   }
   
