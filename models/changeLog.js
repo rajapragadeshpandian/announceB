@@ -262,6 +262,14 @@ function adhoc() {
     return data;
 }
 
+function getAllChanges() {
+    const change = changeLog.find()
+        .limit(10)
+        .exec()
+
+    return change;
+}
+
 
 module.exports = {
     createChanges: createChanges,
@@ -277,7 +285,8 @@ module.exports = {
     removeChange: removeChange,
     uniqueTags: uniqueTags,
     incrementVisit: incrementVisit,
-    adhoc: adhoc
+    adhoc: adhoc,
+    getAllChanges: getAllChanges
 
     //remove : remove
 }

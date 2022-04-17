@@ -1,9 +1,9 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { UserContext } from '../App';
 
 const ComponentC = () => {
-const user = useContext(UserContext);
-console.log(user);
+    const user = useContext(UserContext);
+    console.log(user);
     return (
         <h3>{user}</h3>
     )
