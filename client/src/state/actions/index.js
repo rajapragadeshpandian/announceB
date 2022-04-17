@@ -1,3 +1,5 @@
+
+
 export const fetchChanges = (url) => {
     return (dispatch) => {
         //fetch('https://jsonplaceholder.typicode.com/posts/1')
@@ -28,6 +30,35 @@ export const fetchUser = () => {
                 dispatch({ type: "GET_USERS", data: data })
             })
             .catch((err) => err)
+    }
+}
+
+export const fetchBlog = () => {
+    return (dispatch) => {
+        fetch('/changelog/blog/get')
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                //history.push('/blog');
+                dispatch({ type: "FETCH_BLOG", payload: data })
+            })
+            .catch((err) => err)
+    }
+}
+
+export const createBlog = (content) => {
+    console.log(content);
+    return (dispatch) => {
+        fetch('/changelog/blog/create', {
+            method: 'POST',
+            body: JSON.stringify(content),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch(err => err)
     }
 }
 
@@ -64,12 +95,8 @@ export const filterCustomer = (values) => {
     return (dispatch) => {
         // fetch('/customer/uniqueProps')
         fetch('/customer/filter', {
-            // Adding method type
             method: "POST",
-            // Adding body or contents to send
             body: JSON.stringify(values),
-            //body : token,
-            // Adding headers to the request
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
             }
